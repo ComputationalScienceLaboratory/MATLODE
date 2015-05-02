@@ -1,0 +1,308 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Library</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="Library.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Library</h1><!--introduction--><p>
+Up: <a href="../../index.html">MATLODE Toolbox</a>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Core Integrators</a></li><li><a href="#2">Input Configuration</a></li><li><a href="#3">Jacobian Vector Product</a></li><li><a href="#4">Memory</a></li><li><a href="#5">Single Step Method</a></li><li><a href="#6">Structs</a></li></ul></div><h2>Core Integrators<a name="1"></a></h2><p>
+  <h3>Core Integrators ADJ</h3>
+  <ul>
+      <li><a href="nothing.html">ERK ADJ1 Discrete Integrator</a></li>
+      <li><a href="nothing.html">ERK ADJ2 Discrete Integrator</a></li>
+      <li><a href="nothing.html">RK ADJ1 Discrete Integrator</a></li>
+      <li><a href="nothing.html">RK ADJ2 Discrete Integrator</a></li>
+      <li><a href="nothing.html">ROS ADJ1 Discrete Integrator</a></li>
+      <li><a href="nothing.html">ROS ADJ2 Discrete Integrator</a></li>
+      <li><a href="nothing.html">SDIRK ADJ1 Discrete Integrator</a></li>
+      <li><a href="nothing.html">SDIRK ADJ2 Discrete Integrator</a></li>
+  </ul>
+  <h3>Core Integrators FWD</h3>
+  <ul>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/ERK_FWD_Integrator.html">ERK FWD Integrator</a></li>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/EXP_FWD_Integrator.html">EXP FWD Integrator</a></li>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/EXPK_FWD_Integrator.html">EXPK FWD Integrator</a></li>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/RK_FWD_Integrator.html">RK FWD Integrator</a></li>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/ROK_FWD_Integrator.html">ROK FWD Integrator</a></li>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/ROS_FWD_Integrator.html">ROS FWD Integrator</a></li>
+      <li><a href="../../Core_Method/CoreMethod_FWD/html/SDIRK_FWD_Integrator.html">SDIRK FWD Integrator</a></li>
+  </ul>
+  <h3>Core Integrators TLM</h3>
+  <ul>
+      <li><a href="nothing.html">ERK TLM Integrator</a></li>
+      <li><a href="nothing.html">RK TLM Integrator</a></li>
+      <li><a href="nothing.html">ROS TLM Integrator</a></li>
+      <li><a href="nothing.html">SDIRK TLM Integrator</a></li>
+  </ul>
+<p>Return to <a href="Library.html">Top</a></p>
+</p><h2>Input Configuration<a name="2"></a></h2><p>
+  <h3>Fine Tuned ADJ</h3>
+  <ul>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_ERK_ADJ.html">OPTIONS Fine Tuned ERK ADJ</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_RK_ADJ.html">OPTIONS Fine Tuned RK ADJ</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_ROS_ADJ.html">OPTIONS Fine Tuned ROS ADJ</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_SDIRK_ADJ.html">OPTIONS Fine Tuned SDIRK ADJ</a></li>
+  </ul>
+  <h3>Fine Tuned FWD</h3>
+  <ul>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_ERK_FWD.html">OPTIONS Fine Tuned ERK FWD</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_EXP_FWD.html">OPTIONS Fine Tuned EXP FWD</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_EXPK_FWD.html">OPTIONS Fine Tuned EXPK FWD</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_RK_FWD.html">OPTIONS Fine Tuned RK FWD</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_ROK_FWD.html">OPTIONS Fine Tuned ROK FWD</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_ROS_FWD.html">OPTIONS Fine Tuned ROS FWD</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_SDIRK_FWD.html">OPTIONS Fine Tuned SDIRK FWD</a></li>
+  </ul>
+  <h3>Fine Tuned TLM</h3>
+  <ul>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_ERK_TLM.html">OPTIONS Fine Tuned ERK TLM</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_RK_TLM.html">OPTIONS Fine Tuned RK TLM</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_ROS_TLM.html">OPTIONS Fine Tuned ROS TLM</a></li>
+      <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_SDIRK_TLM.html">OPTIONS Fine Tuned SDIRK TLM</a></li>
+  </ul>
+  <h3>User Supplied ADJ</h3>
+  <ul>
+      <li><a href="nothing.html">OPTIONS User Supplied ERK ADJ</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied RK ADJ</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied ROS ADJ</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied SDIRK ADJ</a></li>
+  </ul>
+  <h3>User Supplied FWD</h3>
+  <ul>
+      <li><a href="nothing.html">OPTIONS User Supplied ERK FWD</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied RK FWD</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied ROS FWD</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied SDIRK FWD</a></li>
+  </ul>
+  <h3>User Supplied TLM</h3>
+  <ul>
+      <li><a href="nothing.html">OPTIONS User Supplied ERK TLM</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied RK TLM</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied ROS TLM</a></li>
+      <li><a href="nothing.html">OPTIONS User Supplied SDIRK TLM</a></li>
+  </ul>
+   <p>
+      <a href="nothing.html">OPTIONS Compare</a><br>
+      <a href="nothing.html">OPTIONS Configuration</a><br>
+      <a href="nothing.html">OPTIONS General Configuration</a><br>
+      <a href="nothing.html">OPTIONS Merge</a>
+  </p>
+<p>Return to <a href="Library.html">Top</a></p>
+</p><h2>Jacobian Vector Product<a name="3"></a></h2><p>
+  <p>
+      <a href="nothing.html">Central2 FD JacV</a><br>
+      <a href="nothing.html">Central4 FD JacV</a><br>
+      <a href="nothing.html">Complex FD JacV</a><br>
+      <a href="nothing.html">Forward FD JacV</a><br>
+      <a href="nothing.html">Left4 FD JacV</a><br>
+      <a href="nothing.html">Matrix Free Jac</a>
+  </p>
+</p><h2>Memory<a name="4"></a></h2><p>
+      <a href="nothing.html">MATLODE Allocate Memory</a><br>
+      <a href="nothing.html">MATLODE Append Memory</a><br>
+      <a href="nothing.html">MATLODE Deallocate Memory</a>
+</p><h2>Single Step Method<a name="5"></a></h2><p>
+      <a href="nothing.html">Arnoldi Adapt</a><br>
+      <a href="nothing.html">Erow4 Adapt Matrix Free</a><br>
+      <a href="nothing.html">Exp4 Adapt Marix Free</a><br>
+      <a href="nothing.html">Exp4 Single Step</a>
+</p><h2>Structs<a name="6"></a></h2><p>
+      <a href="nothing.html">ISTATUS ADD</a><br>
+      <a href="nothing.html">ISTATUS Struct</a><br>
+      <a href="nothing.html">MATLODE OPTIONS</a><br>
+      <a href="nothing.html">RSTATUS Struct</a>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Library
+% <html>
+% Up: <a href="../../index.html">MATLODE Toolbox</a>
+% </html>
+
+%% Core Integrators
+% <html>
+%   <h3>Core Integrators ADJ</h3>
+%   <ul>
+%       <li><a href="nothing.html">ERK ADJ1 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">ERK ADJ2 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">RK ADJ1 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">RK ADJ2 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">ROS ADJ1 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">ROS ADJ2 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">SDIRK ADJ1 Discrete Integrator</a></li>
+%       <li><a href="nothing.html">SDIRK ADJ2 Discrete Integrator</a></li>
+%   </ul>
+%   <h3>Core Integrators FWD</h3>
+%   <ul>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/ERK_FWD_Integrator.html">ERK FWD Integrator</a></li>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/EXP_FWD_Integrator.html">EXP FWD Integrator</a></li>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/EXPK_FWD_Integrator.html">EXPK FWD Integrator</a></li>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/RK_FWD_Integrator.html">RK FWD Integrator</a></li>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/ROK_FWD_Integrator.html">ROK FWD Integrator</a></li>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/ROS_FWD_Integrator.html">ROS FWD Integrator</a></li>
+%       <li><a href="../../Core_Method/CoreMethod_FWD/html/SDIRK_FWD_Integrator.html">SDIRK FWD Integrator</a></li>
+%   </ul>
+%   <h3>Core Integrators TLM</h3>
+%   <ul>
+%       <li><a href="nothing.html">ERK TLM Integrator</a></li>
+%       <li><a href="nothing.html">RK TLM Integrator</a></li>
+%       <li><a href="nothing.html">ROS TLM Integrator</a></li>
+%       <li><a href="nothing.html">SDIRK TLM Integrator</a></li>
+%   </ul>
+% <p>Return to <a href="Library.html">Top</a></p>
+% </html>
+
+%% Input Configuration
+% <html>
+%   <h3>Fine Tuned ADJ</h3>
+%   <ul>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_ERK_ADJ.html">OPTIONS Fine Tuned ERK ADJ</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_RK_ADJ.html">OPTIONS Fine Tuned RK ADJ</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_ROS_ADJ.html">OPTIONS Fine Tuned ROS ADJ</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_ADJ/html/OPTIONS_FineTuned_SDIRK_ADJ.html">OPTIONS Fine Tuned SDIRK ADJ</a></li>
+%   </ul>
+%   <h3>Fine Tuned FWD</h3>
+%   <ul>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_ERK_FWD.html">OPTIONS Fine Tuned ERK FWD</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_EXP_FWD.html">OPTIONS Fine Tuned EXP FWD</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_EXPK_FWD.html">OPTIONS Fine Tuned EXPK FWD</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_RK_FWD.html">OPTIONS Fine Tuned RK FWD</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_ROK_FWD.html">OPTIONS Fine Tuned ROK FWD</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_ROS_FWD.html">OPTIONS Fine Tuned ROS FWD</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_FWD/html/OPTIONS_FineTuned_SDIRK_FWD.html">OPTIONS Fine Tuned SDIRK FWD</a></li>
+%   </ul>
+%   <h3>Fine Tuned TLM</h3>
+%   <ul>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_ERK_TLM.html">OPTIONS Fine Tuned ERK TLM</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_RK_TLM.html">OPTIONS Fine Tuned RK TLM</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_ROS_TLM.html">OPTIONS Fine Tuned ROS TLM</a></li>
+%       <li><a href="../Input_Configuration/FineTuned/FineTuned_TLM/html/OPTIONS_FineTuned_SDIRK_TLM.html">OPTIONS Fine Tuned SDIRK TLM</a></li>
+%   </ul>
+%   <h3>User Supplied ADJ</h3>
+%   <ul>
+%       <li><a href="nothing.html">OPTIONS User Supplied ERK ADJ</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied RK ADJ</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied ROS ADJ</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied SDIRK ADJ</a></li>
+%   </ul>
+%   <h3>User Supplied FWD</h3>
+%   <ul>
+%       <li><a href="nothing.html">OPTIONS User Supplied ERK FWD</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied RK FWD</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied ROS FWD</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied SDIRK FWD</a></li>
+%   </ul>
+%   <h3>User Supplied TLM</h3>
+%   <ul>
+%       <li><a href="nothing.html">OPTIONS User Supplied ERK TLM</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied RK TLM</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied ROS TLM</a></li>
+%       <li><a href="nothing.html">OPTIONS User Supplied SDIRK TLM</a></li>
+%   </ul>
+%    <p>
+%       <a href="nothing.html">OPTIONS Compare</a><br>
+%       <a href="nothing.html">OPTIONS Configuration</a><br>
+%       <a href="nothing.html">OPTIONS General Configuration</a><br>
+%       <a href="nothing.html">OPTIONS Merge</a>
+%   </p>
+% <p>Return to <a href="Library.html">Top</a></p>
+% </html>
+
+%% Jacobian Vector Product
+% <html>
+%   <p>
+%       <a href="nothing.html">Central2 FD JacV</a><br>
+%       <a href="nothing.html">Central4 FD JacV</a><br>
+%       <a href="nothing.html">Complex FD JacV</a><br>
+%       <a href="nothing.html">Forward FD JacV</a><br>
+%       <a href="nothing.html">Left4 FD JacV</a><br>
+%       <a href="nothing.html">Matrix Free Jac</a>
+%   </p>
+% </html>
+
+%% Memory
+% <html>
+%       <a href="nothing.html">MATLODE Allocate Memory</a><br>
+%       <a href="nothing.html">MATLODE Append Memory</a><br>
+%       <a href="nothing.html">MATLODE Deallocate Memory</a>
+% </html>
+
+%% Single Step Method
+% <html>
+%       <a href="nothing.html">Arnoldi Adapt</a><br>
+%       <a href="nothing.html">Erow4 Adapt Matrix Free</a><br>
+%       <a href="nothing.html">Exp4 Adapt Marix Free</a><br>
+%       <a href="nothing.html">Exp4 Single Step</a>
+% </html>
+
+%% Structs
+% <html>
+%       <a href="nothing.html">ISTATUS ADD</a><br>
+%       <a href="nothing.html">ISTATUS Struct</a><br>
+%       <a href="nothing.html">MATLODE OPTIONS</a><br>
+%       <a href="nothing.html">RSTATUS Struct</a>
+% </html>
+##### SOURCE END #####
+--></body></html>

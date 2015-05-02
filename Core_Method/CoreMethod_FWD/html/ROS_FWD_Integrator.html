@@ -1,0 +1,430 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ROS_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-27"><meta name="DC.source" content="ROS_FWD_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>ROS_FWD_Integrator</h1><!--introduction--><p> Up: <a href="../../../Library/html/Library.html">Library</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Reference</a></li><li><a href="#7">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><h2>Input Parameters<a name="2"></a></h2><h2>Output Parameters<a name="3"></a></h2><h2>Description<a name="4"></a></h2><h2>Reference<a name="5"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><h2>Major Modification History<a name="7"></a></h2><p>
+<table border=1>
+  <tr>
+      <td><b>Date</b></td>
+      <td>Developer</td>
+      <td>Email</td>
+      <td>Action</td>
+  </tr>
+  <tr>
+      <td>1/1/2014</td>
+      <td>Tony D'Augustine</td>
+      <td>adaug13@vt,edu</td>
+      <td>Release MATLODE_v2.0.00</td>
+  </tr>
+</table>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% ROS_FWD_Integrator
+%
+% <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
+%
+%% Syntax
+%
+%
+%% Input Parameters
+%
+%
+%% Output Parameters
+%
+%
+%% Description
+%
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+%
+% [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
+%     tangent linear integration of ODEs, SIAM Journal on Scientific 
+%     Computing, 36(5), C504-C523, 2014.
+%
+function [ Tout Yout ISTATUS RSTATUS Ierr, stack_ptr, quadrature ] = ROS_FWD_Integrator( OdeFunction,...
+        Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr )
+
+    % Force initial value matrix to be N X 1.
+    if ( size(Y,2) == 1 )
+        % DO NOTHING
+    else
+        Y = transpose(Y);
+    end  
+
+    % Get Problem Size
+    NVAR = max(size(Y));
+
+    % Initialize time variables
+    Tinitial = Tspan(1);
+    Tfinal = Tspan(2);
+        
+    % note: based off DLAMCH('E') NOT MATLAB's EPS
+    Roundoff = eps/2;
+    
+    DeltaMin = 1e-5;
+    
+   if ( OPTIONS.storeCheckpoint == true )
+        Yout = zeros(NVAR,OPTIONS.Max_no_steps);
+        Tout = zeros(OPTIONS.Max_no_steps,1);
+        TYindex = 1;
+        Yout(:,TYindex) = Y;
+        Tout(TYindex,1) = Tinitial; 
+    end    
+    
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Global Variables
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    global ros_A ros_C ros_M ros_E
+    global ros_Alpha ros_Gamma
+    global ros_NewF
+    
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Initial Settings
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    ISTATUS = ISTATUS_Struct('default');
+    RSTATUS = RSTATUS_Struct('default');    
+    
+    K = zeros(NVAR*Coefficient.NStage,1);
+    L = zeros(OPTIONS.NADJ*Coefficient.NStage,1);
+    
+    quadrature = OPTIONS.Quadrature();    
+
+    T = Tinitial;
+    H = min( max( abs(OPTIONS.Hmin), abs(OPTIONS.Hstart) ), abs(OPTIONS.Hmax) );
+    if ( abs(H) <= 10.0*Roundoff )
+        H = DeltaMin;
+    end
+    
+    if ( Tfinal >= Tinitial )
+        Direction = 1;
+    else
+        Direction = -1;
+    end
+    H = Direction*H;
+    
+    RejectLastH = false;
+    RejectMoreH = false;
+    
+        
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Time loop
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    while ( ( Direction > 0 ) && ( (T-Tfinal)+Roundoff <= 0.0 ) ...
+            || ( Direction < 0 ) && ( (Tfinal-T)+Roundoff <= 0.0 ) )
+        
+        if ( ISTATUS.Nstp >= OPTIONS.Max_no_steps )
+            error('Number of steps exceeds maximum buffer bound \n T= %f;     H= %f', T, H );
+        end
+        if ( ( ( T+0.1*H ) == T) || ( H <= Roundoff ) )
+            error('Step size too small: T + 10*H = T or H < Roundoff \n T= %f;     H= %f', T, H );
+        end
+        
+        % Limit H if necessary to avoid going beyond Tfinal
+        H = min( H, abs( Tfinal-T ) );
+        
+        % Compute the function at current time
+        Fcn0 = OdeFunction( T, Y );
+        ISTATUS.Nfun = ISTATUS.Nfun + 1;
+        
+        % Compute the function derivative with respect to T
+        if ( ~OPTIONS.Autonomous )
+            [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, OdeFunction, ISTATUS );
+        end
+        
+        % Compute the Jacobian at current time
+        fjac = OPTIONS.Jacobian(T,Y);
+        ISTATUS.Njac = ISTATUS.Njac + 1;
+        
+        % Repeat step calculation until current step accepted
+        accepted = false;
+        while ( ~accepted ) % accepted
+            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( NVAR, H, Direction, ros_Gamma(1), fjac, ISTATUS );
+            
+            if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
+                error('Matrix is repeatedly singular');
+            end
+            
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Stages
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            for istage=1:Coefficient.NStage % stages
+                
+                % Current istage offset. Current istage vector is K(ioffset+1:ioffset_NVAR)
+                ioffset = NVAR*(istage-1);
+                
+                % For the 1st stage the function has been computed previously
+                if ( istage == 1 )
+                    Fcn = Fcn0;
+                    if ( adjStackFlag )
+                        Ystage = Y;
+                        Ynew = Y;
+                    end
+                elseif ( ros_NewF(istage) )
+                    Ynew = Y;
+                    for j=1:istage-1;
+                        Ynew = Ynew + ros_A((istage-1)*(istage-2)/2+j)*K(NVAR*(j-1)+1:NVAR*(j-1)+NVAR);
+                    end
+                    Tau = T + ros_Alpha(istage)*Direction*H;
+                    Fcn = OdeFunction( Tau, Ynew );
+                    ISTATUS.Nfun = ISTATUS.Nfun + 1;
+                end
+
+                if ( adjStackFlag )
+                    if ( istage > 1 )
+                        Ystage(ioffset+1:ioffset+NVAR) = Ynew;
+                    end
+                end
+
+                K(ioffset+1:ioffset+NVAR) = Fcn;
+                for j=1:istage-1
+                    HC = ros_C((istage-1)*(istage-2)/2+j)/(Direction*H);
+                    K(ioffset+1:ioffset+NVAR) = K(ioffset+1:ioffset+NVAR) + HC*K(NVAR*(j-1)+1:NVAR*(j-1)+NVAR);
+                end
+                if ( ( ~OPTIONS.Autonomous ) && ( ros_Gamma(istage) ~= 0.0 ) )
+                    HG = Direction*H*ros_Gamma(istage);
+                    K(ioffset+1:ioffset+NVAR) = K(ioffset+1:ioffset+NVAR) + HG*dFdT;
+                end
+                
+                % Solve the system
+                K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+                ISTATUS.Nsol = ISTATUS.Nsol + 1;
+                
+            end % stages
+            
+            Ynew = Y;
+            for j=1:Coefficient.NStage
+                Ynew = Ynew + ros_M(j)*K(NVAR*(j-1)+1:NVAR*(j-1)+NVAR);
+            end
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Error Estimation
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            % Compute the error estimation
+            Yerr = zeros(NVAR,1);
+            for j=1:Coefficient.NStage
+                Yerr = Yerr + ros_E(j)*K(NVAR*(j-1)+1:NVAR*(j-1)+NVAR);
+            end
+
+            % Compute error norm
+            SCAL = OPTIONS.AbsTol + OPTIONS.RelTol.*max(abs(Y),abs(Ynew));
+            Err = max(sqrt(sum((Yerr./SCAL).^2)/NVAR),1d-10);
+            
+            % New step size is bounded by FacMin <= Hnew/H <= FacMax
+            Fac = min( OPTIONS.FacMax, max( OPTIONS.FacMin, ...
+                OPTIONS.FacSafe/Err^(1.0/Coefficient.ELO) ) );
+            Hnew = H*Fac;
+            
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Accept/Reject 
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            % Check the error magnitude and adjust the step size
+            ISTATUS.Nstp = ISTATUS.Nstp + 1;
+            if ( ( Err <= 1.0 ) || ( H <= OPTIONS.Hmin ) ) 
+                ISTATUS.Nacc = ISTATUS.Nacc + 1;
+                
+                if ( adjStackFlag )
+                    stack_ptr = rosPush(NVAR,T,H,Ystage,K,OPTIONS,Coefficient,stack_ptr);
+                end
+                
+                if ( adjQuadFlag )
+                    RY = OPTIONS.DRDY(T,Y);
+                    R = OPTIONS.QFun(T,Y);
+                    if ( ~OPTIONS.Autonomous )
+                        Delta = sqrt(Roundoff)*max(DeltaMin,abs(T));
+                        dRdT = OPTIONS.QFun(T+Delta,Y);
+                        dRdT = dRdT - R;
+                        dRdT = dRdT*(1/Delta);
+                    end
+                    
+                    % Compute the stages for the quadrature term
+                    for istage=1:Coefficient.NStage
+                        ioffset = OPTIONS.NADJ*(istage-1);
+                        if ( istage == 1 )
+                            % do nothing
+                        elseif ( ros_NewF(istage) )
+                            Tau = T + ros_Alpha(istage)*Direction*H;
+                            R = OPTIONS.QFun(Tau,Ystage(NVAR*(istage-1)+1:NVAR*(istage-1)+1+NVAR-1));
+                        end
+                        
+                        L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1)) = R;
+                        for j=1:istage-1
+                            HC = ros_C((istage-1)*(istage-2)/2+j)/(Direction*H);
+                            L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1)) = L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1)) + HC*L(OPTIONS.NADJ*(j-1)+1:(OPTIONS.NADJ*(j-1)+1)+(OPTIONS.NADJ-1));
+                        end
+                        
+                        if ( ~OPTIONS.Autonomous && (ros_Gamma(istage) ~= 0) )
+                            HG = Direction*H*ros_Gamma(istage);
+                            L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1)) = L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1)) + HG*dRdT;
+                        end
+                        
+                        for i=1:OPTIONS.NADJ
+                            for j=1:NVAR
+                                L(ioffset+i) = L(ioffset+i)+RY(j,i)*K(NVAR*(istage-1)+j);
+                            end
+                        end
+                        L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1)) = L(ioffset+1:(ioffset+1)+(OPTIONS.NADJ-1))*Direction*H*ros_Gamma(1);
+                    end
+                    
+                % Compute the new quadrature solution
+                    for j=1:Coefficient.NStage
+                        quadrature = quadrature + ros_M(j)*L(OPTIONS.NADJ*(j-1)+1:(OPTIONS.NADJ*(j-1)+1)+(OPTIONS.NADJ-1));
+                    end                    
+                end
+                
+                % Update time
+                T = T + Direction*H;          
+                
+                % Update solution
+                Y = Ynew;
+                
+                if ( OPTIONS.storeCheckpoint == true )
+                    Tout(TYindex,1) = T;                
+                    Yout(:,TYindex) = Y;
+                    TYindex = TYindex + 1;                
+                end
+                
+                Hnew = max( OPTIONS.Hmin, min( Hnew, OPTIONS.Hmax ) );
+                if ( RejectLastH ) % No step size increase after a rejected step
+                    Hnew = min( Hnew, H );
+                end
+                
+                % Last T and H
+                RSTATUS.Nhexit = H;
+                RSTATUS.Nhnew = Hnew;
+                RSTATUS.Ntexit = T;
+                
+                RejectLastH = false;
+                RejectMoreH = false;
+                H = Hnew;
+                accepted = true;                
+                
+                % for debugging
+                if ( OPTIONS.displaySteps == true )
+                    str = ['Accepted step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    disp(str); 
+                end
+                
+            else % Reject step
+                if ( RejectMoreH )
+                    Hnew = H*OPTIONS.FacRej;
+                end
+                
+                RejectMoreH = RejectLastH;
+                RejectLastH = true;
+                H = Hnew;
+                
+                if ( ISTATUS.Nacc >= 1 ) 
+                    ISTATUS.Nrej = ISTATUS.Nrej + 1;
+                end
+                
+                % for debugging
+                if ( OPTIONS.displaySteps == true )
+                    str = ['Rejected step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    disp(str);
+                end
+                
+            end
+        end
+    end
+    
+    % Successful return
+    Ierr = 1;
+    
+    % Decallocate Memory
+    if ( OPTIONS.storeCheckpoint == true )
+        Tout(TYindex:OPTIONS.Max_no_steps) = [];
+        Yout(:,TYindex:OPTIONS.Max_no_steps) = [];       
+    else
+        Tout = T;
+        Yout = Y;
+    end
+    Yout = transpose(Yout);
+    
+return;
+
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt,edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+% 
+##### SOURCE END #####
+--></body></html>

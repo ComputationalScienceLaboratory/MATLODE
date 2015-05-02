@@ -1,0 +1,324 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Testing Material: Testing_Simple_TLM</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-20"><meta name="DC.source" content="Testing_Simple_TLM.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Testing Material: Testing_Simple_TLM</h1><!--introduction--><p>
+Up: <a href="Testing_Material.html">Testing Material</a>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Methodology</a></li><li><a href="#4">Test Case 1A: MalOde_ERK_TLM_DRIVER_Integrator (Default)</a></li><li><a href="#5">Test Case 1B: MalOde_ERK_TLM_DRIVER_Integrator</a></li><li><a href="#6">Test Case 2A: MalOde_RK_TLM_DRIVER_Integrator (Default)</a></li><li><a href="#7">Test Case 2B: MalOde_RK_TLM_DRIVER_Integrator</a></li><li><a href="#8">Test Case 2C: MalOde_RK_TLM_DRIVER_Integrator</a></li><li><a href="#9">Test Case 3A: MalOde_ROS_TLM_DRIVER_Integrator (Default)</a></li><li><a href="#10">Test Case 3B: MalOde_ROS_TLM_DRIVER_Integrator</a></li><li><a href="#11">Test Case 4A: MalOde_SDIRK_TLM_DRIVER_Integrator (Default)</a></li><li><a href="#12">Test Case 4B: MalOde_SDIRK_TLM_DRIVER_Integrator</a></li><li><a href="#13">Test Case 4C: MalOde_SDIRK_TLM_DRIVER_Integrator</a></li></ul></div><p>For the following test cases, we will use the ODE test problem below.</p><pre class="codeinput">Ode_Function = @vanDerPol_Function;
+Ode_Jacobian = @vanDerPol_Jacobian;
+Ode_Hess_vec = @vanDerPol_Hess_vec;
+
+Tspan = [   0;  20  ];
+y0    = [   2; -0.66];
+</pre><p>We first generate a reference solution using MATLAB's built in ODE integrator ode45.</p><pre class="codeinput">Option_Ref = odeset(<span class="string">'AbsTol'</span>, 1e-12, <span class="string">'RelTol'</span>, 1e-12);
+[T_Ref, Y_Ref] = ode45(Ode_Function,Tspan,y0,Option_Ref);
+
+Sens_Ref = [0.1084443916E+01    0.3618905872E-01;
+            0.7020197127E-01    0.2342715214E-02];
+</pre><h2>Methodology<a name="3"></a></h2><p>In order to not overwhelm the reader with a cumbersome amount of test cases, we will demonstrate the validity of MATLODE&reg; with the most commonly used parameter settings. For all ODE solvers in MATLODE&reg; tangent linear package, we perform an absolute and relative tolerance sweep using the built in default ODE option struct denoted by 'A' in the section title. Additionally we perform a second absolute and relative tolerance sweep, denoted by 'B', changing the method used in the integrator. When applicable, the direct sensivity option parameter is toggled denoted by 'C' followed by an absolute and relative tolerance sweep.</p><h2>Test Case 1A: MalOde_ERK_TLM_DRIVER_Integrator (Default)<a name="4"></a></h2><p>Description: Running <tt>MATLODE_ERK_TLM_Integrator</tt> with different absolute and relative tolerance values using the default option struct.</p><p><b>Description</b>: Running <tt>MATLODE_ERK_TLM_Integrator</tt> with different absolute and relative tolerance values using the default option struct.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))));
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ERK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+a = loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 1B: MalOde_ERK_TLM_DRIVER_Integrator<a name="5"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_ERK_TLM_Integrator</tt> validity given alternative coefficients.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'Method'</span>,3);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ERK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 2A: MalOde_RK_TLM_DRIVER_Integrator (Default)<a name="6"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_RK_TLM_Integrator</tt> validity given default option struct.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))));
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_RK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 2B: MalOde_RK_TLM_DRIVER_Integrator<a name="7"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_RK_TLM_Integrator</tt> validity given alternative coefficients.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'Method'</span>,1);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_RK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 2C: MalOde_RK_TLM_DRIVER_Integrator<a name="8"></a></h2><p>An abolute and relative tolerance sweep depicting <tt>MATLODE_RK_TLM_Integrator</tt> validity given nondirect sensitivity analysis.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'DirectTLM'</span>,false);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_RK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 3A: MalOde_ROS_TLM_DRIVER_Integrator (Default)<a name="9"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_ROS_TLM_Integrator</tt> validity given default option struct.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'Hess_vec'</span>,Ode_Hess_vec);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ROS_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 3B: MalOde_ROS_TLM_DRIVER_Integrator<a name="10"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_ROS_TLM_Integrator</tt> validity given alternative coefficients.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'Hess_vec'</span>,Ode_Hess_vec,<span class="string">'Method'</span>,2);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ROS_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 4A: MalOde_SDIRK_TLM_DRIVER_Integrator (Default)<a name="11"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_SDIRK_TLM_Integrator</tt> validity given default option struct.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))));
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_SDIRK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 4B: MalOde_SDIRK_TLM_DRIVER_Integrator<a name="12"></a></h2><p>An absolute and relative tolerance sweep depicting <tt>MATLODE_SDIRK_TLM_Integrator</tt> validity given alternative coefficients.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'Method'</span>,5);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_SDIRK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><h2>Test Case 4C: MalOde_SDIRK_TLM_DRIVER_Integrator<a name="13"></a></h2><p>An abolute and relative tolerance sweep depicting <tt>MATLODE_SDIRK_TLM_Integrator</tt> validity given nondirect sensitivity analysis.</p><pre class="codeinput">Option = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,eye(max(size(y0))),<span class="string">'DirectTLM'</span>,false);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_SDIRK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title(<span class="string">'Van Der Pol rRMS (Solution)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+figure(2);
+loglog(steps,errorSensitivity);
+title(<span class="string">'Van Der Pol rRMS (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Testing Material: Testing_Simple_TLM
+%
+% <html>
+% Up: <a href="Testing_Material.html">Testing Material</a>
+% </html>
+% 
+%%
+% For the following test cases, we will use the ODE test problem below. 
+Ode_Function = @vanDerPol_Function;
+Ode_Jacobian = @vanDerPol_Jacobian;
+Ode_Hess_vec = @vanDerPol_Hess_vec;
+
+Tspan = [   0;  20  ];
+y0    = [   2; -0.66];
+
+%%
+% We first generate a reference solution using MATLAB's built in ODE
+% integrator ode45.
+Option_Ref = odeset('AbsTol', 1e-12, 'RelTol', 1e-12);
+[T_Ref, Y_Ref] = ode45(Ode_Function,Tspan,y0,Option_Ref);
+
+Sens_Ref = [0.1084443916E+01    0.3618905872E-01;
+            0.7020197127E-01    0.2342715214E-02];
+
+%% Methodology
+% In order to not overwhelm the reader with a cumbersome amount of test cases,
+% we will demonstrate the validity of MATLODE(R) with the most commonly used
+% parameter settings. For all ODE solvers in MATLODE(R) tangent linear package, we
+% perform an absolute and relative tolerance sweep using the built in
+% default ODE option struct denoted by 'A' in the section title.
+% Additionally we perform a second absolute and relative tolerance sweep,
+% denoted by 'B', changing the method used in the integrator. When
+% applicable, the direct sensivity option parameter is toggled denoted by
+% 'C' followed by an absolute and relative tolerance sweep.
+        
+%% Test Case 1A: MalOde_ERK_TLM_DRIVER_Integrator (Default)
+% Description: Running |MATLODE_ERK_TLM_Integrator| with different absolute
+% and relative tolerance values using the default option struct.
+%
+% *Description*: Running |MATLODE_ERK_TLM_Integrator| with different absolute
+% and relative tolerance values using the default option struct.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))));
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ERK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+a = loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 1B: MalOde_ERK_TLM_DRIVER_Integrator
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_ERK_TLM_Integrator| validity given alternative coefficients.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'Method',3);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ERK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 2A: MalOde_RK_TLM_DRIVER_Integrator (Default)
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_RK_TLM_Integrator| validity given default option struct.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))));
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_RK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 2B: MalOde_RK_TLM_DRIVER_Integrator
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_RK_TLM_Integrator| validity given alternative coefficients.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'Method',1);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_RK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 2C: MalOde_RK_TLM_DRIVER_Integrator
+% An abolute and relative tolerance sweep depicting
+% |MATLODE_RK_TLM_Integrator| validity given nondirect sensitivity
+% analysis.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'DirectTLM',false);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_RK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 3A: MalOde_ROS_TLM_DRIVER_Integrator (Default)
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_ROS_TLM_Integrator| validity given default option struct.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'Hess_vec',Ode_Hess_vec);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ROS_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 3B: MalOde_ROS_TLM_DRIVER_Integrator
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_ROS_TLM_Integrator| validity given alternative coefficients.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'Hess_vec',Ode_Hess_vec,'Method',2);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_ROS_TLM_Integrator,Ode_Function,Tspan,y0,Option,-10,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 4A: MalOde_SDIRK_TLM_DRIVER_Integrator (Default)
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_SDIRK_TLM_Integrator| validity given default option struct.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))));
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_SDIRK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 4B: MalOde_SDIRK_TLM_DRIVER_Integrator
+% An absolute and relative tolerance sweep depicting
+% |MATLODE_SDIRK_TLM_Integrator| validity given alternative coefficients.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'Method',5);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_SDIRK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 4C: MalOde_SDIRK_TLM_DRIVER_Integrator
+% An abolute and relative tolerance sweep depicting
+% |MATLODE_SDIRK_TLM_Integrator| validity given nondirect sensitivity
+% analysis.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',eye(max(size(y0))),'DirectTLM',false);
+[steps, errorSolution, errorSensitivity ] = TEST_General_Sensitivity(@MATLODE_SDIRK_TLM_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol rRMS (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol rRMS (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+##### SOURCE END #####
+--></body></html>

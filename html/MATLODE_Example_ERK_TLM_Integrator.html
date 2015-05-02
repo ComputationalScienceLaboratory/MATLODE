@@ -1,0 +1,277 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLODE_Example_ERK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_ERK_TLM_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLODE_Example_ERK_TLM_Integrator</h1><!--introduction--><p>
+   Up: <a href="../Examples/html/Examples.html">Examples</a>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#4">Advanced Features</a></li></ul></div><p>For the following examples we will use Arenstorf Orbit as a toy problem to illustrate <tt>MATLODE_ERK_TLM_Integrator</tt> functionalities and features. To initially setup Brusselator, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="codeinput">Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Ode_YTLM            = eye(4);
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+</pre><h2>Basic Functionality<a name="2"></a></h2><p>Now that we have our model loaded in our workspace, we can perform a tangent linear explicit Runge-Kutta integration using MATLODE's prebuilt default settings. We note that a Jacobian and Y_TLM required and passed by MATLODE's option struct.</p><pre class="codeinput">Options  = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,Ode_YTLM);
+[ ~, Y, Sens ] = MATLODE_ERK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+  Columns 1 through 3
+
+   0.989365398322643  -0.008118074065802  -1.113854858951780
+
+  Column 4
+
+  -1.347375530505811
+
+sensitivity at Time_Interval(2)
+   1.0e+06 *
+
+  Columns 1 through 3
+
+   0.013935972017972  -0.004266173814348   0.000027043915070
+   0.008179760777190  -0.002348774863634   0.000014891733314
+   0.944413955565086  -0.297449809968606   0.001885443761994
+  -1.483218412779525   0.440717675442452  -0.002793988009634
+
+  Column 4
+
+  -0.000086652911918
+  -0.000050959021233
+  -0.005867049814353
+   0.009230958322628
+
+</pre><h2>Advanced Features<a name="4"></a></h2><p>To <b>save the model state at each time step</b>, one needs to initialize a MATLODE&reg; option struct to store the fine tuning settings. The <tt>(key,value)</tt> pair associated for saving the model state at each time step is denoted as <tt>('storeCheckpoint',true)</tt> or <tt>('storeCheckpoint',false)</tt> depending on whether or not one wants to explicitly fine tune the integrator. In this case, the intermediary time step values are stored executing the command below.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'storeCheckpoint'</span>,true,<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,Ode_YTLM);
+</pre><p>To run <tt>MATLODE_ERK_FWD_Integrator</tt> using the fine tuning, one needs to insert the option struct into the integrator's fourth parameter position.</p><pre class="codeinput">[ ~, Y, Sens ] = MATLODE_ERK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">format <span class="string">long</span>;
+disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+  Columns 1 through 3
+
+   0.989365398322643  -0.008118074065802  -1.113854858951780
+
+  Column 4
+
+  -1.347375530505811
+
+sensitivity at Time_Interval(2)
+   1.0e+06 *
+
+  Columns 1 through 3
+
+   0.013935972017972  -0.004266173814348   0.000027043915070
+   0.008179760777190  -0.002348774863634   0.000014891733314
+   0.944413955565086  -0.297449809968606   0.001885443761994
+  -1.483218412779525   0.440717675442452  -0.002793988009634
+
+  Column 4
+
+  -0.000086652911918
+  -0.000050959021233
+  -0.005867049814353
+   0.009230958322628
+
+</pre><p>After plotting the results, one can now visualize the model.</p><pre class="codeinput">figure(1);
+plot(Y(:,1),Y(:,2));
+title(<span class="string">'Arenstorf Orbit'</span>);
+xlabel(<span class="string">'Y(:,1)'</span>);
+ylabel(<span class="string">'Y(:,2)'</span>);
+</pre><img vspace="5" hspace="5" src="MATLODE_Example_ERK_TLM_Integrator_01.png" alt=""> <p>To obtain a smoother graphical repusentation, one can further tighten the error tolerances. To tighten the relative and abolute error tolerances, one fine tunes the option struct. Since the option struct is already in the workspace, one adds the relative and absolute <tt>(key,value)</tt> pair to the option struct. Then plot the results.</p><pre class="codeinput">Options = MATLODE_OPTIONS(Options,<span class="string">'AbsTol'</span>,1e-12,<span class="string">'RelTol'</span>,1e-12);
+[ T, Y, Sens ] = MATLODE_ERK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">format <span class="string">long</span>;
+disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+  Columns 1 through 3
+
+   0.993999999922114  -0.000000079957168  -0.000012606226297
+
+  Column 4
+
+  -2.001585118385729
+
+sensitivity at Time_Interval(2)
+   1.0e+06 *
+
+  Columns 1 through 3
+
+   0.004141460842001  -0.001373436793264   0.000008712126201
+   0.013650742272501  -0.004049058454606   0.000025690749214
+   2.220300498658203  -0.660821033958704   0.004192788254230
+   0.644407485994680  -0.213758538185508   0.001355935230860
+
+  Column 4
+
+  -0.000025691247242
+  -0.000084980825140
+  -0.013820780308166
+  -0.003997499017851
+
+</pre><p>After plotting the results, one can now visualize the model.</p><pre class="codeinput">figure(2);
+plot(Y(:,1),Y(:,2));
+title(<span class="string">'Arenstorf Orbit'</span>);
+xlabel(<span class="string">'Y(:,1)'</span>);
+ylabel(<span class="string">'Y(:,2)'</span>);
+</pre><img vspace="5" hspace="5" src="MATLODE_Example_ERK_TLM_Integrator_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLODE_Example_ERK_TLM_Integrator
+%
+% <html>
+%    Up: <a href="../Examples/html/Examples.html">Examples</a>
+% </html>
+%%
+% For the following examples we will use Arenstorf Orbit as a toy problem 
+% to illustrate |MATLODE_ERK_TLM_Integrator| functionalities and features.
+% To initially setup Brusselator, execute the MATLAB commands below to
+% load our input parameters into our workspace. 
+Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Ode_YTLM            = eye(4);
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+
+%% Basic Functionality
+% Now that we have our model loaded in our workspace, we can perform a
+% tangent linear explicit Runge-Kutta integration using MATLODE's prebuilt default
+% settings. We note that a Jacobian and Y_TLM required and passed by MATLODE's
+% option struct.
+Options  = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',Ode_YTLM);
+[ ~, Y, Sens ] = MATLODE_ERK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+
+%% Advanced Features
+% To *save the model state at each time step*, one needs to
+% initialize a MATLODE(R) option struct to store the fine tuning settings. The
+% |(key,value)| pair associated for saving the model state at each time
+% step is denoted as |('storeCheckpoint',true)| or
+% |('storeCheckpoint',false)| depending on whether or not one wants to
+% explicitly fine tune the integrator. In this case, the intermediary time
+% step values are stored executing the command below.
+Options = MATLODE_OPTIONS('storeCheckpoint',true,'Jacobian',Ode_Jacobian,'Y_TLM',Ode_YTLM);
+
+%%
+% To run |MATLODE_ERK_FWD_Integrator| using the fine tuning, one needs to
+% insert the option struct into the integrator's fourth parameter position.
+[ ~, Y, Sens ] = MATLODE_ERK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+format long;
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+
+%%
+% After plotting the results, one can now visualize the model.
+figure(1);
+plot(Y(:,1),Y(:,2));
+title('Arenstorf Orbit');
+xlabel('Y(:,1)');
+ylabel('Y(:,2)');
+
+%%
+% To obtain a smoother graphical repusentation, one can further tighten the 
+% error tolerances. To tighten the relative and abolute error tolerances,
+% one fine tunes the option struct. Since the option struct is already in 
+% the workspace, one adds the relative and absolute |(key,value)| pair to 
+% the option struct. Then plot the results.
+Options = MATLODE_OPTIONS(Options,'AbsTol',1e-12,'RelTol',1e-12);
+[ T, Y, Sens ] = MATLODE_ERK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+format long;
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+
+%%
+% After plotting the results, one can now visualize the model.
+figure(2);
+plot(Y(:,1),Y(:,2));
+title('Arenstorf Orbit');
+xlabel('Y(:,1)');
+ylabel('Y(:,2)');
+
+##### SOURCE END #####
+--></body></html>

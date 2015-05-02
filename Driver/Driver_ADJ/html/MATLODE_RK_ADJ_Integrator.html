@@ -1,0 +1,683 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLODE_RK_ADJ_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_RK_ADJ_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLODE_RK_ADJ_Integrator</h1><!--introduction--><p> Up: <a href="DRIVER_ADJ.html">DRIVER_ADJ</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Reference</a></li><li><a href="#8">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                                   MATLODE_RK_ADJ_Integrator
+                  [ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options)
+ [ T, Y, Sens, Quad, Mu, Stats ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>Ode_Function</tt>: model function</p><p><tt>Time_Interval</tt>: time span</p><p><tt>Y0</tt>: initial model state vector</p><p><tt>Options</tt>: MATLODE option struct</p><h2>Output Parameters<a name="3"></a></h2><p><tt>T</tt>: saved time snapshots</p><p><tt>Y</tt>: saved model state vectors</p><p><tt>Sens</tt>: Sensitivity matrix</p><p><tt>Quad</tt>: Quadrature term</p><p><tt>Mu</tt>: Mu term</p><p><tt>Stats</tt>: integrator statistics</p><h2>Description<a name="4"></a></h2><p>Driver file to solve the system y' = F(t,y) and adjoint sensitivity using an Implicit Runge-Kutta (RK) method.</p><p><tt>MATLODE_RK_ADJ_Integrator</tt> displays the available methods associated with the exponential forward integrator.</p><p><tt>[T, Y, Sens] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options)</tt> computes the ODE solution with respect to the user supplied options configuration and adjoint sensitivity.</p><p><tt>[T, Y, Sens, Quad, Mu, Stats]</tt> = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options)| computes the ODE solution with respect to the user supplied options configuration, sensitivity, quadrature, mu and statisitics.</p><h2>Example<a name="5"></a></h2><p>For the following examples we will use Arenstorf Orbit as a toy problem to illustrate <tt>MATLODE_RK_ADJ_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="language-matlab">Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Ode_Lambda          = eye(4);
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+</pre><p>Now that we have our model loaded in our workspace, we can perform a adjoint implicit Runge-Kutta integration using MATLODE's prebuilt default settings. We note that a Jacobian and Lambda are required for sensitivity analysis.</p><pre class="language-matlab">Options  = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda);
+[ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="language-matlab">disp(<span class="string">'solution and adjoint sensitivty at Time_Interval(2)'</span>);
+disp(Y);
+disp(Sens);
+</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Sensitivity Analysis -&gt; MATLODE_Example_RK_ADJ_Integrator.</p><h2>Reference<a name="6"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504&#8211;C523, 2014</p><p>[3] E. Hairer and G. Wanner, Solving Ordinary Differential Equations II.     Stiff and Differential- Algebraic Problems, Springer Series in     Computational Mathematics, Berlin, 1991.</p><pre class="codeinput"><span class="keyword">function</span> [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
+</pre><pre class="codeinput">    <span class="comment">% Display input/output parameters</span>
+    <span class="keyword">if</span> ( nargout == 0 &amp;&amp; nargin == 0 )
+        fprintf(<span class="string">'Syntax: \n'</span>);
+        fprintf( <span class="string">'                                  MATLODE_RK_ADJ_Integrator \n'</span> );
+        fprintf( <span class="string">'                 [ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options) \n'</span> );
+        fprintf( <span class="string">'[ T, Y, Sens, Quad, Mu, Stats ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options) \n'</span> );
+        fprintf( <span class="string">'\n'</span> );
+        <span class="keyword">return</span>;
+    <span class="keyword">end</span>
+
+    <span class="comment">% Force initial value matrix to be N X 1.</span>
+    <span class="keyword">if</span> ( size(Y0,2) == 1 )
+        <span class="comment">% DO NOTHING</span>
+    <span class="keyword">else</span>
+        Y0 = transpose(Y0);
+    <span class="keyword">end</span>
+
+    <span class="comment">% Get Problem Size</span>
+    NVAR = max(size(Y0));
+
+    <span class="comment">% Initialize Y</span>
+    Y(:,1) = Y0;
+
+    <span class="comment">% Adjoint Flags</span>
+    adjStackFlag = false;
+    adjQuadFlag  = false;
+    adjMuFlag    = false;
+
+    <span class="comment">% Initialize Ierr</span>
+    Ierr = 0;
+
+    <span class="comment">% Initialize ISTATUS and RSTATUS</span>
+    ISTATUS_TOTAL = ISTATUS_Struct(<span class="string">'default'</span>);
+
+    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, <span class="string">'RK'</span>, <span class="string">'ADJ'</span>, Y0, Tspan );
+
+    OPTIONS.NADJ = size(Y0,1);
+    OPTIONS.NVAR = size(Y0,1);
+
+    <span class="comment">% Call RK ADJ integration</span>
+    <span class="comment">% [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = RK_ADJ2_Integrator( NVAR, ...</span>
+    <span class="comment">% NADJ, OPTIONS, FWD_Tout(end), Lambda, GetQuad, ICNTRL, Coefficient, stack_ptr );</span>
+
+    <span class="keyword">if</span> ( ~isempty(OPTIONS.Jacp) )
+        <span class="comment">% RungeKuttaADJ1 w/ Quadrature</span>
+        <span class="keyword">if</span> ( ~isempty(OPTIONS.QFun) &amp;&amp; ~isempty(OPTIONS.DRDP) &amp;&amp; <span class="keyword">...</span>
+                ~isempty(OPTIONS.DRDY) )
+            <span class="comment">% Adjoint Flags</span>
+            adjStackFlag = true;
+            adjQuadFlag  = true;
+            adjMuFlag    = true;
+            stack_ptr    = 0;
+
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">% Call Forward and Adjoint Core Method</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">%   Accounts for Tspan n-dimensional array to force output at</span>
+            <span class="comment">%   specific times. Accumlates statistics.</span>
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct(<span class="string">'default'</span>);
+            <span class="keyword">for</span> interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = <span class="keyword">...</span>
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            <span class="keyword">end</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+            <span class="comment">% Call RK ADJ1 Core Method no Quadrature</span>
+            <span class="comment">% disp('RungeKuttaADJ1 w/ Quadrature');</span>
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = <span class="keyword">...</span>
+                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;
+        <span class="comment">% RungeKuttaADJ1 no Quadrature</span>
+        <span class="keyword">else</span>
+            <span class="comment">% Adjoint Flags</span>
+            adjStackFlag = true;
+            adjQuadFlag  = false;
+            adjMuFlag    = true;
+            stack_ptr    = 0;
+
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">% Call Forward and Adjoint Core Method</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">%   Accounts for Tspan n-dimensional array to force output at</span>
+            <span class="comment">%   specific times. Accumlates statistics.</span>
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct(<span class="string">'default'</span>);
+            <span class="keyword">for</span> interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = <span class="keyword">...</span>
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            <span class="keyword">end</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+            <span class="comment">% Call RK ADJ1 Core Method no Quadrature</span>
+            <span class="comment">% disp('RungeKuttaADJ2 no Quadrature');</span>
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = <span class="keyword">...</span>
+                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;
+        <span class="keyword">end</span>
+    <span class="keyword">else</span>
+        <span class="comment">% RungeKuttaADJ2 w/ Quadrature</span>
+        <span class="keyword">if</span> ( ~isempty(OPTIONS.QFun) &amp;&amp; ~isempty(OPTIONS.DRDY) )
+            <span class="comment">% Adjoint Flags</span>
+            adjStackFlag = true;
+            adjQuadFlag  = true;
+            adjMuFlag    = false;
+            stack_ptr    = 0;
+
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">% Call Forward and Adjoint Core Method</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">%   Accounts for Tspan n-dimensional array to force output at</span>
+            <span class="comment">%   specific times. Accumlates statistics.</span>
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct(<span class="string">'default'</span>);
+            <span class="keyword">for</span> interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = <span class="keyword">...</span>
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            <span class="keyword">end</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+            <span class="comment">% Call RK ADJ2 Core Method no Quadrature</span>
+            <span class="comment">% disp('RungeKuttaADJ2 w/ Quadrature');</span>
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = <span class="keyword">...</span>
+                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;
+        <span class="comment">% RungeKuttaADJ2 no Quadrature</span>
+        <span class="keyword">else</span>
+            <span class="comment">% Adjoint Flags</span>
+            adjStackFlag = true;
+            adjQuadFlag  = false;
+            adjMuFlag    = false;
+            stack_ptr    = 0;
+
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">% Call Forward and Adjoint Core Method</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            <span class="comment">%   Accounts for Tspan n-dimensional array to force output at</span>
+            <span class="comment">%   specific times. Accumlates statistics.</span>
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct(<span class="string">'default'</span>);
+            <span class="keyword">for</span> interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = <span class="keyword">...</span>
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            <span class="keyword">end</span>
+            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+            <span class="comment">% Call RK ADJ2 Core Method no Quadrature</span>
+            <span class="comment">% disp('RungeKuttaADJ2 no Quadrature');</span>
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = <span class="keyword">...</span>
+                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% Fold statistics</span>
+    FWD_RSTATUS.Etime = sum(elapsedTime_FWD);
+    ADJ_RSTATUS.Etime = elapsedTime_ADJ;
+    Stats.ISTATUS_FWD = FWD_ISTATUS;
+    Stats.RSTATUS_FWD = FWD_RSTATUS;
+    Stats.ISTATUS_ADJ = ADJ_ISTATUS;
+    Stats.RSTATUS_ADJ = ADJ_RSTATUS;
+
+    <span class="comment">% Display Forward Statistics</span>
+    <span class="keyword">if</span> ( OPTIONS.displayStats == true )
+        fprintf(<span class="string">'\n Forward Statistics'</span>);
+        PrintISTATUS( FWD_ISTATUS );
+        PrintRSTATUS( FWD_RSTATUS );
+    <span class="keyword">end</span>
+
+    <span class="comment">% Display Adjoint Statistics</span>
+    <span class="keyword">if</span> ( OPTIONS.displayStats == true )
+        fprintf( <span class="string">'\n Adjoint Statistics'</span> );
+        PrintISTATUS( ADJ_ISTATUS );
+        PrintRSTATUS( ADJ_RSTATUS );
+    <span class="keyword">end</span>
+
+    ISTATUS_TOTAL.Nfun = FWD_ISTATUS.Nfun + ADJ_ISTATUS.Nfun;
+    ISTATUS_TOTAL.Njac = FWD_ISTATUS.Njac + ADJ_ISTATUS.Njac;
+    ISTATUS_TOTAL.Nstp = FWD_ISTATUS.Nstp + ADJ_ISTATUS.Nstp;
+    ISTATUS_TOTAL.Nacc = FWD_ISTATUS.Nacc + ADJ_ISTATUS.Nacc;
+    ISTATUS_TOTAL.Nrej = FWD_ISTATUS.Nrej + ADJ_ISTATUS.Nrej;
+    ISTATUS_TOTAL.Ndec = FWD_ISTATUS.Ndec + ADJ_ISTATUS.Ndec;
+    ISTATUS_TOTAL.Nsol = FWD_ISTATUS.Nsol + ADJ_ISTATUS.Nsol;
+    ISTATUS_TOTAL.Nsng = FWD_ISTATUS.Nsng + ADJ_ISTATUS.Nsng;
+    ISTATUS_TOTAL.Nchk = FWD_ISTATUS.Nchk + ADJ_ISTATUS.Nchk;
+
+    <span class="comment">% Display Total Statistics</span>
+    <span class="keyword">if</span> ( OPTIONS.displayStats == true )
+        fprintf( <span class="string">'\n Total Statistics'</span> );
+        PrintISTATUS( ISTATUS_TOTAL );
+    <span class="keyword">end</span>
+
+    <span class="comment">% Outputs</span>
+    Quadrature = OPTIONS.Quadrature;
+    <span class="keyword">if</span> ( ~exist(<span class="string">'Mu'</span>,<span class="string">'var'</span>)  )
+        Mu = [];
+    <span class="keyword">end</span>
+
+<span class="keyword">return</span>;
+</pre><pre class="codeoutput">Syntax: 
+                                  MATLODE_RK_ADJ_Integrator 
+                 [ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options) 
+[ T, Y, Sens, Quad, Mu, Stats ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options) 
+
+</pre><h2>Major Modification History<a name="8"></a></h2><p>
+<table border=1>
+  <tr>
+      <td><b>Date</b></td>
+      <td>Developer</td>
+      <td>Email</td>
+      <td>Action</td>
+  </tr>
+  <tr>
+      <td>1/1/2014</td>
+      <td>Tony D'Augustine</td>
+      <td>adaug13@vt,edu</td>
+      <td>Release MATLODE</td>
+  </tr>
+</table>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLODE_RK_ADJ_Integrator
+%
+% <html> Up: <a href="DRIVER_ADJ.html">DRIVER_ADJ</a> </html>
+%
+%% Syntax
+%                                     MATLODE_RK_ADJ_Integrator
+%                    [ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options)
+%   [ T, Y, Sens, Quad, Mu, Stats ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options)
+%
+%% Input Parameters
+% |Ode_Function|: model function
+%
+% |Time_Interval|: time span
+%
+% |Y0|: initial model state vector
+%
+% |Options|: MATLODE option struct
+%
+%% Output Parameters
+% |T|: saved time snapshots
+%
+% |Y|: saved model state vectors
+%
+% |Sens|: Sensitivity matrix
+%
+% |Quad|: Quadrature term
+%
+% |Mu|: Mu term
+%
+% |Stats|: integrator statistics
+%
+%% Description
+% Driver file to solve the system y' = F(t,y) and adjoint sensitivity 
+% using an Implicit Runge-Kutta (RK) method.
+%
+% |MATLODE_RK_ADJ_Integrator| displays the available methods
+% associated with the exponential forward integrator.
+%
+% |[T, Y, Sens] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0,
+% Options)| computes the ODE solution with respect to the user supplied
+% options configuration and adjoint sensitivity.
+%
+% |[T, Y, Sens, Quad, Mu, Stats]| = MATLODE_RK_ADJ_Integrator(Ode_Function,
+% Time_Interval, Y0, Options)| computes the ODE solution with respect to 
+% the user supplied options configuration, sensitivity, quadrature, mu and
+% statisitics.
+%
+%% Example
+% For the following examples we will use Arenstorf Orbit as a toy problem 
+% to illustrate |MATLODE_RK_ADJ_Integrator| functionalities and features.
+% To initially setup Arenstorf Orbit, execute the MATLAB commands below to
+% load our input parameters into our workspace. 
+%
+%   Ode_Function        = @arenstorfOrbit_Function;
+%   Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+%   Ode_Lambda          = eye(4);
+%   Time_Interval       = [ 0 17.0652166 ];
+%   Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+%
+% Now that we have our model loaded in our workspace, we can perform a
+% adjoint implicit Runge-Kutta integration using MATLODE's prebuilt default
+% settings. We note that a Jacobian and Lambda are required for sensitivity analysis.
+%
+%   Options  = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda);
+%   [ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+%
+% Printing out our results, we can analyze our model state at our final
+% time.
+%
+%   disp('solution and adjoint sensitivty at Time_Interval(2)');
+%   disp(Y);
+%   disp(Sens);
+%
+% For addition examples, see Help -> Supplemental Software -> Examples ->
+% Sensitivity Analysis -> MATLODE_Example_RK_ADJ_Integrator.
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+%
+% [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
+%     tangent linear integration of ODEs, SIAM Journal on Scientific 
+%     Computing, 36(5), C504–C523, 2014
+%
+% [3] E. Hairer and G. Wanner, Solving Ordinary Differential Equations II. 
+%     Stiff and Differential- Algebraic Problems, Springer Series in 
+%     Computational Mathematics, Berlin, 1991.
+%
+function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
+    % Display input/output parameters
+    if ( nargout == 0 && nargin == 0 )
+        fprintf('Syntax: \n');
+        fprintf( '                                  MATLODE_RK_ADJ_Integrator \n' );
+        fprintf( '                 [ T, Y, Sens ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options) \n' );
+        fprintf( '[ T, Y, Sens, Quad, Mu, Stats ] = MATLODE_RK_ADJ_Integrator(Ode_Function, Time_Interval, Y0, Options) \n' );
+        fprintf( '\n' );
+        return;
+    end 
+    
+    % Force initial value matrix to be N X 1.
+    if ( size(Y0,2) == 1 )
+        % DO NOTHING
+    else
+        Y0 = transpose(Y0);
+    end        
+
+    % Get Problem Size
+    NVAR = max(size(Y0));
+
+    % Initialize Y
+    Y(:,1) = Y0;
+     
+    % Adjoint Flags
+    adjStackFlag = false;
+    adjQuadFlag  = false;
+    adjMuFlag    = false;
+    
+    % Initialize Ierr
+    Ierr = 0;
+    
+    % Initialize ISTATUS and RSTATUS
+    ISTATUS_TOTAL = ISTATUS_Struct('default');
+        
+    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'RK', 'ADJ', Y0, Tspan );
+             
+    OPTIONS.NADJ = size(Y0,1);
+    OPTIONS.NVAR = size(Y0,1);
+     
+    % Call RK ADJ integration
+    % [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = RK_ADJ2_Integrator( NVAR, ...
+    % NADJ, OPTIONS, FWD_Tout(end), Lambda, GetQuad, ICNTRL, Coefficient, stack_ptr );
+    
+    if ( ~isempty(OPTIONS.Jacp) )
+        % RungeKuttaADJ1 w/ Quadrature
+        if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDP) && ...
+                ~isempty(OPTIONS.DRDY) )
+            % Adjoint Flags
+            adjStackFlag = true;
+            adjQuadFlag  = true;
+            adjMuFlag    = true;
+            stack_ptr    = 0;
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Call Forward and Adjoint Core Method
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %   Accounts for Tspan n-dimensional array to force output at
+            %   specific times. Accumlates statistics.
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct('default');
+            for interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
+            
+            % Call RK ADJ1 Core Method no Quadrature
+            % disp('RungeKuttaADJ1 w/ Quadrature');
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
+                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;            
+        % RungeKuttaADJ1 no Quadrature
+        else
+            % Adjoint Flags
+            adjStackFlag = true;
+            adjQuadFlag  = false;
+            adjMuFlag    = true;
+            stack_ptr    = 0;
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Call Forward and Adjoint Core Method
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %   Accounts for Tspan n-dimensional array to force output at
+            %   specific times. Accumlates statistics.
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct('default');
+            for interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%             
+            
+            % Call RK ADJ1 Core Method no Quadrature
+            % disp('RungeKuttaADJ2 no Quadrature');
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
+                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;            
+        end
+    else
+        % RungeKuttaADJ2 w/ Quadrature
+        if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDY) )
+            % Adjoint Flags
+            adjStackFlag = true;
+            adjQuadFlag  = true;
+            adjMuFlag    = false;
+            stack_ptr    = 0;
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Call Forward and Adjoint Core Method
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %   Accounts for Tspan n-dimensional array to force output at
+            %   specific times. Accumlates statistics.
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct('default');
+            for interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%             
+            
+            % Call RK ADJ2 Core Method no Quadrature
+            % disp('RungeKuttaADJ2 w/ Quadrature');
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
+                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;            
+        % RungeKuttaADJ2 no Quadrature
+        else
+            % Adjoint Flags
+            adjStackFlag = true;
+            adjQuadFlag  = false;
+            adjMuFlag    = false;
+            stack_ptr    = 0;
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Call Forward and Adjoint Core Method
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %   Accounts for Tspan n-dimensional array to force output at
+            %   specific times. Accumlates statistics.
+            tspanMaxSize = max(size(Tspan));
+            FWD_Yout_Interval = transpose(Y0);
+            Yout_FWD = transpose(Y0);
+            Tout_FWD = Tspan(1);
+            FWD_ISTATUS = ISTATUS_Struct('default');
+            for interval=1:tspanMaxSize-1
+                tic;
+                [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
+                    RK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                elapsedTime_FWD(interval) = toc;
+                FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+                Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+            end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
+            
+            % Call RK ADJ2 Core Method no Quadrature
+            % disp('RungeKuttaADJ2 no Quadrature');
+            tic;
+            [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
+                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+            elapsedTime_ADJ = toc;
+        end
+    end
+    
+    % Fold statistics
+    FWD_RSTATUS.Etime = sum(elapsedTime_FWD);
+    ADJ_RSTATUS.Etime = elapsedTime_ADJ;
+    Stats.ISTATUS_FWD = FWD_ISTATUS;
+    Stats.RSTATUS_FWD = FWD_RSTATUS;    
+    Stats.ISTATUS_ADJ = ADJ_ISTATUS;
+    Stats.RSTATUS_ADJ = ADJ_RSTATUS;   
+    
+    % Display Forward Statistics
+    if ( OPTIONS.displayStats == true )
+        fprintf('\n Forward Statistics');
+        PrintISTATUS( FWD_ISTATUS );
+        PrintRSTATUS( FWD_RSTATUS );
+    end    
+    
+    % Display Adjoint Statistics
+    if ( OPTIONS.displayStats == true )
+        fprintf( '\n Adjoint Statistics' );
+        PrintISTATUS( ADJ_ISTATUS );
+        PrintRSTATUS( ADJ_RSTATUS );
+    end
+       
+    ISTATUS_TOTAL.Nfun = FWD_ISTATUS.Nfun + ADJ_ISTATUS.Nfun;
+    ISTATUS_TOTAL.Njac = FWD_ISTATUS.Njac + ADJ_ISTATUS.Njac;
+    ISTATUS_TOTAL.Nstp = FWD_ISTATUS.Nstp + ADJ_ISTATUS.Nstp;
+    ISTATUS_TOTAL.Nacc = FWD_ISTATUS.Nacc + ADJ_ISTATUS.Nacc;
+    ISTATUS_TOTAL.Nrej = FWD_ISTATUS.Nrej + ADJ_ISTATUS.Nrej;
+    ISTATUS_TOTAL.Ndec = FWD_ISTATUS.Ndec + ADJ_ISTATUS.Ndec;
+    ISTATUS_TOTAL.Nsol = FWD_ISTATUS.Nsol + ADJ_ISTATUS.Nsol;
+    ISTATUS_TOTAL.Nsng = FWD_ISTATUS.Nsng + ADJ_ISTATUS.Nsng;
+    ISTATUS_TOTAL.Nchk = FWD_ISTATUS.Nchk + ADJ_ISTATUS.Nchk;     
+    
+    % Display Total Statistics
+    if ( OPTIONS.displayStats == true )
+        fprintf( '\n Total Statistics' );
+        PrintISTATUS( ISTATUS_TOTAL );
+    end   
+        
+    % Outputs
+    Quadrature = OPTIONS.Quadrature;
+    if ( ~exist('Mu','var')  )
+        Mu = [];
+    end    
+
+return;
+
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt,edu</td>
+%       <td>Release MATLODE</td>
+%   </tr>
+% </table>
+% </html>
+% 
+
+##### SOURCE END #####
+--></body></html>

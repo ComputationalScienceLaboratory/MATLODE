@@ -1,0 +1,146 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLODE_Example_ROS_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_ROS_FWD_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLODE_Example_ROS_FWD_Integrator</h1><!--introduction--><p>
+   Up: <a href="../Examples/html/Examples.html">Examples</a>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#4">Advanced Features</a></li></ul></div><p>For the following examples Arenstorf Orbit is used as a toy problem to illustrate <tt>MATLODE_ROS_FWD_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load the input parameters into the workspace.</p><pre class="codeinput">Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+</pre><h2>Basic Functionality<a name="2"></a></h2><p>Now that the model is loaded in the workspace, one performs a forward Rosenbrock integration using the prebuilt default settings. Note, for Rosenbrock integrators, the Jacobian is required.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian);
+[ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Execute the following commands to analyze the final model state.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+  Columns 1 through 3
+
+   0.991128738194503   0.005808680341908   0.933220592793551
+
+  Column 4
+
+  -1.694307055801689
+
+</pre><h2>Advanced Features<a name="4"></a></h2><p>To analyze intermediary steps, toggle the option struct parameter 'displaySteps' to true. Printing intermediary steps often gives an immediate visual queue on how hard the intergrator is working internally.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'displaySteps'</span>,true);
+[ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,[Time_Interval(1) Time_Interval(1)+0.0029],Y0,Options);
+</pre><pre class="codeoutput">Accepted step. Time = 1e-05; Stepsize = 6e-05
+Accepted step. Time = 7e-05; Stepsize = 0.00036
+Accepted step. Time = 0.00043; Stepsize = 0.00077939
+Accepted step. Time = 0.0012094; Stepsize = 0.00073114
+Accepted step. Time = 0.0019405; Stepsize = 0.0011091
+Accepted step. Time = 0.0029; Stepsize = 0.00093643
+</pre><p>Noticing above that no initial steps are rejected, increasing Hstart will force the error controller to be more aggressive in the beginning of the Rosenbrock intergration scheme.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'displaySteps'</span>,true,<span class="string">'Hstart'</span>,0.0005);
+[ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,[Time_Interval(1) Time_Interval(1)+0.0029],Y0,Options);
+</pre><pre class="codeoutput">Accepted step. Time = 0.0005; Stepsize = 0.00069527
+Accepted step. Time = 0.0011953; Stepsize = 0.00079987
+Accepted step. Time = 0.0019951; Stepsize = 0.0010336
+Accepted step. Time = 0.0029; Stepsize = 0.00093982
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLODE_Example_ROS_FWD_Integrator
+%
+% <html>
+%    Up: <a href="../Examples/html/Examples.html">Examples</a>
+% </html>
+%%
+% For the following examples Arenstorf Orbit is used as a toy problem 
+% to illustrate |MATLODE_ROS_FWD_Integrator| functionalities and features.
+% To initially setup Arenstorf Orbit, execute the MATLAB commands below to
+% load the input parameters into the workspace. 
+Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+
+%% Basic Functionality
+% Now that the model is loaded in the workspace, one performs a
+% forward Rosenbrock integration using the prebuilt default
+% settings. Note, for Rosenbrock integrators, the Jacobian is
+% required.
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian);
+[ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Execute the following commands to analyze the final model state.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+
+%% Advanced Features
+% To analyze intermediary steps, toggle the option struct parameter
+% 'displaySteps' to true. Printing intermediary steps often gives an
+% immediate visual queue on how hard the intergrator is working internally.
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'displaySteps',true);
+[ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,[Time_Interval(1) Time_Interval(1)+0.0029],Y0,Options);
+
+%%
+% Noticing above that no initial steps are rejected, increasing Hstart will
+% force the error controller to be more aggressive in the beginning of the
+% Rosenbrock intergration scheme. 
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'displaySteps',true,'Hstart',0.0005);
+[ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,[Time_Interval(1) Time_Interval(1)+0.0029],Y0,Options);
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,14 @@
+function [ ISTATUS ] = ISTATUS_Add( ISTATUS1, ISTATUS2 )
+
+    ISTATUS.Nfun = ISTATUS1.Nfun + ISTATUS2.Nfun;
+    ISTATUS.Njac = ISTATUS1.Njac + ISTATUS2.Njac;
+    ISTATUS.Nstp = ISTATUS1.Nstp + ISTATUS2.Nstp;
+    ISTATUS.Nacc = ISTATUS1.Nacc + ISTATUS2.Nacc;
+    ISTATUS.Nrej = ISTATUS1.Nrej + ISTATUS2.Nrej;
+    ISTATUS.Ndec = ISTATUS1.Ndec + ISTATUS2.Ndec;
+    ISTATUS.Nsol = ISTATUS1.Nsol + ISTATUS2.Nsol;
+    ISTATUS.Nsng = ISTATUS1.Nsng + ISTATUS2.Nsng;
+    ISTATUS.Nchk = ISTATUS1.Nchk + ISTATUS2.Nchk;
+
+return;
+

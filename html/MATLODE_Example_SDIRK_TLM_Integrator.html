@@ -1,0 +1,204 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLODE_Example_SDIRK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_SDIRK_TLM_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLODE_Example_SDIRK_TLM_Integrator</h1><!--introduction--><p>
+   Up: <a href="../Examples/html/Examples.html">Examples</a>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#5">Advanced Features</a></li></ul></div><p>For the following examples Arenstorf Orbit is used as a toy problem to illustrate <tt>MATLODE_SDIRK_TLM_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load the input parameters into the workspace.</p><pre class="codeinput">Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Ode_YTLM            = eye(4);
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+</pre><h2>Basic Functionality<a name="2"></a></h2><p>Now that the model is loaded in the workspace, one performs a forward implicit Runge-Kutta integration using the prebuilt default settings. Note, for implicite Runge-Kutta tangent linear integrators, the Jacobian and Y_TLM is required.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,Ode_YTLM,<span class="string">'storeCheckpoint'</span>,true);
+[ ~, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+  Columns 1 through 3
+
+   0.993361350358526  -0.003791231129465  -0.557175919928586
+
+  Column 4
+
+  -1.843226156724899
+
+sensitivity at Time_Interval(2)
+   1.0e+06 *
+
+  Columns 1 through 3
+
+   0.008664706038234  -0.002746472000195   0.000017424543948
+   0.013389672332976  -0.004012360248571   0.000025459057471
+   2.192100809653940  -0.675013681548083   0.004282793806521
+  -0.703509778005246   0.198286030016517  -0.001258342928550
+
+  Column 4
+
+  -0.000053831489093
+  -0.000083331076401
+  -0.013631308567663
+   0.004386138901873
+
+</pre><p>After plotting the results, one can now visualize the model.</p><pre class="codeinput">figure(1);
+plot(Y(:,1),Y(:,2));
+title(<span class="string">'Arenstorf Orbit'</span>);
+xlabel(<span class="string">'Y(:,1)'</span>);
+ylabel(<span class="string">'Y(:,2)'</span>);
+</pre><img vspace="5" hspace="5" src="MATLODE_Example_SDIRK_TLM_Integrator_01.png" alt=""> <h2>Advanced Features<a name="5"></a></h2><p>To perform <b>nondirect sensitivity analysis</b>, toggle the 'DirectTLM' option parameter to false. This enables the sensitivity matrix to be calculated using Newton iterations. Note, it is strongly recommended to first try direct sensitivity analysis before trying nondirect for efficiency purposes.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,Ode_YTLM,<span class="string">'DirectTLM'</span>,false);
+[ ~, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+  Columns 1 through 3
+
+   0.993361350358526  -0.003791231129465  -0.557175919928586
+
+  Column 4
+
+  -1.843226156724899
+
+sensitivity at Time_Interval(2)
+   1.0e+06 *
+
+  Columns 1 through 3
+
+   0.008664653756679  -0.002746451121725   0.000017424413239
+   0.013389579093279  -0.004012322626933   0.000025458821407
+   2.192086619721465  -0.675007972703288   0.004282758023376
+  -0.703504330964360   0.198283802514363  -0.001258328929495
+
+  Column 4
+
+  -0.000053831163761
+  -0.000083330497371
+  -0.013631220367666
+   0.004386105130705
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLODE_Example_SDIRK_TLM_Integrator
+%
+% <html>
+%    Up: <a href="../Examples/html/Examples.html">Examples</a>
+% </html>
+%%
+% For the following examples Arenstorf Orbit is used as a toy problem 
+% to illustrate |MATLODE_SDIRK_TLM_Integrator| functionalities and features.
+% To initially setup Arenstorf Orbit, execute the MATLAB commands below to
+% load the input parameters into the workspace. 
+Ode_Function        = @arenstorfOrbit_Function;
+Ode_Jacobian        = @arenstorfOrbit_Jacobian;
+Ode_YTLM            = eye(4);
+Time_Interval       = [ 0 17.0652166 ];
+Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
+
+%% Basic Functionality
+% Now that the model is loaded in the workspace, one performs a
+% forward implicit Runge-Kutta integration using the prebuilt default
+% settings. Note, for implicite Runge-Kutta tangent linear integrators, 
+% the Jacobian and Y_TLM is required.
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',Ode_YTLM,'storeCheckpoint',true);
+[ ~, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+
+%%
+% After plotting the results, one can now visualize the model.
+figure(1);
+plot(Y(:,1),Y(:,2));
+title('Arenstorf Orbit');
+xlabel('Y(:,1)');
+ylabel('Y(:,2)');
+
+%% Advanced Features
+% To perform *nondirect sensitivity analysis*, toggle the 'DirectTLM'
+% option parameter to false. This enables the sensitivity matrix
+% to be calculated using Newton iterations. Note, it is strongly
+% recommended to first try direct sensitivity analysis before trying
+% nondirect for efficiency purposes. 
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Y_TLM',Ode_YTLM,'DirectTLM',false);
+[ ~, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+##### SOURCE END #####
+--></body></html>

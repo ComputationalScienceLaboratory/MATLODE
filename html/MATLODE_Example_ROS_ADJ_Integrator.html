@@ -1,0 +1,272 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLODE_Example_ROS_ADJ_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_ROS_ADJ_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLODE_Example_ROS_ADJ_Integrator</h1><!--introduction--><p>
+   Up: <a href="../Examples/html/Examples.html">Examples</a>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#4">Advanced Features</a></li></ul></div><p>For the following examples we will use Van Der Pol as a toy problem to illustrate <tt>MATLODE_ROS_ADJ_Integrator</tt> functionalities and features. To initially setup Van Der Pol, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="codeinput">Ode_Function        = @vanDerPol_Function;
+Ode_Jacobian        = @vanDerPol_Jacobian;
+Ode_Lambda          = eye(2);
+Ode_Quadrature      = @vanDerPol_Quadrature;
+Ode_QFun            = @vanDerPol_QFun;
+Ode_DRDP            = @vanDerPol_DRDP;
+Ode_DRDY            = @vanDerPol_DRDY;
+Ode_Hesstr_vec      = @vanDerPol_Hesstr_vec;
+Ode_Jacp            = @vanDerPol_Jacp;
+Ode_Hesstr_vec_r_py = @vanDerPol_Hesstr_vec_r_py;
+Ode_Hesstr_vec_f_py = @vanDerPol_Hesstr_vec_f_py;
+Ode_Hesstr_vec_r    = @vanDerPol_Hesstr_vec_r;
+Ode_Mu              = @vanDerPol_Mu;
+Time_Interval       = [ 0 20 ];
+Y0                  = [2; -0.66];
+</pre><h2>Basic Functionality<a name="2"></a></h2><p>Now that we have our model loaded in our workspace, we can perform an adjoint Rosenbrock integration using MATLODE's prebuilt default settings. We note that a Jacobian and Lambda are required and passed by MATLODE&reg;'s option struct.</p><pre class="codeinput">Options  = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda,<span class="string">'Hesstr_vec'</span>,Ode_Hesstr_vec);
+[ ~, Y, Sens ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+   1.914997535334449  -0.071620986894423
+
+sensitivity at Time_Interval(2)
+   1.153958473571282   0.074770893962760
+   0.038510765579949   0.002495310217439
+
+</pre><h2>Advanced Features<a name="4"></a></h2><p>Calculating Mu and Quadrature depends on the input parameters to the option struct. Below are three examples illustrating the required input parameters to obtain the desired output.</p><p><b>Example 1:</b> Mu: false | Quadrature: true</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda, <span class="keyword">...</span>
+    <span class="string">'Quadrature'</span>,Ode_Quadrature,<span class="string">'QFun'</span>,Ode_QFun,<span class="string">'DRDY'</span>,Ode_DRDY, <span class="keyword">...</span>
+    <span class="string">'Hesstr_vec'</span>,Ode_Hesstr_vec,<span class="string">'Hesstr_vec_r'</span>,Ode_Hesstr_vec_r);
+[ ~, Y, Sens, Quad, ~ ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+disp(<span class="string">'quadrature at Time_Interval(2)'</span>);
+disp(Quad);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+   1.914997535334449  -0.071620986894423
+
+sensitivity at Time_Interval(2)
+   0.270365153007235   0.228729367534286
+   0.007890520586555   0.041006075797396
+
+quadrature at Time_Interval(2)
+   1.819228370407761
+  -0.085002464665557
+
+</pre><p><b>Example 2:</b> Mu: true | Quadrature: false</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda, <span class="keyword">...</span>
+    <span class="string">'Jacp'</span>,Ode_Jacp,<span class="string">'Mu'</span>,Ode_Mu,<span class="string">'NP'</span>,1,<span class="string">'Hesstr_vec'</span>,Ode_Hesstr_vec,<span class="keyword">...</span>
+    <span class="string">'Hesstr_vec_f_py'</span>,Ode_Hesstr_vec_f_py);
+[ ~, Y, Sens, ~, Mu ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+disp(<span class="string">'mu at Time_Interval(2)'</span>);
+disp(Mu);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+   1.914997535334449  -0.071620986894423
+
+sensitivity at Time_Interval(2)
+   1.146931661926977   0.074315588315960
+   0.038276263311960   0.002480115529975
+
+mu at Time_Interval(2)
+   0.122821616433231   0.015085813689266
+
+</pre><p><b>Example 3:</b> Mu: true | Quadrature: true</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda, <span class="keyword">...</span>
+    <span class="string">'Jacp'</span>,Ode_Jacp,<span class="string">'Mu'</span>,Ode_Mu,<span class="string">'Quadrature'</span>,Ode_Quadrature, <span class="keyword">...</span>
+    <span class="string">'QFun'</span>,Ode_QFun,<span class="string">'DRDY'</span>,Ode_DRDY,<span class="string">'DRDP'</span>,Ode_DRDP,<span class="string">'NP'</span>,1, <span class="keyword">...</span>
+    <span class="string">'Hesstr_vec'</span>,Ode_Hesstr_vec,<span class="string">'Hesstr_vec_f_py'</span>,Ode_Hesstr_vec_f_py, <span class="keyword">...</span>
+    <span class="string">'Hesstr_vec_r_py'</span>,Ode_Hesstr_vec_r_py,<span class="string">'Hesstr_vec_r'</span>,Ode_Hesstr_vec_r);
+[ ~, Y, Sens, Quad, Mu ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+</pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
+disp(Y(end,:));
+disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
+disp(Sens);
+disp(<span class="string">'quadrature at Time_Interval(2)'</span>);
+disp(Quad);
+disp(<span class="string">'mu at Time_Interval(2)'</span>);
+disp(Mu);
+</pre><pre class="codeoutput">solution at Time_Interval(2)
+   1.914997535334449  -0.071620986894423
+
+sensitivity at Time_Interval(2)
+   0.447846833780721   0.221247250242815
+   0.013813572620501   0.040756378841930
+
+quadrature at Time_Interval(2)
+   1.819228370407761
+  -0.085002464665557
+
+mu at Time_Interval(2)
+  -5.831338011237693   0.276533426870627
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLODE_Example_ROS_ADJ_Integrator
+%
+% <html>
+%    Up: <a href="../Examples/html/Examples.html">Examples</a>
+% </html>
+%%
+% For the following examples we will use Van Der Pol as a toy problem 
+% to illustrate |MATLODE_ROS_ADJ_Integrator| functionalities and features.
+% To initially setup Van Der Pol, execute the MATLAB commands below to
+% load our input parameters into our workspace. 
+Ode_Function        = @vanDerPol_Function;
+Ode_Jacobian        = @vanDerPol_Jacobian;
+Ode_Lambda          = eye(2);
+Ode_Quadrature      = @vanDerPol_Quadrature;
+Ode_QFun            = @vanDerPol_QFun;
+Ode_DRDP            = @vanDerPol_DRDP;
+Ode_DRDY            = @vanDerPol_DRDY;
+Ode_Hesstr_vec      = @vanDerPol_Hesstr_vec;
+Ode_Jacp            = @vanDerPol_Jacp;
+Ode_Hesstr_vec_r_py = @vanDerPol_Hesstr_vec_r_py;
+Ode_Hesstr_vec_f_py = @vanDerPol_Hesstr_vec_f_py;
+Ode_Hesstr_vec_r    = @vanDerPol_Hesstr_vec_r;
+Ode_Mu              = @vanDerPol_Mu;
+Time_Interval       = [ 0 20 ];
+Y0                  = [2; -0.66];
+
+%% Basic Functionality
+% Now that we have our model loaded in our workspace, we can perform an adjoint
+% Rosenbrock integration using MATLODE's prebuilt default
+% settings. We note that a Jacobian and Lambda are required and passed by MATLODE(R)'s
+% option struct.
+Options  = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda,'Hesstr_vec',Ode_Hesstr_vec);
+[ ~, Y, Sens ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+
+%% Advanced Features
+% Calculating Mu and Quadrature depends on the input parameters to the
+% option struct. Below are three examples illustrating the required input
+% parameters to obtain the desired output.
+
+%%
+% *Example 1:* Mu: false | Quadrature: true
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda, ...
+    'Quadrature',Ode_Quadrature,'QFun',Ode_QFun,'DRDY',Ode_DRDY, ...
+    'Hesstr_vec',Ode_Hesstr_vec,'Hesstr_vec_r',Ode_Hesstr_vec_r);
+[ ~, Y, Sens, Quad, ~ ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+disp('quadrature at Time_Interval(2)');
+disp(Quad);
+
+%%
+% *Example 2:* Mu: true | Quadrature: false
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda, ...
+    'Jacp',Ode_Jacp,'Mu',Ode_Mu,'NP',1,'Hesstr_vec',Ode_Hesstr_vec,...
+    'Hesstr_vec_f_py',Ode_Hesstr_vec_f_py);
+[ ~, Y, Sens, ~, Mu ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+disp('mu at Time_Interval(2)');
+disp(Mu);
+
+%%
+% *Example 3:* Mu: true | Quadrature: true
+Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda, ...
+    'Jacp',Ode_Jacp,'Mu',Ode_Mu,'Quadrature',Ode_Quadrature, ...
+    'QFun',Ode_QFun,'DRDY',Ode_DRDY,'DRDP',Ode_DRDP,'NP',1, ...
+    'Hesstr_vec',Ode_Hesstr_vec,'Hesstr_vec_f_py',Ode_Hesstr_vec_f_py, ...
+    'Hesstr_vec_r_py',Ode_Hesstr_vec_r_py,'Hesstr_vec_r',Ode_Hesstr_vec_r);
+[ ~, Y, Sens, Quad, Mu ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
+
+%%
+% Printing out our results, we can analyze our model state at our final
+% time.
+disp('solution at Time_Interval(2)');
+disp(Y(end,:));
+disp('sensitivity at Time_Interval(2)');
+disp(Sens);
+disp('quadrature at Time_Interval(2)');
+disp(Quad);
+disp('mu at Time_Interval(2)');
+disp(Mu);
+##### SOURCE END #####
+--></body></html>
