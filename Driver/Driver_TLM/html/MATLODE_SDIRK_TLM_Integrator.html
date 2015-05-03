@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_SDIRK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-20"><meta name="DC.source" content="MATLODE_SDIRK_TLM_Integrator.m"><style type="text/css">
+      --><title>MATLODE_SDIRK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_SDIRK_TLM_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,11 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>MATLODE_SDIRK_TLM_Integrator</h1><!--introduction--><p> Up: <a href="DRIVER_TLM.html">DRIVER_TLM</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Reference</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                               MATLODE_SDIRK_TLM_Integrator
+  </style></head><body><div class="content"><h1>MATLODE_SDIRK_TLM_Integrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Reference</a></li><li><a href="#8">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                               MATLODE_SDIRK_TLM_Integrator
               [ T, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options)
  [ T, Y, Sens, Quad, Stats ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>Ode_Function</tt>: model function</p><p><tt>Time_Interval</tt>: time span</p><p><tt>Y0</tt>: initial model state vector</p><p><tt>Options</tt>: MATLODE option struct</p><h2>Output Parameters<a name="3"></a></h2><p><tt>T</tt>: saved time snapshots</p><p><tt>Y</tt>: saved model state vectors</p><p><tt>Sens</tt>: Sensitivity matrix</p><p><tt>Quad</tt>: Quadrature term</p><p><tt>Stats</tt>: integrator statistics</p><h2>Description<a name="4"></a></h2><p>Driver file to solve the system y' = F(t,y) and tangent linear sensitivity using an Singly Diagonally Implicit Runge-Kutta (SDIRK) method.</p><p><tt>MATLODE_SDIRK_TLM_Integrator</tt> displays the available methods associated with the exponential forward integrator.</p><p><tt>[T, Y, Sens] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options)</tt> computes the ODE solution with respect to the user supplied options configuration and tangent linear sensitivity.</p><p><tt>[T, Y, Sens, Quad, Stats]</tt> = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options)| computes the ODE solution with respect to the user supplied options configuration, tangent linear sensitivity, quadrature and statisitics.</p><h2>Example<a name="5"></a></h2><p>For the following examples we will use Arenstorf Orbit as a toy problem to illustrate <tt>MATLODE_SDIRK_TLM_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="language-matlab">Ode_Function        = @arenstorfOrbit_Function;
 Ode_Jacobian        = @arenstorfOrbit_Jacobian;
@@ -78,75 +82,34 @@ Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
 </pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="language-matlab">disp(<span class="string">'solution and tangent linear sensitivty at Time_Interval(2)'</span>);
 disp(Y);
 disp(Sens);
-</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Sensitivity Analysis -&gt; MATLODE_Example_SDIRK_TLM_Integrator.</p><h2>Reference<a name="6"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504&#8211;C523, 2014</p><pre class="codeinput"><span class="keyword">function</span> [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_SDIRK_TLM_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
-    <span class="comment">% Display input/output parameters</span>
-    <span class="keyword">if</span> ( nargout == 0 &amp;&amp; nargin == 0 )
-        fprintf(<span class="string">'Syntax: \n'</span>);
-        fprintf( <span class="string">'                          MATLODE_SDIRK_TLM_Integrator \n'</span> );
-        fprintf( <span class="string">'         [ T, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options) \n'</span> );
-        fprintf( <span class="string">'  [ T, Y, Sens, Stats ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options) \n'</span> );
-        fprintf( <span class="string">'\n'</span> );
-        <span class="keyword">return</span>;
-    <span class="keyword">end</span>
-
-    <span class="comment">% Force initial value matrix to be N X 1.</span>
-    <span class="keyword">if</span> ( size(Y0,2) == 1 )
-        <span class="comment">% DO NOTHING</span>
-    <span class="keyword">else</span>
-        Y0 = transpose(Y0);
-    <span class="keyword">end</span>
-
-    <span class="comment">% Configure Options</span>
-    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,<span class="string">'SDIRK'</span>,<span class="string">'TLM'</span>,Y0, Tspan );
-
-    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
-    <span class="comment">% Call Tangent Linear Method</span>
-    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
-    <span class="comment">%   Accounts for tspan n-dimensional array to force output at</span>
-    <span class="comment">%   specific times. Accumlates statistics.</span>
-    tspanMaxSize = max(size(Tspan));
-    Yout_TLM_interval = transpose(Y0);
-    Yout_TLM = transpose(Y0);
-    Tout_TLM = Tspan(1);
-    ISTATUS_TLM = ISTATUS_Struct(<span class="string">'default'</span>);
-    <span class="keyword">for</span> interval=1:tspanMaxSize-1
-        tic;
-        [ Tout_TLM_interval, Yout_TLM_interval, Y_TLM_Interval, ISTATUS_TLM_interval, RSTATUS_TLM, Ierr ] = <span class="keyword">...</span>
-            SDIRK_TLM_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Yout_TLM_interval(end,:), OPTIONS, Coefficient);
-        OPTIONS.Y_TLM = Y_TLM_Interval;
-        elapsedTime(interval) = toc;
-        ISTATUS_TLM = ISTATUS_Add(ISTATUS_TLM,ISTATUS_TLM_interval);
-        Tout_TLM = [Tout_TLM; Tout_TLM_interval];
-        Yout_TLM = [Yout_TLM; Yout_TLM_interval];
-    <span class="keyword">end</span>
-    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
-
-    <span class="comment">% Fold statistics</span>
-    RSTATUS_TLM.Etime = sum(elapsedTime);
-    Stats_TLM.ISTATUS = ISTATUS_TLM;
-    Stats_TLM.RSTATUS = RSTATUS_TLM;
-
-    <span class="comment">% Display Statistics</span>
-    <span class="keyword">if</span> ( OPTIONS.displayStats == true )
-        fprintf( <span class="string">'\n SDIRK_TLM Statistics'</span> );
-        PrintISTATUS( ISTATUS_TLM);
-        PrintRSTATUS( RSTATUS_TLM );
-    <span class="keyword">end</span>
-
-    <span class="comment">% Outputs</span>
-    Y_TLM = OPTIONS.Y_TLM;
-
-<span class="keyword">return</span>;
-</pre><pre class="codeoutput">Syntax: 
-                          MATLODE_SDIRK_TLM_Integrator 
-         [ T, Y, Sens ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options) 
-  [ T, Y, Sens, Stats ] = MATLODE_SDIRK_TLM_Integrator(Ode_Function, Time_Interval, Y0, Options) 
-
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Sensitivity Analysis -&gt; MATLODE_Example_SDIRK_TLM_Integrator.</p><h2>Reference<a name="6"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504&#8211;C523, 2014</p><h2>Major Modification History<a name="8"></a></h2><p>
+<table border=1>
+  <tr>
+      <td><b>Date</b></td>
+      <td>Developer</td>
+      <td>Email</td>
+      <td>Action</td>
+  </tr>
+  <tr>
+      <td>1/1/2014</td>
+      <td>Tony D'Augustine</td>
+      <td>adaug13@vt,edu</td>
+      <td>Release MATLODE_v2.0.00</td>
+  </tr>
+</table>
+</p><p>
+  <div>
+      <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLODE_SDIRK_TLM_Integrator
 %
-% <html> Up: <a href="DRIVER_TLM.html">DRIVER_TLM</a> </html>
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 %% Syntax
 %                                 MATLODE_SDIRK_TLM_Integrator
@@ -285,6 +248,29 @@ function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_SDIRK_TLM_Integrator
         
 return;
 
-
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt,edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+%
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

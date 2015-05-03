@@ -6,8 +6,6 @@
 %   </div>
 % </html>
 %
-% <html> Up: <a href="DRIVER_FWD.html">DRIVER_FWD</a> </html>
-%
 %% Syntax
 %                   MATLODE_EXP_FWD_Integrator
 %          [T, Y] = MATLODE_EXP_FWD_Integrator(Ode_Function, Time_Interval, Y0)

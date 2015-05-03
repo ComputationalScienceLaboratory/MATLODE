@@ -6,8 +6,6 @@
 %   </div>
 % </html>
 %
-% <html>Up: <a href="../../../html/User_Guide.html">User Guide</a></html>
-%
 %% Syntax
 %                   MATLODE_ERK_FWD_Integrator
 %          [T, Y] = MATLODE_ERK_FWD_Integrator(Ode_Function, Time_Interval, Y0)
@@ -92,6 +90,8 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
+%%
+% Copyright 2015 Computational Science Laboratory
 function [ Tout_FWD, Yout_FWD, FWD_Stats ] = MATLODE_ERK_FWD_Integrator( OdeFunction, Tspan, Y0, varargin )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

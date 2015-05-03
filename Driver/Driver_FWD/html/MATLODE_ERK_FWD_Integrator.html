@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_ERK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-02"><meta name="DC.source" content="MATLODE_ERK_FWD_Integrator.m"><style type="text/css">
+      --><title>MATLODE_ERK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_ERK_FWD_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -70,7 +70,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
   <div>
       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
   </div>
-</p><p>Up: <a href="../../../html/User_Guide.html">User Guide</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#12">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                 MATLODE_ERK_FWD_Integrator
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#13">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                 MATLODE_ERK_FWD_Integrator
         [T, Y] = MATLODE_ERK_FWD_Integrator(Ode_Function, Time_Interval, Y0)
  [T, Y, Stats] = MATLODE_ERK_FWD_Integrator(Ode_Function, Time_Interval, Y0)
         [T, Y] = MATLODE_ERK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)
@@ -80,88 +80,7 @@ Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
 </pre><p>Now that we have our model loaded in our workspace, we can perform a forward explicit Runge-Kutta integration using MATLODE's prebuilt default settings.</p><pre class="language-matlab">[ T, Y ] = MatlOde_ERK_FWD_Integrator(Ode_Function,Time_Interval,Y0);
 </pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="language-matlab">disp(<span class="string">'solution at Time_Interval(2)'</span>);
 disp(Y);
-</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Forward Integration -&gt; MATLODE_Example_ERK_FWD_Integrator.</p><h2>Contact Information<a name="6"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="10"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><pre class="codeinput"><span class="keyword">function</span> [ Tout_FWD, Yout_FWD, FWD_Stats ] = MATLODE_ERK_FWD_Integrator( OdeFunction, Tspan, Y0, varargin )
-</pre><pre class="codeinput">    <span class="comment">% Display input/output parameters</span>
-    <span class="keyword">if</span> ( nargout == 0 &amp;&amp; nargin == 0 )
-        fprintf(<span class="string">'Syntax: \n'</span>);
-        fprintf( <span class="string">'                     MATLODE_ERK_FWD_Integrator \n'</span> );
-        fprintf( <span class="string">'          [ T, Y ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0) \n'</span> );
-        fprintf( <span class="string">'   [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0) \n'</span> );
-        fprintf( <span class="string">'          [ T, Y ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0, options) \n'</span> );
-        fprintf( <span class="string">'   [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0, options) \n'</span> );
-        fprintf( <span class="string">'\n'</span> );
-        <span class="keyword">return</span>;
-    <span class="keyword">end</span>
-
-    <span class="comment">% Check inputs</span>
-    <span class="keyword">if</span> ( nargin &lt; 3 )
-        error(<span class="string">'Not enough input arguments.'</span>);
-    <span class="keyword">elseif</span> ( nargin == 3 )
-        OPTIONS_U = MATLODE_OPTIONS();
-    <span class="keyword">elseif</span> ( nargin == 4 )
-        OPTIONS_U = varargin{1};
-    <span class="keyword">else</span>
-        error(<span class="string">'Too many input arguments.'</span>);
-    <span class="keyword">end</span>
-
-    <span class="comment">% Force initial value matrix to be N X 1.</span>
-    <span class="keyword">if</span> ( size(Y0,2) == 1 )
-        <span class="comment">% DO NOTHING</span>
-    <span class="keyword">else</span>
-        Y0 = transpose(Y0);
-    <span class="keyword">end</span>
-
-    <span class="comment">% Initialize Adjoint Flags</span>
-    adjStackFlag = false;
-    adjQuadFlag = false;
-
-    <span class="comment">% Configure Forward Options</span>
-    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,<span class="string">'ERK'</span>,<span class="string">'FWD'</span>,Y0, Tspan );
-
-    OPTIONS.NVAR = max(size(Y0));
-
-    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
-    <span class="comment">% Call Forwrad Method</span>
-    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
-    <span class="comment">%   Accounts for Tspan n-dimensional array to force output at</span>
-    <span class="comment">%   specific times. Accumlates statistics.</span>
-    tspanMaxSize = max(size(Tspan));
-    Yout_FWD_interval = transpose(Y0);
-    Yout_FWD = transpose(Y0);
-    Tout_FWD = Tspan(1);
-    ISTATUS_FWD = ISTATUS_Struct(<span class="string">'default'</span>);
-    <span class="keyword">for</span> interval=1:tspanMaxSize-1
-        tic;
-        [ Tout_FWD_interval, Yout_FWD_interval, ISTATUS_FWD_interval, RSTATUS_FWD, Ierr ] = <span class="keyword">...</span>
-            ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Yout_FWD_interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag );
-        elapsedTime(interval) = toc;
-        ISTATUS_FWD = ISTATUS_Add(ISTATUS_FWD,ISTATUS_FWD_interval);
-        Tout_FWD = [Tout_FWD Tout_FWD_interval];
-        Yout_FWD = [Yout_FWD; Yout_FWD_interval];
-    <span class="keyword">end</span>
-    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
-
-    <span class="comment">% Fold statistics</span>
-    RSTATUS_FWD.Etime = sum(elapsedTime);
-    FWD_Stats.ISTATUS = ISTATUS_FWD;
-    FWD_Stats.RSTATUS = RSTATUS_FWD;
-
-    <span class="comment">% Display Statistics</span>
-    <span class="keyword">if</span> ( OPTIONS.displayStats == true )
-       fprintf( <span class="string">'\nForward Statistics'</span> );
-       PrintISTATUS( ISTATUS_FWD );
-       PrintRSTATUS( RSTATUS_FWD );
-    <span class="keyword">end</span>
-
-<span class="keyword">return</span>;
-</pre><pre class="codeoutput">Syntax: 
-                     MATLODE_ERK_FWD_Integrator 
-          [ T, Y ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0) 
-   [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0) 
-          [ T, Y ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0, options) 
-   [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator(odefun, Tspan, y0, options) 
-
-</pre><h2>Major Modification History<a name="12"></a></h2><p>
+</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Forward Integration -&gt; MATLODE_Example_ERK_FWD_Integrator.</p><h2>Contact Information<a name="6"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="10"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><p>Copyright 2015 Computational Science Laboratory</p><h2>Major Modification History<a name="13"></a></h2><p>
 <table border=1>
   <tr>
       <td><b>Date</b></td>
@@ -189,8 +108,6 @@ disp(Y);
 %       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
 %   </div>
 % </html>
-%
-% <html>Up: <a href="../../../html/User_Guide.html">User Guide</a></html>
 %
 %% Syntax
 %                   MATLODE_ERK_FWD_Integrator
@@ -276,6 +193,8 @@ disp(Y);
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
+%%
+% Copyright 2015 Computational Science Laboratory
 function [ Tout_FWD, Yout_FWD, FWD_Stats ] = MATLODE_ERK_FWD_Integrator( OdeFunction, Tspan, Y0, varargin )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

@@ -6,8 +6,8 @@
         <tocitem target="nothing.html" image="HelpIcon.GETTING_STARTED">Getting Started
         </tocitem>
         
-        <tocitem target="Driver/html/DRIVER.html" image="HelpIcon.USER_GUIDE">User Guide
-            <tocitem target="Driver/html/DRIVER.html" image="HelpIcon.USER_GUIDE">Forward Integration
+        <tocitem target="html/User_Guide.html" image="HelpIcon.USER_GUIDE">User Guide
+            <tocitem target="html/User_Guide.html#2" image="HelpIcon.USER_GUIDE">Forward Integration
                 <tocitem target="Driver/Driver_FWD/html/MATLODE_ERK_FWD_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_ERK_FWD_Integrator</tocitem>
                 <tocitem target="Driver/Driver_FWD/html/MATLODE_EXP_FWD_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_EXP_FWD_Integrator</tocitem>                
                 <tocitem target="Driver/Driver_FWD/html/MATLODE_EXPK_FWD_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_EXPK_FWD_Integrator</tocitem>                
@@ -16,14 +16,14 @@
                 <tocitem target="Driver/Driver_FWD/html/MATLODE_ROS_FWD_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_ROS_FWD_Integrator</tocitem>
                 <tocitem target="Driver/Driver_FWD/html/MATLODE_SDIRK_FWD_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_SDIRK_FWD_Integrator</tocitem>
             </tocitem>
-            <tocitem target="Driver/html/DRIVER.html" image="HelpIcon.USER_GUIDE">Sensitivity Analysis
-                <tocitem target="Driver/html/DRIVER.html" image="HelpIcon.USER_GUIDE">Adjoint Sensitivity Analysis
+            <tocitem target="html/User_Guide.html#4" image="HelpIcon.USER_GUIDE">Sensitivity Analysis
+                <tocitem target="html/User_Guide.html#4" image="HelpIcon.USER_GUIDE">Adjoint Sensitivity Analysis
                     <tocitem target="Driver/Driver_ADJ/html/MATLODE_ERK_ADJ_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_ERK_ADJ_Integrator</tocitem>
                     <tocitem target="Driver/Driver_ADJ/html/MATLODE_RK_ADJ_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_RK_ADJ_Integrator</tocitem>
                     <tocitem target="Driver/Driver_ADJ/html/MATLODE_ROS_ADJ_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_ROS_ADJ_Integrator</tocitem>
                     <tocitem target="Driver/Driver_ADJ/html/MATLODE_SDIRK_ADJ_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_SDIRK_ADJ_Integrator</tocitem>
                 </tocitem>            
-                <tocitem target="Driver/html/DRIVER.html" image="HelpIcon.USER_GUIDE">Tangent Linear Sensitivity Analysis
+                <tocitem target="html/User_Guide.html#3" image="HelpIcon.USER_GUIDE">Tangent Linear Sensitivity Analysis
                     <tocitem target="Driver/Driver_TLM/html/MATLODE_ERK_TLM_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_ERK_TLM_Integrator</tocitem>
                     <tocitem target="Driver/Driver_TLM/html/MATLODE_RK_TLM_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_RK_TLM_Integrator</tocitem>
                     <tocitem target="Driver/Driver_TLM/html/MATLODE_ROS_TLM_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_ROS_TLM_Integrator</tocitem>

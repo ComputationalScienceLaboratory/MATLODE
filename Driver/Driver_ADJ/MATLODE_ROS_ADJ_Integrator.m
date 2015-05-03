@@ -1,6 +1,10 @@
 %% MATLODE_ROS_ADJ_Integrator
 %
-% <html> Up: <a href="DRIVER_ADJ.html">DRIVER_ADJ</a> </html>
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 %% Syntax
 %                                     MATLODE_ROS_ADJ_Integrator
@@ -76,6 +80,13 @@
 % For addition examples, see Help -> Supplemental Software -> Examples ->
 % Sensitivity Analysis -> MATLODE_Example_ROS_ADJ_Integrator.
 %
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
 % [1] Tony D'Augustine, Adrian Sandu. MATLODE
 %
@@ -83,6 +94,8 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504–C523, 2014
 %
+%% 
+% Copyright 2015 Computational Science Laboratory
 function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )
@@ -348,3 +361,9 @@ return;
 % </table>
 % </html>
 % 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

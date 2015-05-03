@@ -6,9 +6,7 @@
 %   </div>
 % </html>
 %
-% <html> Up: <a href="DRIVER_FWD.html">DRIVER_FWD</a> </html>
-%
-%% Syntanx
+%% Syntax
 %                   MATLODE_EXPK_FWD_Integrator
 %          [T, Y] = MATLODE_EXPK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)
 %   [T, Y, Stats] = MATLODE_EXPK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)

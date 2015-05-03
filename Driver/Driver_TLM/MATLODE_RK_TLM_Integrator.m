@@ -1,6 +1,10 @@
 %% MATLODE_RK_TLM_Integrator
 %
-% <html> Up: <a href="DRIVER_TLM.html">DRIVER_TLM</a> </html>
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 %% Syntax
 %                                 MATLODE_RK_TLM_Integrator
@@ -140,4 +144,27 @@ function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_RK_TLM_Integrator( O
 return;
 
 
-
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt,edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+%
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

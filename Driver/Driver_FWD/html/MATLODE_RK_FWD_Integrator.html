@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_RK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-02"><meta name="DC.source" content="MATLODE_RK_FWD_Integrator.m"><style type="text/css">
+      --><title>MATLODE_RK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_RK_FWD_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -70,7 +70,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
   <div>
       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
   </div>
-</p><p> Up: <a href="DRIVER_FWD.html">DRIVER_FWD</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#12">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                 MATLODE_RK_FWD_Integrator
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#12">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                 MATLODE_RK_FWD_Integrator
         [T, Y] = MATLODE_RK_FWD_Integrator(Ode_Function, Time_Interval, Y0)
  [T, Y, Stats] = MATLODE_RK_FWD_Integrator(Ode_Function, Time_Interval, Y0)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>Ode_Function</tt>: model function</p><p><tt>Time_Interval</tt>: time span</p><p><tt>Y0</tt>: initial model state vector</p><p><tt>Options</tt>: MATLODE option struct</p><h2>Output Parameters<a name="3"></a></h2><p><tt>T</tt>: saved time snapshots</p><p><tt>Y</tt>: saved model state vectors</p><p><tt>Stats</tt>: integrator statistics</p><h2>Description<a name="4"></a></h2><p>Driver file to solve the system y' = F(t,y) using a Implicit Runge-Kutta (RK) method.</p><p><tt>MATLODE_RK_FWD_Integrator</tt> displays the available methods associated with the implicit Runge Kutta forward integrator.</p><p><tt>[T, Y] = MATLODE_RK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)</tt> computes the ODE solution with respect to the user supplied options configuration.</p><p><tt>[T, Y, Stats] = MATLODE_RK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)</tt> computes the ODE solution with respect to the user supplied options configuration and returns the computation statistics.</p><h2>Example<a name="5"></a></h2><p>For the following examples we will use Arenstorf Orbit as a toy problem to illustrate <tt>MATLODE_ERK_FWD_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="language-matlab">Ode_Function        = @arenstorfOrbit_Function;
 Ode_Jacobian        = @arenstorfOrbit_Jacobian;
@@ -108,8 +108,6 @@ disp(Y);
 %       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
 %   </div>
 % </html>
-%
-% <html> Up: <a href="DRIVER_FWD.html">DRIVER_FWD</a> </html>
 %
 %% Syntax
 %                   MATLODE_RK_FWD_Integrator

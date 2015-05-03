@@ -60,10 +60,8 @@ function options = MATLODE_OPTIONS(varargin)
     AbsTol_str          = '         AbsTol: [ Absolute error tolerance for Forward integrators. ]\n';
     AbsTol_ADJ_str      = '     AbsTol_ADJ: [ Absolute Newton iteration tolerance for solving adjoint system. ]\n';
     AbsTol_TLM_str      = '     AbsTol_TLM: [ Absolute error estimation for TLM at Newton stages. ]\n';
-    AdjointSolve_str    = '   AdjointSolve: [ Not Implemented. ]\n';
     Autonomous_str      = '     Autonomous: [ ]\n';
     ChunkSize_str       = '      ChunkSize: [ Appended memory block size ]\n';
-    Desired_Mode_str    = '   Desired_Mode: [ (Strongly Recommended) Ensures desired adjoint executes. ]\n';
     DirectADJ_str       = '      DirectADJ: [ Determines whether direct adjoint sensitivity analysis is performed. ]\n';
     DirectTLM_str       = '      DirectTLM: [ Determines whether direct tangent linear sensitivity analysis is performed. ]\n';
     displayStats_str    = '   displayStats: [ Determines whether statistics are displayed ]\n';
@@ -121,10 +119,9 @@ if (nargin == 0) && (nargout == 0)
     fprintf( AbsTol_str );
     fprintf( AbsTol_ADJ_str );
     fprintf( AbsTol_TLM_str ); 
-    fprintf( AdjointSolve_str );
     fprintf( Autonomous_str );
     fprintf( ChunkSize_str );
-    fprintf( Desired_Mode_str );    
+        
     fprintf( DirectADJ_str );
     fprintf( DirectTLM_str );
     fprintf( displayStats_str );
@@ -189,7 +186,7 @@ if (nargin == 1) && (nargout == 0)
             fprintf( AbsTol_ADJ_str );
             fprintf( AbsTol_TLM_str );
             fprintf( ChunkSize_str );
-            fprintf( Desired_Mode_str );
+            
             fprintf( displayStats_str );
             fprintf( displaySteps_str );
             fprintf( DRDP_str );
@@ -303,7 +300,7 @@ if (nargin == 2) && (nargout == 0)
                     fprintf( AbsTol_str );
                     fprintf( AbsTol_ADJ_str );
                     fprintf( ChunkSize_str );
-                    fprintf( Desired_Mode_str );
+                    
                     fprintf( displayStats_str );
                     fprintf( displaySteps_str );
                     fprintf( DRDP_str );
@@ -404,7 +401,7 @@ if (nargin == 2) && (nargout == 0)
                     fprintf( AbsTol_str );
                     fprintf( AbsTol_ADJ_str );
                     fprintf( ChunkSize_str );
-                    fprintf( Desired_Mode_str );
+                    
                     fprintf( DirectADJ_str );
                     fprintf( displayStats_str );
                     fprintf( displaySteps_str );  
@@ -494,7 +491,7 @@ if (nargin == 2) && (nargout == 0)
                     fprintf( AbsTol_str );
                     fprintf( AbsTol_ADJ_str );
                     fprintf( ChunkSize_str );
-                    fprintf( Desired_Mode_str );
+                    
                     fprintf( displayStats_str );
                     fprintf( displaySteps_str );
                     fprintf( DRDP_str );
@@ -590,7 +587,7 @@ if (nargin == 2) && (nargout == 0)
                     fprintf( AbsTol_str );
                     fprintf( AbsTol_ADJ_str );
                     fprintf( ChunkSize_str );
-                    fprintf( Desired_Mode_str );
+                    
                     fprintf( DirectADJ_str );
                     fprintf( displayStats_str );
                     fprintf( displaySteps_str );
@@ -634,7 +631,6 @@ Names = [
     'AbsTol           '
     'AbsTol_ADJ       '
     'AbsTol_TLM       '
-    'AdjointSolve     '
     'Autonomous       '
     'ChunkSize        '
     'Desired_Mode     '
