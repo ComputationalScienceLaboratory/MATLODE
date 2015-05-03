@@ -1,3 +1,16 @@
+%% OPTIONS_Configuration
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+% Copyright 2015 Computational Science Laboratory
 function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, implementation, y0, tspan  )
 
     %% Toggle Warning Configuration
@@ -88,3 +101,9 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
 
 end
 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

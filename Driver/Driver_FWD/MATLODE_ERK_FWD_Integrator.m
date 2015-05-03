@@ -65,7 +65,7 @@
 % forward explicit Runge-Kutta integration using MATLODE's prebuilt default
 % settings.
 %
-%   [ T, Y ] = MatlOde_ERK_FWD_Integrator(Ode_Function,Time_Interval,Y0);
+%   [ T, Y ] = MATLODE_ERK_FWD_Integrator(Ode_Function,Time_Interval,Y0);
 %
 % Printing out our results, we can analyze our model state at our final
 % time.
@@ -84,7 +84,8 @@
 %%
 % Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 

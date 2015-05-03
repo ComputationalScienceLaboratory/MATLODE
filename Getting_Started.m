@@ -1,8 +1,11 @@
 %% Getting Started
 %
 % <html>
-% Up: <a href="../index.html">MATLODE Toolbox</a>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
 % </html>
+%
 %% Installation (Recommended)
 % # Download MATLODE.mltbx
 % # Navigate to MATLODE.mltbx in directory
@@ -70,3 +73,10 @@ Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
 
 %%
 % Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

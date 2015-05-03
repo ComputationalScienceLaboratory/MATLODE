@@ -1,3 +1,9 @@
+%%
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
 function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, family, implementation, y0, tspan )
     
     roundOff = eps/2;
@@ -600,3 +606,9 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
 
 end
 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

@@ -87,7 +87,8 @@
 %%
 % Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
@@ -159,7 +160,8 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
                 tic;
                 [ FWD_Tout_interval, FWD_Yout_interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
                     SDIRK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
-                elapsedTime_FWD(interval) = toc;
+                elapsedTime_% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.FWD(interval) = toc;
                 FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
                 Tout_FWD = [Tout_FWD FWD_Tout_interval];
                 Yout_FWD = [Yout_FWD; FWD_Yout_interval];

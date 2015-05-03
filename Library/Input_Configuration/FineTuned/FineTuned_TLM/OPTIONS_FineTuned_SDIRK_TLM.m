@@ -1,6 +1,12 @@
 %% OPTIONS_FineTuned_SDIRK_TLM
 %
 % <html>
+%   <div>
+%       <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html>
 % Up: <a href="../../../../html/Library.html">Library</a>
 % </html>
 %
@@ -44,3 +50,9 @@ function OPTIONS = OPTIONS_FineTuned_SDIRK_TLM
 
 end
 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

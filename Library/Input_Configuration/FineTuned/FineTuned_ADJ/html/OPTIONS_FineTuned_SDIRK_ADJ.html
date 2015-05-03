@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>OPTIONS_FineTuned_SDIRK_ADJ</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-22"><meta name="DC.source" content="OPTIONS_FineTuned_SDIRK_ADJ.m"><style type="text/css">
+      --><title>OPTIONS_FineTuned_SDIRK_ADJ</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="OPTIONS_FineTuned_SDIRK_ADJ.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,13 +67,16 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>OPTIONS_FineTuned_SDIRK_ADJ</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p>
 Up: <a href="../../../../html/Library.html">Library</a>
 </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Singly Diagonally Implicit Runge-Kutta (SDIRK) Adjoint (ADJ) Fine Tuning</a></li></ul></div><h2>Singly Diagonally Implicit Runge-Kutta (SDIRK) Adjoint (ADJ) Fine Tuning<a name="1"></a></h2><p>The following is the default fine tuning for the SDIRK ADJ integrator. All option settings fine tuned to 0 will use the default configuration settings.</p><p><b>IMPORTANT:</b> If an option setting is required by integrator, the corresponding setting must be fined to 0 or an appropriate value as desired.</p><p>Copyright 2015 Computational Science Laboratory</p><pre class="codeinput"><span class="keyword">function</span> OPTIONS = OPTIONS_FineTuned_SDIRK_ADJ
 <span class="comment">% something</span>
     OPTIONS = MATLODE_OPTIONS(<span class="keyword">...</span>
         <span class="string">'AbsTol'</span>,          0, <span class="keyword">...</span>
         <span class="string">'AbsTol_ADJ'</span>,      0, <span class="keyword">...</span>
-        <span class="string">'AdjointSolve'</span>,    1, <span class="keyword">...</span>
         <span class="string">'ChunkSize'</span>,       0, <span class="keyword">...</span>
         <span class="string">'displayStats'</span>,    0, <span class="keyword">...</span>
         <span class="string">'displaySteps'</span>,    0, <span class="keyword">...</span>
@@ -101,9 +104,19 @@ Up: <a href="../../../../html/Library.html">Library</a>
         <span class="string">'DirectADJ'</span>,       1 );
 
 <span class="keyword">end</span>
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p>
+  <div>
+      <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% OPTIONS_FineTuned_SDIRK_ADJ
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html>
 % Up: <a href="../../../../html/Library.html">Library</a>
@@ -124,7 +137,6 @@ function OPTIONS = OPTIONS_FineTuned_SDIRK_ADJ
     OPTIONS = MATLODE_OPTIONS(...
         'AbsTol',          0, ...
         'AbsTol_ADJ',      0, ...
-        'AdjointSolve',    1, ...
         'ChunkSize',       0, ...
         'displayStats',    0, ...
         'displaySteps',    0, ...
@@ -153,6 +165,11 @@ function OPTIONS = OPTIONS_FineTuned_SDIRK_ADJ
 
 end
 
-
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

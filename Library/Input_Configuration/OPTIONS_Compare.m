@@ -1,6 +1,31 @@
 %% OPTIONS_Compare
 %
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%    OPTIONS_Compare(Options1,Options2)
+%
+%% Input Parameters
+% |Options1|: Option struct to be compared to Options2
+%
+% |Options2|: Option struct to be compared to Options1
+%
+%% Output Parameters
+% No output parameters. Function prints to command window.
+%
+%% Description
+% Compared two MATLODE option structs and prints results to command window.
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
 %%
+% Copyright 2015 Computational Science Laboratory
 function OPTIONS_Compare( option1, option2 )
 
     % AbsTol
@@ -539,7 +564,12 @@ function OPTIONS_Compare( option1, option2 )
         end
     end      
     
-    
-
 end
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 

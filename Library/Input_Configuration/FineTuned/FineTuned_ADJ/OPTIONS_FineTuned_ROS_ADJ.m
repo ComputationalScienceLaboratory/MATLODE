@@ -1,6 +1,12 @@
 %% OPTIONS_FineTuned_ROS_ADJ
 %
 % <html>
+%   <div>
+%       <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html>
 % Up: <a href="../../../../html/Library.html">Library</a>
 % </html>
 %
@@ -17,7 +23,6 @@
 function OPTIONS = OPTIONS_FineTuned_ROS_ADJ
     OPTIONS = MATLODE_OPTIONS(...
         'AbsTol',          0, ...
-        'AdjointSolve',    1, ...
         'Autonomous',      0, ...
         'ChunkSize',       0, ...
         'displayStats',    0, ...
@@ -41,3 +46,9 @@ function OPTIONS = OPTIONS_FineTuned_ROS_ADJ
 
 end
 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

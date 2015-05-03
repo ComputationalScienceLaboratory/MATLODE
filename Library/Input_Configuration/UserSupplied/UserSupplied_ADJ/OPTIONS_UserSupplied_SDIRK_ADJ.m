@@ -1,12 +1,34 @@
+%% OPTIONS_UserSupplied_SDIRK_ADJ
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%    [Options] = OPTIONS_UserSupplied_SDIRK_ADJ(Options_U)
+%
+%% Input Parameters
+% |Options_U|: User supplied option struct
+%
+%% Output Parameters
+% |Options|: Option struct with only necessary option parameters
+%
+%% Description
+% Warns user if option parameter is not used.
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+% Copyright 2015 Computational Science Laboratory
 function [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_ADJ( OPTIONS_U )
 
     if ( ~isempty(OPTIONS_U.AbsTol_TLM) == true )
         warning('MatlODE:configuration','AbsTol_TLM is not used in integrator.');
         OPTIONS_U.AbsTol_TLM = [];
-    end
-    if ( ~isempty(OPTIONS_U.AdjointSolve) == true )
-        warning('MatlODE:configuration','AdjointSolve is not used in integrator.');
-        OPTIONS_U.AdjointSolve = [];
     end
     if ( ~isempty(OPTIONS_U.Desired_Mode) == true );
         warning('MatlODE:configuration','Desired_Mode is not used in integrator.');
@@ -83,3 +105,9 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_ADJ( OPTIONS_U )
 
 end
 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

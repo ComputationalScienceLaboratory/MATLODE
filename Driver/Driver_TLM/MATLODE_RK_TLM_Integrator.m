@@ -77,12 +77,15 @@
 % Sensitivity Analysis -> MATLODE_Example_RK_TLM_Integrator.
 %
 %% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504–C523, 2014
 %
+%%
+% Copyright 2015 Computational Science Laboratory 
 function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_RK_TLM_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

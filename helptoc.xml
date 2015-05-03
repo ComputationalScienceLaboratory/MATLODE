@@ -3,7 +3,7 @@
 
     <tocitem target="index.html">
     
-        <tocitem target="nothing.html" image="HelpIcon.GETTING_STARTED">Getting Started
+        <tocitem target="html/Getting_Started.html" image="HelpIcon.GETTING_STARTED">Getting Started
         </tocitem>
         
         <tocitem target="html/User_Guide.html" image="HelpIcon.USER_GUIDE">User Guide

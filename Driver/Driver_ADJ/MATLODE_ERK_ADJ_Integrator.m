@@ -86,7 +86,8 @@
 %%
 % Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 

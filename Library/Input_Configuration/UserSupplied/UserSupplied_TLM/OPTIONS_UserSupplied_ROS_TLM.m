@@ -4,10 +4,6 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_ROS_TLM( OPTIONS_U )
         warning('MatlODE:configuration','AbsTol_ADJ is not used in integrator.');
         OPTIONS_U.AbsTol_ADJ = [];
     end
-    if ( ~isempty(OPTIONS_U.AdjointSolve) == true )
-        warning('MatlODE:configuration','AdjointSolve is not used in integrator.');
-        OPTIONS_U.AdjointSolve = [];
-    end
     if ( ~isempty(OPTIONS_U.Autonomous) == true )
         warning('MatlODE:configuration','Autonomous is not used in integrator.');
         OPTIONS_U.Autonomous = [];

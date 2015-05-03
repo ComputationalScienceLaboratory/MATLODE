@@ -1,0 +1,262 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>OPTIONS_UserSupplied_ROS_FWD</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="OPTIONS_UserSupplied_ROS_FWD.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>OPTIONS_UserSupplied_ROS_FWD</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Reference</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>  [Options] = OPTIONS_UserSupplied_ROS_FWD(Options_U)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>Options_U</tt>: User supplied option struct</p><h2>Output Parameters<a name="3"></a></h2><p><tt>Options</tt>: Option struct with only necessary option parameters</p><h2>Description<a name="4"></a></h2><p>Warns user if option parameter is not used.</p><h2>Reference<a name="5"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><p>Copyright 2015 Computational Science Laboratory</p><p>
+  <div>
+      <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% OPTIONS_UserSupplied_ROS_FWD
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%    [Options] = OPTIONS_UserSupplied_ROS_FWD(Options_U)
+%
+%% Input Parameters
+% |Options_U|: User supplied option struct
+%
+%% Output Parameters
+% |Options|: Option struct with only necessary option parameters
+%
+%% Description
+% Warns user if option parameter is not used.
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+% Copyright 2015 Computational Science Laboratory
+function [ OPTIONS_U ] = OPTIONS_UserSupplied_ROS_FWD( OPTIONS_U )
+
+    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    %   On/Off Warnings
+    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+    if ( OPTIONS_U.WarningConfig == false )
+        warning('off','MatlODE:configuration');
+    else 
+        warning('on','MatlODE:configuration');
+    end
+
+    if ( ~isempty(OPTIONS_U.AbsTol_ADJ) == true )
+        warning('MatlODE:configuration','AbsTol_ADJ is not used in integrator.');
+        OPTIONS_U.AbsTol_ADJ = [];
+    end
+    if ( ~isempty(OPTIONS_U.AbsTol_TLM) == true )
+        warning('MatlODE:configuration','AbsTol_TLM is not used in integrator.');
+        OPTIONS_U.AbsTol_TLM = [];
+    end
+    if ( ~isempty(OPTIONS_U.Desired_Mode) == true );
+        warning('MatlODE:configuration','Desired_Mode is not used in integrator.');
+        OPTIONS_U.Desired_Mode = [];
+    end
+    if ( ~isempty(OPTIONS_U.DirectADJ) == true )
+        warning('MatlODE:configuration','DirectADJ is not used in integrator.');
+        OPTIONS_U.DirectADJ = [];
+    end
+    if ( ~isempty(OPTIONS_U.DirectTLM) == true )
+        warning('MatlODE:configuration','DirectTLM is not used in integrator.');
+        OPTIONS_U.DirectTLM = [];
+    end
+    if ( ~isempty(OPTIONS_U.DRDP) == true )
+        warning('MatlODE:configuration','DirectTLM is not used in integrator.');
+        OPTIONS_U.DRDP = [];
+    end
+    if ( ~isempty(OPTIONS_U.DRDY) == true )
+        warning('MatlODE:configuration','DRDY is not used in integrator.');
+        OPTIONS_U.DRDY = [];
+    end
+    if ( ~isempty(OPTIONS_U.FDAprox) == true )
+        warning('MatlODE:configuration','FDAprox is not used in integrator.');
+        OPTIONS_U.FDAprox = [];
+    end
+    if ( ~isempty(OPTIONS_U.FDIncrement) == true )
+        warning('MatlODE:configuration','FDIncrement is not used in integrator.');
+        OPTIONS_U.FDIncrement = [];
+    end                    
+    if ( ~isempty(OPTIONS_U.Gustafsson) == true )
+        warning('MatlODE:configuration','Gustafsson is not used in integrator.');
+        OPTIONS_U.Gustafsson = [];
+    end
+    if ( ~isempty(OPTIONS_U.Hess_vec) == true )
+        warning('MatlODE:configuration','Hess_vec is not used in integrator.');
+        OPTIONS_U.Hess_vec = [];
+    end
+    if ( ~isempty(OPTIONS_U.Hesstr_vec) == true )
+        warning('MatlODE:configuration','Hesstr_vec is not used in integrator.');
+        OPTIONS_U.Hesstr_vec = [];
+    end
+    if ( ~isempty(OPTIONS_U.Hesstr_vec_f_py) == true )
+        warning('MatlODE:configuration','Hesstr_vec_f_py is not used in integrator.');
+        OPTIONS_U.Hesstr_vec_f_py = [];
+    end
+    if ( ~isempty(OPTIONS_U.Hesstr_vec_r) == true )
+        warning('MatlODE:configuration','Hesstr_vec_r is not used in integrator.');
+        OPTIONS_U.Hesstr_vec_r = [];
+    end
+    if ( ~isempty(OPTIONS_U.Hesstr_vec_r_py) == true )
+        warning('MatlODE:configuration','Hesstr_vec_r_py is not used in integrator.');
+        OPTIONS_U.Hesstr_vec_r_py = [];
+    end
+    if ( ~isempty(OPTIONS_U.ThetaMin) == true )
+        warning('MatlODE:configuration','ThetaMin is not used in integrator.');
+    end
+    if ( ~isempty(OPTIONS_U.TLMNewtonEst) == true )
+        warning('MatlODE:configuration','TLMNewtonEst is not used in integrator.');
+        OPTIONS_U.TLMNewtonEst = [];
+    end
+    if ( ~isempty(OPTIONS_U.TLMTruncErr) == true )
+        warning('MatlODE:configuration','TLMTruncErr is not used in integrator.');
+        OPTIONS_U.TLMTruncErr = [];
+    end
+    if ( ~isempty(OPTIONS_U.MatrixFree) == true )
+        warning('MatlODE:configuration','MatrixFree is not used in integrator.');
+        OPTIONS_U.MatrixFree = [];
+    end                    
+    if ( ~isempty(OPTIONS_U.Mu) == true )
+        warning('MatlODE:configuration','Mu is not used in integrator.');
+        OPTIONS_U.Mu = [];
+    end
+    if ( ~isempty(OPTIONS_U.NewtonMaxIt) == true )
+        warning('MatlODE:configuration','NewtonMaxIt is not used in integrator.');
+        OPTIONS_U.NewtonMaxIt = [];
+    end
+    if ( ~isempty(OPTIONS_U.NewtonTol) == true )
+        warning('MatlODE:configuration','NewtonTol is not used in integrator.');
+        OPTIONS_U.NewtonTol = [];
+    end
+    if ( ~isempty(OPTIONS_U.QFun) == true )
+        warning('MatlODE:configuration','QFun is not used in integrator.');
+        OPTIONS_U.QFun = [];
+    end
+    if ( ~isempty(OPTIONS_U.Qmax) == true )
+        warning('MatlODE:configuration','Qmax is not used in integrator.');
+        OPTIONS_U.Qmax = [];
+    end
+    if ( ~isempty(OPTIONS_U.Qmin) == true )
+        warning('MatlODE:configuration','Qmin is not used in integrator.');
+        OPTIONS_U.Qmin = [];
+    end
+    if ( ~isempty(OPTIONS_U.Quadrature) == true )
+        warning('MatlODE:configuration','Quadrature is not used in integrator.');
+        OPTIONS_U.Quadrature = [];
+    end
+    if ( ~isempty(OPTIONS_U.RelTol_ADJ) == true )
+        warning('MatlODE:configuration','RelTol_ADJ is not used in integrator.');
+        OPTIONS_U.RelTol_ADJ = [];
+    end
+    if ( ~isempty(OPTIONS_U.RelTol_TLM) == true )
+        warning('MatlODE:configuration','RelTol_TLM is not used in integrator.');
+        OPTIONS_U.RelTol_TLM = [];
+    end
+    if ( ~isempty(OPTIONS_U.SaveLU) == true )
+        warning('MatlODE:configuration','SaveLU is not used in integrator.');
+        OPTIONS_U.SaveLU = [];
+    end
+    if ( ~isempty(OPTIONS_U.SdirkError) == true )
+        warning('MatlODE:configuration','SdirkError is not used in integrator.');
+        OPTIONS_U.SdirkError = [];
+    end
+    if ( ~isempty(OPTIONS_U.StartNewton) == true )
+        warning('MatlODE:configuration','StartNewton is not used in integrator.');
+        OPTIONS_U.StartNewton = [];
+    end
+    if ( ~isempty(OPTIONS_U.ThetaMin) == true )
+        warning('MatlODE:configuration','ThetaMin is not used in integrator.');
+        OPTIONS_U.ThetaMin = [];
+    end
+    if ( ~isempty(OPTIONS_U.TLMTruncErr) == true )
+        warning('MatlODE:configuration','TLMTruncErr is not used in integrator.');
+        OPTIONS_U.TLMTruncErr = [];
+    end
+    if ( ~isempty(OPTIONS_U.Y_TLM) == true )
+        warning('MatlODE:configuration','Y_TLM is not used in integrator.');
+        OPTIONS_U.Y_TLM = [];
+    end      
+
+
+end
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
+##### SOURCE END #####
+--></body></html>
