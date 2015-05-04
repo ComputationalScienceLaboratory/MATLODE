@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_Example_ROS_ADJ_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_ROS_ADJ_Integrator.m"><style type="text/css">
+      --><title>MATLODE_Example_ROS_ADJ_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_Example_ROS_ADJ_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,6 +67,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>MATLODE_Example_ROS_ADJ_Integrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p>
    Up: <a href="../Examples/html/Examples.html">Examples</a>
 </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#4">Advanced Features</a></li></ul></div><p>For the following examples we will use Van Der Pol as a toy problem to illustrate <tt>MATLODE_ROS_ADJ_Integrator</tt> functionalities and features. To initially setup Van Der Pol, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="codeinput">Ode_Function        = @vanDerPol_Function;
 Ode_Jacobian        = @vanDerPol_Jacobian;
@@ -90,14 +94,14 @@ disp(Y(end,:));
 disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
 disp(Sens);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.914997535334449  -0.071620986894423
+   1.914997535334450  -0.071620986894423
 
 sensitivity at Time_Interval(2)
    1.153958473571282   0.074770893962760
    0.038510765579949   0.002495310217439
 
 </pre><h2>Advanced Features<a name="4"></a></h2><p>Calculating Mu and Quadrature depends on the input parameters to the option struct. Below are three examples illustrating the required input parameters to obtain the desired output.</p><p><b>Example 1:</b> Mu: false | Quadrature: true</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda, <span class="keyword">...</span>
-    <span class="string">'Quadrature'</span>,Ode_Quadrature,<span class="string">'QFun'</span>,Ode_QFun,<span class="string">'DRDY'</span>,Ode_DRDY, <span class="keyword">...</span>
+    <span class="string">'Quadrature'</span>,Ode_Quadrature,<span class="string">'QFun'</span>,Ode_QFun,<span class="string">'DRDY'</span>,Ode_DRDY,<span class="keyword">...</span>
     <span class="string">'Hesstr_vec'</span>,Ode_Hesstr_vec,<span class="string">'Hesstr_vec_r'</span>,Ode_Hesstr_vec_r);
 [ ~, Y, Sens, Quad, ~ ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
 </pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
@@ -107,7 +111,7 @@ disp(Sens);
 disp(<span class="string">'quadrature at Time_Interval(2)'</span>);
 disp(Quad);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.914997535334449  -0.071620986894423
+   1.914997535334450  -0.071620986894423
 
 sensitivity at Time_Interval(2)
    0.270365153007235   0.228729367534286
@@ -128,7 +132,7 @@ disp(Sens);
 disp(<span class="string">'mu at Time_Interval(2)'</span>);
 disp(Mu);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.914997535334449  -0.071620986894423
+   1.914997535334450  -0.071620986894423
 
 sensitivity at Time_Interval(2)
    1.146931661926977   0.074315588315960
@@ -152,7 +156,7 @@ disp(Quad);
 disp(<span class="string">'mu at Time_Interval(2)'</span>);
 disp(Mu);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.914997535334449  -0.071620986894423
+   1.914997535334450  -0.071620986894423
 
 sensitivity at Time_Interval(2)
    0.447846833780721   0.221247250242815
@@ -165,9 +169,19 @@ quadrature at Time_Interval(2)
 mu at Time_Interval(2)
   -5.831338011237693   0.276533426870627
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p>Copyright 2015 Computational Science Laboratory</p><p>
+  <div>
+      <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLODE_Example_ROS_ADJ_Integrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html>
 %    Up: <a href="../Examples/html/Examples.html">Examples</a>
@@ -217,7 +231,7 @@ disp(Sens);
 %%
 % *Example 1:* Mu: false | Quadrature: true
 Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda, ...
-    'Quadrature',Ode_Quadrature,'QFun',Ode_QFun,'DRDY',Ode_DRDY, ...
+    'Quadrature',Ode_Quadrature,'QFun',Ode_QFun,'DRDY',Ode_DRDY,...
     'Hesstr_vec',Ode_Hesstr_vec,'Hesstr_vec_r',Ode_Hesstr_vec_r);
 [ ~, Y, Sens, Quad, ~ ] = MATLODE_ROS_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
 
@@ -268,5 +282,15 @@ disp('quadrature at Time_Interval(2)');
 disp(Quad);
 disp('mu at Time_Interval(2)');
 disp(Mu);
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

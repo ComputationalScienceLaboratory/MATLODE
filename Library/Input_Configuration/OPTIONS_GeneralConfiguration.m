@@ -541,19 +541,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     if( strcmp(implementation,'ADJ') )
         switch( family )
             case 'ERK'
-            case 'RK'
-            switch( OPTIONS.AdjointSolve )
-                case 0
-                    % disp('Solve_fixed');
-                case 1
-                    % disp('Solve_fixed');
-                case 2
-                    % disp('Solve_direct');
-                case 3
-                    % disp('Solve_adaptive');
-                otherwise
-                    disp('ERROR: REGISTER 14');
-            end                
+            case 'RK'              
             case 'ROS'
             case 'SDIRK'
             otherwise

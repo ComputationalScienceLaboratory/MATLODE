@@ -1,6 +1,12 @@
 %% MATLODE_Example_SDIRK_FWD_Integrator
 %
 % <html>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html>
 %    Up: <a href="../Examples/html/Examples.html">Examples</a>
 % </html>
 %%
@@ -48,3 +54,13 @@ Options = MATLODE_OPTIONS('Jacobian',Ode_JacobianVector,'MatrixFree',true);
 % Execute the following commands to analyze the final model state.
 disp('solution at Time_Interval(2)');
 disp(Y(end,:));
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

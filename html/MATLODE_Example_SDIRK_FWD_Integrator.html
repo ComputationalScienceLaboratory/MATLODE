@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_Example_SDIRK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_SDIRK_FWD_Integrator.m"><style type="text/css">
+      --><title>MATLODE_Example_SDIRK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_Example_SDIRK_FWD_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,6 +67,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>MATLODE_Example_SDIRK_FWD_Integrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p>
    Up: <a href="../Examples/html/Examples.html">Examples</a>
 </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#4">Advanced Functionality</a></li></ul></div><p>For the following examples Arenstorf Orbit is used as a toy problem to illustrate <tt>MATLODE_SDIRK_FWD_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load the input parameters into the workspace.</p><pre class="codeinput">Ode_Function        = @arenstorfOrbit_Function;
 Ode_Jacobian        = @arenstorfOrbit_Jacobian;
@@ -125,11 +129,11 @@ disp(Y(end,:));
 </pre><pre class="codeoutput">solution at Time_Interval(2)
   Columns 1 through 3
 
-   0.918124438055006  -0.039973777648758  -0.638924935480216
+   0.918124438054635  -0.039973777645167  -0.638924935480527
 
   Column 4
 
-  -0.088581558035649
+  -0.088581558004557
 
 </pre><p>If a Jacobian vector product approximation is available, can pass the Jacobian vector product function handler to 'Jacobian' and toggle the 'MatrixFree' in the option struct.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_JacobianVector,<span class="string">'MatrixFree'</span>,true);
 [ ~, Y ] = MATLODE_SDIRK_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
@@ -138,15 +142,25 @@ disp(Y(end,:));
 </pre><pre class="codeoutput">solution at Time_Interval(2)
   Columns 1 through 3
 
-   0.996883951675026   0.020584159426189   0.633482175864490
+   0.996883951675007   0.020584159425570   0.633482175866250
 
   Column 4
 
-  -0.884556217536157
+  -0.884556217550569
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p>Copyright 2015 Computational Science Laboratory</p><p>
+  <div>
+      <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLODE_Example_SDIRK_FWD_Integrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html>
 %    Up: <a href="../Examples/html/Examples.html">Examples</a>
@@ -196,5 +210,15 @@ Options = MATLODE_OPTIONS('Jacobian',Ode_JacobianVector,'MatrixFree',true);
 % Execute the following commands to analyze the final model state.
 disp('solution at Time_Interval(2)');
 disp(Y(end,:));
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

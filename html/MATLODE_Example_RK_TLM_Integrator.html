@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_Example_RK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_RK_TLM_Integrator.m"><style type="text/css">
+      --><title>MATLODE_Example_RK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_Example_RK_TLM_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,6 +67,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>MATLODE_Example_RK_TLM_Integrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p>
    Up: <a href="../Examples/html/Examples.html">Examples</a>
 </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#4">Advanced Features</a></li></ul></div><p>For the following examples Arenstorf Orbit is used as a toy problem to illustrate <tt>MATLODE_RK_TLM_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load the input parameters into the workspace.</p><pre class="codeinput">Ode_Function        = @arenstorfOrbit_Function;
 Ode_Jacobian        = @arenstorfOrbit_Jacobian;
@@ -82,28 +86,28 @@ disp(Sens);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
   Columns 1 through 3
 
-   0.995683236985069   0.003082830712656   0.337097245941238
+   0.995683236985042   0.003082830712448   0.337097245924434
 
   Column 4
 
-  -1.690210404461741
+  -1.690210404475069
 
 sensitivity at Time_Interval(2)
    1.0e+06 *
 
   Columns 1 through 3
 
-   0.001897034914603  -0.000702632999756   0.000004457258758
-   0.014014939823589  -0.004225978530536   0.000026821010152
-   1.129083784775020  -0.334712638502328   0.002124411988722
-   0.904569072954531  -0.283792487614403   0.001800964778757
+   0.001897034914726  -0.000702632999792   0.000004457258758
+   0.014014939823651  -0.004225978530554   0.000026821010152
+   1.129083784822564  -0.334712638516832   0.002124411988814
+   0.904569072948624  -0.283792487612921   0.001800964778747
 
   Column 4
 
   -0.000011725290480
-  -0.000087222290942
-  -0.007030445866727
-  -0.005622766156361
+  -0.000087222290943
+  -0.007030445867023
+  -0.005622766156324
 
 </pre><h2>Advanced Features<a name="4"></a></h2><p>To perform <b>nondirect sensitivity analysis</b>, toggle the 'DirectTLM' option parameter to false. This enables the sensitivity matrix to be calculated using Newton iterations. Note, it is strongly recommended to first try direct sensitivity analysis before trying nondirect for efficiency purposes.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Y_TLM'</span>,Ode_YTLM,<span class="string">'DirectTLM'</span>,false);
 [ ~, Y, Sens ] = MATLODE_RK_TLM_Integrator(Ode_Function,Time_Interval,Y0,Options);
@@ -114,32 +118,42 @@ disp(Sens);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
   Columns 1 through 3
 
-   0.995683236985069   0.003082830712656   0.337097245941238
+   0.995683236985042   0.003082830712448   0.337097245924434
 
   Column 4
 
-  -1.690210404461741
+  -1.690210404475069
 
 sensitivity at Time_Interval(2)
    1.0e+06 *
 
   Columns 1 through 3
 
-   0.001897073110606  -0.000702641110081   0.000004457308369
-   0.014015303195956  -0.004226093249392   0.000026821726256
-   1.129113450285306  -0.334722165479576   0.002124471499005
-   0.904591601665614  -0.283799265344582   0.001801007001283
+   0.001897073110729  -0.000702641110118   0.000004457308369
+   0.014015303196019  -0.004226093249410   0.000026821726256
+   1.129113450332855  -0.334722165494080   0.002124471499097
+   0.904591601659710  -0.283799265343100   0.001801007001273
 
   Column 4
 
-  -0.000011725535564
-  -0.000087224584148
-  -0.007030632922057
-  -0.005622908673807
+  -0.000011725535565
+  -0.000087224584149
+  -0.007030632922353
+  -0.005622908673770
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p>Copyright 2015 Computational Science Laboratory</p><p>
+  <div>
+      <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLODE_Example_RK_TLM_Integrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html>
 %    Up: <a href="../Examples/html/Examples.html">Examples</a>
@@ -187,5 +201,15 @@ disp('solution at Time_Interval(2)');
 disp(Y(end,:));
 disp('sensitivity at Time_Interval(2)');
 disp(Sens);
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

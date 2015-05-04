@@ -64,6 +64,8 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIn
     NewtonConverge = true;
     Reject = false;
     SkipJac = false;
+    
+    OPTIONS.AdjointSolve = 1; %<---- only adjoint solve available
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Time loop begins

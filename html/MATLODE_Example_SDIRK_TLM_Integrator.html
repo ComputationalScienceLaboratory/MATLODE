@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_Example_SDIRK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="MATLODE_Example_SDIRK_TLM_Integrator.m"><style type="text/css">
+      --><title>MATLODE_Example_SDIRK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_Example_SDIRK_TLM_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,6 +67,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>MATLODE_Example_SDIRK_TLM_Integrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p>
    Up: <a href="../Examples/html/Examples.html">Examples</a>
 </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Basic Functionality</a></li><li><a href="#5">Advanced Features</a></li></ul></div><p>For the following examples Arenstorf Orbit is used as a toy problem to illustrate <tt>MATLODE_SDIRK_TLM_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load the input parameters into the workspace.</p><pre class="codeinput">Ode_Function        = @arenstorfOrbit_Function;
 Ode_Jacobian        = @arenstorfOrbit_Jacobian;
@@ -132,7 +136,7 @@ sensitivity at Time_Interval(2)
 
    0.008664653756679  -0.002746451121725   0.000017424413239
    0.013389579093279  -0.004012322626933   0.000025458821407
-   2.192086619721465  -0.675007972703288   0.004282758023376
+   2.192086619721466  -0.675007972703288   0.004282758023376
   -0.703504330964360   0.198283802514363  -0.001258328929495
 
   Column 4
@@ -142,9 +146,19 @@ sensitivity at Time_Interval(2)
   -0.013631220367666
    0.004386105130705
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p>Copyright 2015 Computational Science Laboratory</p><p>
+  <div>
+      <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLODE_Example_SDIRK_TLM_Integrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html>
 %    Up: <a href="../Examples/html/Examples.html">Examples</a>
@@ -200,5 +214,15 @@ disp('solution at Time_Interval(2)');
 disp(Y(end,:));
 disp('sensitivity at Time_Interval(2)');
 disp(Sens);
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

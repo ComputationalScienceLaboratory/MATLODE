@@ -1,6 +1,12 @@
 %% MATLODE_Example_RK_ADJ_Integrator
 %
 % <html>
+%   <div>
+%       <img style="float: right" src="../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html>
 %    Up: <a href="../Examples/html/Examples.html">Examples</a>
 % </html>
 %%
@@ -87,3 +93,13 @@ disp('quadrature at Time_Interval(2)');
 disp(Quad);
 disp('mu at Time_Interval(2)');
 disp(Mu);
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

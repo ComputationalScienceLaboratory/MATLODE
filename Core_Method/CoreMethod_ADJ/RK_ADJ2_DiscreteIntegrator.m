@@ -37,6 +37,7 @@ function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = RK_ADJ2_DiscreteIntegr
     NewtonConverge = true;
     Reject = false;
     SkipJac = false;
+    OPTIONS.AdjointSolve = 1; %<------ Only adjoint solver available
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Time loop begins
@@ -198,17 +199,17 @@ function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = RK_ADJ2_DiscreteIntegr
                 
                 end % NewtonLoopAdj
             
-            if( OPTIONS.AdjointSolve == 3 && ~NewtonDone )
-                disp('Newton iterations do not converge, switching to full system.');
-                NewtonConverge = false;
-                Reject = true;
-                % GOTO 111
-            end
+                if( OPTIONS.AdjointSolve == 3 && ~NewtonDone )
+                    disp('Newton iterations do not converge, switching to full system.');
+                    NewtonConverge = false;
+                    Reject = true;
+                    % GOTO 111
+                end
 
-            % Update adjoint solution
-            Lambda(:,iadj) = Lambda(:,iadj) + U1;
-            Lambda(:,iadj) = Lambda(:,iadj) + U2;
-            Lambda(:,iadj) = Lambda(:,iadj) + U3;
+                % Update adjoint solution
+                Lambda(:,iadj) = Lambda(:,iadj) + U1;
+                Lambda(:,iadj) = Lambda(:,iadj) + U2;
+                Lambda(:,iadj) = Lambda(:,iadj) + U3;
             
             else % NewtonConverge == false
                 X(1:NVAR) = -G1;
