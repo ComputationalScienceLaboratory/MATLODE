@@ -1,0 +1,445 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ERK_TLM_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-06"><meta name="DC.source" content="ERK_TLM_Integrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>ERK_TLM_Integrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p> Up: <a href="../../../Library/html/Library.html">Library</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Contact Information</a></li><li><a href="#9">Reference</a></li><li><a href="#10">END: ERK_Integrator_TLM: CORE METHOD %%%</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>  [ Tout, Yout, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( OdeFunction, Tspan, Y0, OPTIONS, Coefficient)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>OdeFunction</tt>: ODE function function handle</p><p><tt>Tspan</tt>: Time interval</p><p><tt>Y0</tt>: Initial state vector</p><p><tt>OPTIONS</tt>: Option struct</p><p><tt>Coefficients</tt>: Constant coefficients associated with method</p><h2>Output Parameters<a name="3"></a></h2><p><tt>Tout</tt>: Time vector</p><p><tt>Yout</tt>: State vector</p><p><tt>ISTATUS</tt>: Integer statistics</p><p><tt>RSTATUS</tt>: Real statistics</p><p><tt>Ierr</tt>: Error flag</p><h2>Description<a name="4"></a></h2><p>Explicit Runge-Kutta tangent linear core method.</p><h2>Contact Information<a name="5"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="9"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><h2>END: ERK_Integrator_TLM: CORE METHOD %%%<a name="10"></a></h2><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% ERK_TLM_Integrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
+%
+%% Syntax
+%    [ Tout, Yout, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( OdeFunction, Tspan, Y0, OPTIONS, Coefficient)
+%
+%% Input Parameters
+% |OdeFunction|: ODE function function handle
+%
+% |Tspan|: Time interval
+%
+% |Y0|: Initial state vector
+%
+% |OPTIONS|: Option struct
+%
+% |Coefficients|: Constant coefficients associated with method
+%
+%% Output Parameters
+% |Tout|: Time vector
+%
+% |Yout|: State vector
+%
+% |ISTATUS|: Integer statistics 
+%
+% |RSTATUS|: Real statistics
+%
+% |Ierr|: Error flag
+%
+%% Description
+% Explicit Runge-Kutta tangent linear core method.
+%
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+% [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
+%     tangent linear integration of ODEs, SIAM Journal on Scientific 
+%     Computing, 36(5), C504-C523, 2014.
+%
+function [ Tout, Yout, Y_TLM, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( OdeFunction,...
+        Tspan, Y, OPTIONS, Coefficient )
+
+    % Force initial value matrix to be N X 1.
+    if ( size(Y,2) == 1 )
+        % DO NOTHING
+    else
+        Y = transpose(Y);
+    end  
+
+    % Get Problem Size
+    NVAR = max(size(Y));
+    NTLM = max(size(OPTIONS.Y_TLM));
+    
+    Tinitial = Tspan(1);
+    Tfinal   = Tspan(2);
+
+    Roundoff = 1.11022302462515654E-016;
+    
+    ISTATUS = ISTATUS_Struct('default');
+    RSTATUS = RSTATUS_Struct('default');
+    
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Global variables
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    global rkA rkB rkC rkE
+    
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Local variables
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    K = zeros( NVAR, Coefficient.NStage );
+    K_TLM = zeros( NVAR, Coefficient.NStage, NTLM ); % TLM weights?
+    
+    Yout = zeros(NVAR,OPTIONS.Max_no_steps);
+    Tout = zeros(OPTIONS.Max_no_steps,1);
+    TYindex = 1;
+    
+    Yout(:,TYindex) = Y;
+    Tout(TYindex,1) = Tinitial;
+             
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Required
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+    if ( isempty(OPTIONS.Y_TLM) )
+        error('User defined option parameter Y_TLM is required.');
+    end
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+% REPLACE_WITH_DASH_DASH-> Initializations
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    T = Tinitial;
+    Tdirection = sign( Tfinal-Tinitial );
+    H = max( abs(OPTIONS.Hmin), abs(OPTIONS.Hstart) );
+    if ( abs(H) <= 10.0*Roundoff ) 
+        H = 1.0d-6;
+    end
+    H = min( abs(H), OPTIONS.Hmax );
+    H = H*sign(Tdirection);
+    Reject = false;
+    FirstStep = true;
+    if( ~OPTIONS.FDAprox )
+        FJAC = zeros(NVAR,NVAR); % ALLOCATE( FJAC( NVAR, NVAR ), STAT=i )
+    end
+
+    % Determine scaling factor for integration
+    SCAL = 1.0 ./ ( OPTIONS.AbsTol + OPTIONS.RelTol .* abs(Y) );
+    
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% REPLACE_WITH_DASH_DASH-> Time loop begins
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    while( (Tfinal-T)*Tdirection - Roundoff > 0.0 ) % Tloop
+        
+        if ( ISTATUS.Nstp > OPTIONS.Max_no_steps )
+            error('Number of steps exceeds maximum bound');
+        end
+        if ( ( T + 0.1*H == T ) || ( abs(H) <= Roundoff ) )
+            error('Step size too small: T + 10*H = T or H < Roundoff');
+        end
+        
+        for istage = 1:Coefficient.NStage % stages           
+            K(:,istage) = 0;
+            TMP = zeros( NVAR, 1 );
+
+            if ( istage > 1 )
+                for j = 1:istage-1
+                    TMP = TMP + H*rkA(istage,j)*K(:,j);
+                end
+            end
+
+            TMP = TMP + Y;
+            
+            K(:,istage) = OdeFunction( T+rkC(istage)*H,TMP);
+            ISTATUS.Nfun = ISTATUS.Nfun + 1;
+
+            if ( ~OPTIONS.FDAprox )
+                FJAC = OPTIONS.Jacobian( T+rkC(istage)*H, TMP );
+                ISTATUS.Njac = ISTATUS.Njac + 1;
+            end
+
+            S_TLM = OPTIONS.Y_TLM;
+            for itlm = 1:NTLM % TlmL
+                if ( istage > 1 )
+                    for j = 1:istage-1
+                        S_TLM(:,itlm) = S_TLM(:,itlm) + H*rkA(istage,j)*K_TLM(:,j,itlm);
+                    end
+                end
+            end
+            
+            if ( ~OPTIONS.FDAprox )
+                K_TLM(:,istage,:) = FJAC*S_TLM;
+            else
+%                [ K_TLM(:,istage,itlm), ISTATUS ] = ...
+%                    Forward_FD_JacV( T+rkC(istage)*H, TMP, S_TLM, ...
+%                    K(:,istage), OdeFunction, ISTATUS);
+%                
+%                 [ K_TLM(:,istage,itlm), ISTATUS ] = ...
+%                     Complex_FD_JacV( T+rkC(istage)*H, TMP, S_TLM, ...
+%                     OdeFunction, ISTATUS);
+%                 
+%                 [ TMP, K_TLM(:,istage,itlm), ISTATUS ] = ...
+%                     Central2_FD_JacV( T+rkC(istage)*H, TMP, S_TLM, ...
+%                     OdeFunction, ISTATUS);
+%                 
+%                 [ TMP, K_TLM(:,istage,itlm), ISTATUS ] = ...
+%                     Central4_FD_JacV( T+rkC(istage)*H, TMP, S_TLM, ...
+%                     OdeFunction, ISTATUS);
+%                 
+%                 [ TMP, K_TLM(:,istage,itlm), ISTATUS ] = ...
+%                     Left4_FD_JacV( T+rkC(istage)*H, TMP, S_TLM, ...
+%                     OdeFunction, ISTATUS);
+                error('Finite Difference Approximation is not implemented yet');
+            end
+            
+        end % stages
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% REPLACE_WITH_DASH_DASH-> Error estimation
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        ISTATUS.Nstp = ISTATUS.Nstp + 1;
+        TMP = zeros(NVAR,1);
+        for i = 1:Coefficient.NStage
+            if ( rkE(i) ~= 0.0 )
+                TMP = TMP + H*rkE(i)*K(:,i); %<REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHprone to cancellation errors
+            end
+        end
+        
+        % Perform error norm
+        Err = sum((TMP.*SCAL).^2,1);
+        Err = max( sqrt( Err/double(NVAR) ), 1.0d-10 );        
+
+        if ( OPTIONS.TLMTruncErr )
+            Yerr_TLM = zeros(NVAR,NTLM);
+            for itlm = 1:NTLM
+                for j = 1:Coefficient.NStage
+                    if ( rkE(j) ~= 0.0 )
+                        Yerr_TLM(:,itlm) = Yerr_TLM(:,itlm) + H*rkE(j)*K_TLM(:,j,itlm);
+                    end
+                end
+            end
+            
+            % Perform sensitivity error norm
+            SCAL_TLM = 1.0 ./ OPTIONS.AbsTol_TLM+OPTIONS.RelTol_TLM .* abs(Yerr_TLM);
+            Err = max([Err, sqrt(sum((OPTIONS.Y_TLM.*SCAL_TLM).^2,1)./NVAR), 1.0d-10] );
+        end
+
+        % Computation of new step size Hnew
+        Fac = OPTIONS.FacSafe*(Err)^(-1.0/Coefficient.ELO);
+        Fac = max( OPTIONS.FacMin, min( OPTIONS.FacMax, Fac ) );
+        Hnew = H*Fac;
+        
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% REPLACE_WITH_DASH_DASH-> Accept/Reject step
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        % accept
+        if ( Err < 1.0 ) % step is accepted
+            FirstStep = false;
+            ISTATUS.Nacc = ISTATUS.Nacc + 1;
+
+            % Update time
+            T = T + H;
+            
+            % Update solution
+            Y_TLM = OPTIONS.Y_TLM;
+            for i = 1:Coefficient.NStage
+                if ( rkB(i) ~= 0.0 )
+                    Y = Y + H*rkB(i)*K(:,i);
+                    for itlm = 1:NTLM
+                        Y_TLM(:,itlm) = Y_TLM(:,itlm) + H*rkB(i)*K_TLM(:,i,itlm);
+                    end                    
+                end
+            end
+            OPTIONS.Y_TLM = Y_TLM;
+            
+            % Store checkpoint values
+            if ( OPTIONS.storeCheckpoint == true )
+                Tout(TYindex,1) = T;            
+                Yout(:,TYindex) = Y;
+                TYindex = TYindex + 1;
+            end
+
+            % update scaling coefficients
+            SCAL = 1.0 ./ ( OPTIONS.AbsTol + OPTIONS.RelTol .* abs(Y) );
+
+            % Next time step
+            Hnew = Tdirection*min( abs(Hnew), OPTIONS.Hmax );
+    
+            % Last T and H
+            RSTATUS.Ntexit = T;
+            RSTATUS.Nhexit = H;
+            RSTATUS.Nhnew = Hnew;
+            
+            % No step increase after a rejection
+            if ( Reject )
+                Hnew = Tdirection*min( abs(Hnew), abs(H) );
+            end
+            Reject = false;
+            
+            % COMMENT HERE:
+            if( ( T + Hnew/OPTIONS.Qmin - Tfinal )*Tdirection > 0.0 )
+                H = Tfinal - T;
+            else
+                % Hratio = Hnew/H; % Hration is not used.
+                H = Hnew;
+            end
+
+            % for debug
+            if ( OPTIONS.displaySteps == true )
+                str = [ 'Accpeted step. Time = ', num2str(T), ';   Stepsize = ', num2str(H) ];
+                disp(str);
+            end
+            
+        else % step is rejected
+            if ( FirstStep || Reject )
+                H = OPTIONS.FacRej*H;
+            else
+                H = Hnew;
+            end
+            Reject = true;
+            
+            % Update Number of rejections
+            if ( ISTATUS.Nacc >= 1.0 )
+                ISTATUS.Nrej = ISTATUS.Nrej + 1;
+            end
+            
+            %for debug
+            if ( OPTIONS.displaySteps == true )
+                str = [ 'Rejected step. Time = ', num2str(T), ';   Stepsize = ', num2str(H) ];
+                disp(str);
+            end
+            
+        end % accept
+    end % time loop
+    
+
+    % Successful return
+    Ierr = 1;
+    
+    % Deallocate Memory
+    if ( OPTIONS.storeCheckpoint == true )
+        Tout(TYindex:OPTIONS.Max_no_steps,:) = [];
+        Yout(:,TYindex:OPTIONS.Max_no_steps) = [];
+    else
+        Tout = T;
+        Yout = Y;
+    end
+
+    % Temporary Fix
+    Yout = transpose(Yout);
+            
+return;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% END: ERK_Integrator_TLM: CORE METHOD %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

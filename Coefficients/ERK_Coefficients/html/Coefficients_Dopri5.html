@@ -1,0 +1,443 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Coefficients_Dopri5</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-04"><meta name="DC.source" content="Coefficients_Dopri5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 )
+</pre><pre class="codeinput"><span class="comment">%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="comment">% Filename: Coefficients_Dopri5.m</span>
+<span class="comment">%</span>
+<span class="comment">% Original Author:</span>
+<span class="comment">%</span>
+<span class="comment">% File Create Date:</span>
+<span class="comment">%</span>
+<span class="comment">% Input Arguments:</span>
+<span class="comment">%   Name    Type</span>
+<span class="comment">%   RK5     integer</span>
+<span class="comment">%</span>
+<span class="comment">% Output Arguments:</span>
+<span class="comment">%   Name        Type</span>
+<span class="comment">%   erkMethod   integer</span>
+<span class="comment">%   rkELO       double</span>
+<span class="comment">%   rkS         integer</span>
+<span class="comment">%   erkName     string</span>
+<span class="comment">%</span>
+<span class="comment">% Modification History:</span>
+<span class="comment">%   Date        Developer         Email             Action</span>
+<span class="comment">%   7/17/2012   Tony D'Augustine  adaug13@vt.edu    Translated Fortran90 Dopri5() method into MATLAB.</span>
+<span class="comment">%</span>
+<span class="comment">%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="comment">% Coefficients_Dopri5:</span>
+<span class="comment">%   Initializes coefficients for the Dopri5 Explict Runge-Kutta method.</span>
+<span class="comment">%</span>
+<span class="comment">%       Stages  Order</span>
+<span class="comment">%       7       5</span>
+<span class="comment">%</span>
+<span class="comment">% Coefficients_Dopri5: INPUT ARGUMENTS</span>
+<span class="comment">%   RK5 (integer):</span>
+<span class="comment">%</span>
+<span class="comment">% Coefficients_Dopri5: OUTPUT ARGUMENTS</span>
+<span class="comment">%   erkMethod (integer):</span>
+<span class="comment">%        rkELO (double):</span>
+<span class="comment">%         rkS (integer):</span>
+<span class="comment">%      erkName (string):</span>
+<span class="comment">%</span>
+<span class="comment">% Coefficients_Dopri5: GLOBAL VARIABLES</span>
+<span class="comment">%   rkA (double):</span>
+<span class="comment">%   rkB (double):</span>
+<span class="comment">%   rkC (double):</span>
+<span class="comment">%   rkD (double):</span>
+<span class="comment">%</span>
+<span class="comment">%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+</pre><p>Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang. Computational Science Laboratory, Virginia Tech. &copy;2015 Virginia Tech Intellectual Properties, Inc.</p><pre class="codeinput">    <span class="keyword">global</span> rkA rkB rkC rkE
+
+    <span class="comment">% Clear all global variables to ensire correct matrix size and values.</span>
+    rkA = []; rkB = []; rkC = []; rkE =[];
+
+    erkMethod = RK5;
+    erkELO = 6.0;
+    erkS = 7;
+<span class="comment">%     erkS = 6;</span>
+    erkName = <span class="string">'Dopri5'</span>;
+
+    rkA(1,1) = 0;
+    rkA(1,2) = 0;
+    rkA(1,3) = 0;
+    rkA(1,4) = 0;
+    rkA(1,5) = 0;
+    rkA(1,6) = 0;
+    rkA(1,7) = 0;
+
+    rkA(2,1) = .2;
+    rkA(2,2) = 0;
+    rkA(2,3) = 0;
+    rkA(2,4) = 0;
+    rkA(2,5) = 0;
+    rkA(2,6) = 0;
+    rkA(2,7) = 0;
+
+    rkA(3,1) = 3.0/40.0;
+    rkA(3,2) = 9.0/40.0;
+    rkA(3,3) = 0;
+    rkA(3,4) = 0;
+    rkA(3,5) = 0;
+    rkA(3,6) = 0;
+    rkA(3,7) = 0;
+
+    rkA(4,1) = 44.0/45.0;
+    rkA(4,2) = -56.0/15.0;
+    rkA(4,3) = 32.0/9.0;
+    rkA(4,4) = 0;
+    rkA(4,5) = 0;
+    rkA(4,6) = 0;
+    rkA(4,7) = 0;
+
+    rkA(5,1) = 19372.0/6561.0;
+    rkA(5,2) = -25360.0/2187.0;
+    rkA(5,3) = 64448.0/6561.0;
+    rkA(5,4) = -212.0/729.0;
+    rkA(5,5) = 0;
+    rkA(5,6) = 0;
+    rkA(5,7) = 0;
+
+    rkA(6,1) = 9017.0 / 3168.0;
+    rkA(6,2) = -355.0 / 33.0;
+    rkA(6,3) = 46732.0 / 5247.0;
+    rkA(6,4) = 49.0 / 176.0;
+    rkA(6,5) = -5103.0 / 18656.0;
+    rkA(6,6) = 0;
+    rkA(6,7) = 0;
+
+    rkA(7,1) = 35.0 / 384.0;
+    rkA(7,2) = 0;
+    rkA(7,3) = 500.0 / 1113.0;
+    rkA(7,4) = 125.0 / 192.0;
+    rkA(7,5) = -2187.0 / 6784.0;
+    rkA(7,6) = 11.0 / 84.0;
+    rkA(7,7) = 0;
+
+<span class="comment">%     rkA(1,1) = .2;</span>
+<span class="comment">%     rkA(1,2) = 0;</span>
+<span class="comment">%     rkA(1,3) = 0;</span>
+<span class="comment">%     rkA(1,4) = 0;</span>
+<span class="comment">%     rkA(1,5) = 0;</span>
+<span class="comment">%     rkA(1,6) = 0;</span>
+<span class="comment">%     rkA(1,7) = 0;</span>
+<span class="comment">%</span>
+<span class="comment">%     rkA(2,1) = 3.0/40.0;</span>
+<span class="comment">%     rkA(2,2) = 9.0/40.0;</span>
+<span class="comment">%     rkA(2,3) = 0;</span>
+<span class="comment">%     rkA(2,4) = 0;</span>
+<span class="comment">%     rkA(2,5) = 0;</span>
+<span class="comment">%     rkA(2,6) = 0;</span>
+<span class="comment">%     rkA(2,7) = 0;</span>
+<span class="comment">%</span>
+<span class="comment">%     rkA(3,1) = 44.0/45.0;</span>
+<span class="comment">%     rkA(3,2) = -56.0/15.0;</span>
+<span class="comment">%     rkA(3,3) = 32.0/9.0;</span>
+<span class="comment">%     rkA(3,4) = 0;</span>
+<span class="comment">%     rkA(3,5) = 0;</span>
+<span class="comment">%     rkA(3,6) = 0;</span>
+<span class="comment">%     rkA(3,7) = 0;</span>
+<span class="comment">%</span>
+<span class="comment">%     rkA(4,1) = 19372.0/6561.0;</span>
+<span class="comment">%     rkA(4,2) = -25360.0/2187.0;</span>
+<span class="comment">%     rkA(4,3) = 64448.0/6561.0;</span>
+<span class="comment">%     rkA(4,4) = -212.0/729.0;</span>
+<span class="comment">%     rkA(4,5) = 0;</span>
+<span class="comment">%     rkA(4,6) = 0;</span>
+<span class="comment">%     rkA(4,7) = 0;</span>
+<span class="comment">%</span>
+<span class="comment">%     rkA(5,1) = 9017.0 / 3168.0;</span>
+<span class="comment">%     rkA(5,2) = -355.0 / 33.0;</span>
+<span class="comment">%     rkA(5,3) = 46732.0 / 5247.0;</span>
+<span class="comment">%     rkA(5,4) = 49.0 / 176.0;</span>
+<span class="comment">%     rkA(5,5) = -5103.0 / 18656.0;</span>
+<span class="comment">%     rkA(5,6) = 0;</span>
+<span class="comment">%     rkA(5,7) = 0;</span>
+<span class="comment">%</span>
+<span class="comment">%     rkA(6,1) = 35.0 / 384.0;</span>
+<span class="comment">%     rkA(6,2) = 0;</span>
+<span class="comment">%     rkA(6,3) = 500.0 / 1113.0;</span>
+<span class="comment">%     rkA(6,4) = 125.0 / 192.0;</span>
+<span class="comment">%     rkA(6,5) = -2187.0 / 6784.0;</span>
+<span class="comment">%     rkA(6,6) = 11.0 / 84.0;</span>
+<span class="comment">%     rkA(6,7) = 0;</span>
+
+<span class="comment">%    rkB   = rkA(6,:);</span>
+    rkB   = rkA(7,:);
+
+    rkC(1)   = 0.0;
+    rkC(2)   = .20;
+    rkC(3)   = .30;
+    rkC(4)   = .80;
+    rkC(5)   = 8.0/9.0;
+    rkC(6)   = 1.0;
+    rkC(7)   = 1.0;
+
+    rkE(1)   = 71.0/57600.0;
+    rkE(2)   = 0;
+    rkE(3)   = -71.0/16695.0;
+    rkE(4)   = 71.0/1920.0;
+    rkE(5)   = -17253.0/339200.0;
+    rkE(6)   = 22.0/525.0;
+    rkE(7)   = -1.0/40.0;
+
+<span class="keyword">return</span>;
+</pre><pre class="codeoutput error">Error using Coefficients_Dopri5 (line 57)
+Not enough input arguments.
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 )
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Filename: Coefficients_Dopri5.m
+%
+% Original Author:
+%
+% File Create Date:
+%
+% Input Arguments:
+%   Name    Type
+%   RK5     integer
+%
+% Output Arguments:
+%   Name        Type 
+%   erkMethod   integer
+%   rkELO       double
+%   rkS         integer
+%   erkName     string
+%
+% Modification History:
+%   Date        Developer         Email             Action  
+%   7/17/2012   Tony D'Augustine  adaug13@vt.edu    Translated Fortran90 Dopri5() method into MATLAB.
+%
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Coefficients_Dopri5:
+%   Initializes coefficients for the Dopri5 Explict Runge-Kutta method.
+%       
+%       Stages  Order
+%       7       5
+%
+% Coefficients_Dopri5: INPUT ARGUMENTS
+%   RK5 (integer):
+%
+% Coefficients_Dopri5: OUTPUT ARGUMENTS
+%   erkMethod (integer):
+%        rkELO (double):
+%         rkS (integer):
+%      erkName (string):
+%
+% Coefficients_Dopri5: GLOBAL VARIABLES
+%   rkA (double):
+%   rkB (double):
+%   rkC (double):
+%   rkD (double):
+%
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%%
+% Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+% Computational Science Laboratory, Virginia Tech.
+% ©2015 Virginia Tech Intellectual Properties, Inc.
+%%
+    global rkA rkB rkC rkE
+    
+    % Clear all global variables to ensire correct matrix size and values.
+    rkA = []; rkB = []; rkC = []; rkE =[];
+
+    erkMethod = RK5;
+    erkELO = 6.0;
+    erkS = 7;
+%     erkS = 6;
+    erkName = 'Dopri5';
+
+    rkA(1,1) = 0; 
+    rkA(1,2) = 0; 
+    rkA(1,3) = 0; 
+    rkA(1,4) = 0; 
+    rkA(1,5) = 0;
+    rkA(1,6) = 0; 
+    rkA(1,7) = 0;
+
+    rkA(2,1) = .2;
+    rkA(2,2) = 0; 
+    rkA(2,3) = 0; 
+    rkA(2,4) = 0;
+    rkA(2,5) = 0;
+    rkA(2,6) = 0;
+    rkA(2,7) = 0;
+
+    rkA(3,1) = 3.0/40.0;
+    rkA(3,2) = 9.0/40.0;
+    rkA(3,3) = 0;
+    rkA(3,4) = 0;
+    rkA(3,5) = 0;
+    rkA(3,6) = 0;
+    rkA(3,7) = 0;
+
+    rkA(4,1) = 44.0/45.0;
+    rkA(4,2) = -56.0/15.0;
+    rkA(4,3) = 32.0/9.0;
+    rkA(4,4) = 0;
+    rkA(4,5) = 0;
+    rkA(4,6) = 0;
+    rkA(4,7) = 0;
+
+    rkA(5,1) = 19372.0/6561.0;
+    rkA(5,2) = -25360.0/2187.0;
+    rkA(5,3) = 64448.0/6561.0;
+    rkA(5,4) = -212.0/729.0;
+    rkA(5,5) = 0;
+    rkA(5,6) = 0;
+    rkA(5,7) = 0;
+
+    rkA(6,1) = 9017.0 / 3168.0;
+    rkA(6,2) = -355.0 / 33.0;
+    rkA(6,3) = 46732.0 / 5247.0;
+    rkA(6,4) = 49.0 / 176.0;
+    rkA(6,5) = -5103.0 / 18656.0;
+    rkA(6,6) = 0;
+    rkA(6,7) = 0;
+
+    rkA(7,1) = 35.0 / 384.0;
+    rkA(7,2) = 0;
+    rkA(7,3) = 500.0 / 1113.0;
+    rkA(7,4) = 125.0 / 192.0;
+    rkA(7,5) = -2187.0 / 6784.0;
+    rkA(7,6) = 11.0 / 84.0;
+    rkA(7,7) = 0;
+
+%     rkA(1,1) = .2;
+%     rkA(1,2) = 0; 
+%     rkA(1,3) = 0; 
+%     rkA(1,4) = 0;
+%     rkA(1,5) = 0;
+%     rkA(1,6) = 0;
+%     rkA(1,7) = 0;
+% 
+%     rkA(2,1) = 3.0/40.0;
+%     rkA(2,2) = 9.0/40.0;
+%     rkA(2,3) = 0;
+%     rkA(2,4) = 0;
+%     rkA(2,5) = 0;
+%     rkA(2,6) = 0;
+%     rkA(2,7) = 0;
+% 
+%     rkA(3,1) = 44.0/45.0;
+%     rkA(3,2) = -56.0/15.0;
+%     rkA(3,3) = 32.0/9.0;
+%     rkA(3,4) = 0;
+%     rkA(3,5) = 0;
+%     rkA(3,6) = 0;
+%     rkA(3,7) = 0;
+% 
+%     rkA(4,1) = 19372.0/6561.0;
+%     rkA(4,2) = -25360.0/2187.0;
+%     rkA(4,3) = 64448.0/6561.0;
+%     rkA(4,4) = -212.0/729.0;
+%     rkA(4,5) = 0;
+%     rkA(4,6) = 0;
+%     rkA(4,7) = 0;
+% 
+%     rkA(5,1) = 9017.0 / 3168.0;
+%     rkA(5,2) = -355.0 / 33.0;
+%     rkA(5,3) = 46732.0 / 5247.0;
+%     rkA(5,4) = 49.0 / 176.0;
+%     rkA(5,5) = -5103.0 / 18656.0;
+%     rkA(5,6) = 0;
+%     rkA(5,7) = 0;
+% 
+%     rkA(6,1) = 35.0 / 384.0;
+%     rkA(6,2) = 0;
+%     rkA(6,3) = 500.0 / 1113.0;
+%     rkA(6,4) = 125.0 / 192.0;
+%     rkA(6,5) = -2187.0 / 6784.0;
+%     rkA(6,6) = 11.0 / 84.0;
+%     rkA(6,7) = 0;
+
+%    rkB   = rkA(6,:);              
+    rkB   = rkA(7,:);              
+
+    rkC(1)   = 0.0;
+    rkC(2)   = .20;
+    rkC(3)   = .30;
+    rkC(4)   = .80;
+    rkC(5)   = 8.0/9.0;
+    rkC(6)   = 1.0;
+    rkC(7)   = 1.0;
+
+    rkE(1)   = 71.0/57600.0;
+    rkE(2)   = 0;
+    rkE(3)   = -71.0/16695.0;
+    rkE(4)   = 71.0/1920.0;
+    rkE(5)   = -17253.0/339200.0;
+    rkE(6)   = 22.0/525.0;
+    rkE(7)   = -1.0/40.0;
+
+return;
+
+
+##### SOURCE END #####
+--></body></html>

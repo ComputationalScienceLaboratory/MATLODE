@@ -1,0 +1,869 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLODE_OPTIONS</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-05"><meta name="DC.source" content="MATLODE_OPTIONS.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLODE_OPTIONS</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#12">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>          MATLODE_OPTIONS
+Options = MATLODE_OPTIONS('key1',value1,'key2',value2,...,'keyN',valueN)
+Options = MATLODE_OPTIONS(Options,'key1',value1,'key2',value2,...,'keyN',valueN)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>'key'</tt> specifies which configuration parameter to assign <tt>value</tt> to.</p><p><tt>value</tt> is the value assigned to <tt>'key'</tt> in the <i>('key',value)</i> option struc.</p><p><tt>Options</tt> is the option configuration <i>('key',value)</i> struct.</p><h2>Output Parameters<a name="3"></a></h2><p><tt>Options</tt> is the option configuration <i>('key',value)</i> struct.</p><h2>Description<a name="4"></a></h2><p>A <i>('key',value)</i> pair option structure for fine tuning MATLODE's library of ordinary differential equation integrators.</p><p><tt>MATLODE_OPTIONS</tt> displays ALL the option configuration parameter descriptions.</p><p><tt>Options = MATLODE_OPTIONS('key1',value1,'key2',value2,...,'keyN',valueN)</tt></p><p><tt>Options = MATLODE_OPTIONS(Options,'key1',value1,'key2',value2,...,'keyN',valueN)</tt></p><h2>Example<a name="5"></a></h2><p>To create a new option struct specifying the absolute and relative tolerance, pass the appropriate <i>('key',value)</i> to <tt>MATLODE_OPTIONS</tt>.</p><pre class="language-matlab">Options = MATLODE_OPTIONS(<span class="string">'AbsTol'</span>,1e-5,<span class="string">'RelTol'</span>,1e-5);
+</pre><p>To alter the option struct, pass the struct as the first parameter.</p><pre>Options = MATLODE_OPTIONS(Options,'NBasisVectors',4);</pre><h2>Contact Information<a name="6"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="10"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><h2>Major Modification History<a name="12"></a></h2><p>
+<table border=1>
+  <tr>
+      <td><b>Date</b></td>
+      <td>Developer</td>
+      <td>Email</td>
+      <td>Action</td>
+  </tr>
+  <tr>
+      <td>1/1/2014</td>
+      <td>Tony D'Augustine</td>
+      <td>adaug13@vt,edu</td>
+      <td>Release MATLODE</td>
+  </tr>
+</table>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLODE_OPTIONS
+%
+%% Syntax
+%            MATLODE_OPTIONS
+%  Options = MATLODE_OPTIONS('key1',value1,'key2',value2,...,'keyN',valueN)
+%  Options = MATLODE_OPTIONS(Options,'key1',value1,'key2',value2,...,'keyN',valueN)
+%
+%% Input Parameters
+%
+% |'key'| specifies which configuration parameter to assign |value| to.
+%
+% |value| is the value assigned to |'key'| in the _('key',value)_ option
+% struc.
+%
+% |Options| is the option configuration _('key',value)_ struct.
+%
+%% Output Parameters
+% |Options| is the option configuration _('key',value)_ struct.
+%
+%% Description
+% A _('key',value)_ pair option structure for fine tuning MATLODE's library
+% of ordinary differential equation integrators.
+%
+% |MATLODE_OPTIONS| displays ALL the option configuration parameter
+% descriptions.
+%
+% |Options = MATLODE_OPTIONS('key1',value1,'key2',value2,...,'keyN',valueN)|
+%
+% |Options = MATLODE_OPTIONS(Options,'key1',value1,'key2',value2,...,'keyN',valueN)|
+%
+%% Example
+% To create a new option struct specifying the absolute and relative
+% tolerance, pass the appropriate _('key',value)_ to |MATLODE_OPTIONS|.
+%
+%   Options = MATLODE_OPTIONS('AbsTol',1e-5,'RelTol',1e-5);
+%
+% To alter the option struct, pass the struct as the first parameter. 
+%
+%  Options = MATLODE_OPTIONS(Options,'NBasisVectors',4);
+%
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+function options = MATLODE_OPTIONS(varargin)
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%   Add option descriptions here so you don't have to change all cases
+%   individually
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    AbsTol_str          = '         AbsTol: [ Absolute error tolerance for Forward integrators. ]\n';
+    AbsTol_ADJ_str      = '     AbsTol_ADJ: [ Absolute Newton iteration tolerance for solving adjoint system. ]\n';
+    AbsTol_TLM_str      = '     AbsTol_TLM: [ Absolute error estimation for TLM at Newton stages. ]\n';
+    Autonomous_str      = '     Autonomous: [ ]\n';
+    ChunkSize_str       = '      ChunkSize: [ Appended memory block size ]\n';
+    DirectADJ_str       = '      DirectADJ: [ Determines whether direct adjoint sensitivity analysis is performed. ]\n';
+    DirectTLM_str       = '      DirectTLM: [ Determines whether direct tangent linear sensitivity analysis is performed. ]\n';
+    displayStats_str    = '   displayStats: [ Determines whether statistics are displayed ]\n';
+    displaySteps_str    = '   displaySteps: [ Determines whether steps are displayed ]\n';
+    DRDP_str            = '           DRDP: [ User defined function: Derivative of r w.r.t. parameters. ]\n';
+    DRDY_str            = '           DRDY: [ User defined function: Derivative of r w.r.t. y vector. ]\n';
+    FacMax_str          = '         FacMax: [ Step size upper bound change ratio. ]\n';
+    FacMin_str          = '         FacMin: [ Step size lower bound change ratio. ]\n';
+    FacRej_str          = '         FacRej: [ Decrease step size factor after two successive rejections. ]\n';
+    FacSafe_str         = '        FacSafe: [ Factor by which the new step is slightly smaller than the predicted value. ]\n';
+    FDAprox_str         = '        FDAprox: [ Determines whether Jacobian Vector products by finite difference is used. ]\n';
+    Gustafsson_str      = '     Gustafsson: [ An alternative error controller approach which may be advantageous depending on the model characteristics. ]\n';
+    Hess_vec_str        = '       Hess_vec: [ User defined function: H * v ]\n';
+    Hesstr_vec_str      = '     Hesstr_vec: [ User defined function: H^T * v ]\n';
+    Hesstr_vec_f_py_str = 'Hesstr_vec_f_py: [ User defined function: (d(f_p^T * u)/dy) * k ]\n';
+    Hesstr_vec_r_str    = '   Hesstr_vec_r: [ User defined function: (d(r_y^T * u)/dy) * k ]\n';
+    Hesstr_vec_r_py_str = 'Hesstr_vec_r_py: [ User defined function: (d(r_p^T *u)/dy) *k ]\n';
+    Hmax_str            = '           Hmax: [ Step size upper bound. ]\n';
+    Hmin_str            = '           Hmin: [ Step size lower bound. ]\n';
+    Hstart_str          = '         Hstart: [ Initial step size. ]\n';
+    ITOL_str            = '           ITOL: [ Depreciated: Determines whether tolerances are vector or scalar ]\n';
+    Jacobian_str        = '       Jacobian: [ User defined function: Jacobian ]\n';
+    Jacp_str            = '           Jacp: [ User defined function: df/dp ]\n';
+    Lambda_str          = '         Lambda: [ Adjoint sensitivity matrix ]\n';
+    MatrixFree_str      = '     MatrixFree: [ Determines whether Jacobian is approximated ]\n';
+    Max_no_steps_str    = '   Max_no_steps: [ Maximum number of steps upper bound ]\n';
+    Method_str          = '         Method: [ Determines which coefficients to use ]\n';
+    Mu_str              = '             Mu: [ Mu vector for sensitivity analysis ]\n';
+    NADJ_str            = '           NADJ: [ Depreciated: The number of cost functionals for which adjoints are evaluated simultaneously ]\n';
+    NBasisVectors       = '  NBasisVectors: [ Number of basis vectors ] \n';
+    NewtonMaxit_str     = '    NewtonMaxIt: [ Maximum number of newton iterations performed ]\n';
+    NewtonTol_str       = '      NewtonTol: [ Newtons method stopping criterion. ]\n';
+    NP_str              = '             NP: [ Number of parameters ]\n';
+    NTLM_str            = '           NTLM: [ Depreciated: The number of tangent linear sensitivity coefficients ]\n';
+    QFun_str            = '           QFun: [ User defined function: r function ]\n';
+    Qmax_str            = '           Qmax: [ Predicted step size to current step size upper bound ratio. ]\n';
+    Qmin_str            = '           Qmin: [ Predicted step size to current step size lower bound ratio. ]\n';
+    Quadrature_str      = '     Quadrature: [ Initial quadrature ]\n';
+    RelTol_str          = '         RelTol: [ Relative error tolerance ]\n';
+    RelTol_ADJ_str      = '     RelTol_ADJ: [ Relative Newton iteration tolerance for solving adjoint system. ]\n';
+    RelTol_TLM_str      = '     RelTol_TLM: [ Relative error estimation for TLM at Newton stages ]\n';
+    SaveLU_str          = '         SaveLU: [ Determines whether to save during LU factorization ]\n';
+    SdirkError_str      = '     SdirkError: [ Alternative error criterion ]\n';
+    StartNewton_str     = '    StartNewton: [ Determines whether newton iterations are performed ]\n';    
+    storeCheckpoint_str = 'storeCheckpoint: [ Determines whether intermediate values are stored ]\n';
+    ThetaMin_str        = '       ThetaMin: [ Factor deciding whether the Jacobian should be recomputed. ]\n';
+    TLMNewtonEst_str    = '   TLMNewtonEst: [ Determines whether to user a tangent linear scaling factor in newton interation ]\n';
+    TLMtruncErr_str     = '    TLMtruncErr: [ Determiens whether to incorpate sensitivity truncation error ]\n';
+    WarningConfig_str   = '  WarningConfig: [ Determines whether warning messages are displayed during option configuration. ]\n';
+    Y_TLM_str           = '          Y_TLM: [ Contains the sensitivities of Y with respect to the specified coefficients ]\n';
+
+% Print out all possible values of properties.
+if (nargin == 0) && (nargout == 0)
+    fprintf( AbsTol_str );
+    fprintf( AbsTol_ADJ_str );
+    fprintf( AbsTol_TLM_str ); 
+    fprintf( Autonomous_str );
+    fprintf( ChunkSize_str );
+        
+    fprintf( DirectADJ_str );
+    fprintf( DirectTLM_str );
+    fprintf( displayStats_str );
+    fprintf( displaySteps_str );   
+    fprintf( DRDP_str );
+    fprintf( DRDY_str );     
+    fprintf( FacMax_str );
+    fprintf( FacMin_str );
+    fprintf( FacRej_str );
+    fprintf( FacSafe_str );
+    fprintf( FDAprox_str );
+    fprintf( Gustafsson_str );
+    fprintf( Hess_vec_str );  
+    fprintf( Hesstr_vec_str );    
+    fprintf( Hesstr_vec_f_py_str );
+    fprintf( Hesstr_vec_r_str );    
+    fprintf( Hesstr_vec_r_py_str );
+    fprintf( Hmax_str );
+    fprintf( Hmin_str );
+    fprintf( Hstart_str );
+    fprintf( ITOL_str );    
+    fprintf( Jacobian_str );    
+    fprintf( Jacp_str );    
+    fprintf( Lambda_str );
+    fprintf( MatrixFree_str );
+    fprintf( Max_no_steps_str );
+    fprintf( Method_str );
+    fprintf( Mu_str );    
+    fprintf( NADJ_str );  
+    fprintf( NBasisVectors );
+    fprintf( NewtonMaxit_str );
+    fprintf( NewtonTol_str );
+    fprintf( NP_str );
+    fprintf( NTLM_str );      
+    fprintf( QFun_str );    
+    fprintf( Qmax_str );
+    fprintf( Qmin_str );
+    fprintf( Quadrature_str );    
+    fprintf( RelTol_str );
+    fprintf( RelTol_ADJ_str );
+    fprintf( RelTol_TLM_str );    
+    fprintf( SaveLU_str );
+    fprintf( SdirkError_str );
+    fprintf( StartNewton_str );
+    fprintf( storeCheckpoint_str );    
+    fprintf( ThetaMin_str );        
+    fprintf( TLMNewtonEst_str );
+    fprintf( TLMtruncErr_str );
+    fprintf( WarningConfig_str );
+    fprintf( Y_TLM_str );    
+    fprintf( '\n' );
+  return;
+end
+
+% print out family or implementation specific properties
+if (nargin == 1) && (nargout == 0)
+    firstArg = varargin{1};
+    switch ( firstArg )
+        case 'ERK'
+            fprintf( '\n' );
+            fprintf( AbsTol_str );
+            fprintf( AbsTol_ADJ_str );
+            fprintf( AbsTol_TLM_str );
+            fprintf( ChunkSize_str );
+            
+            fprintf( displayStats_str );
+            fprintf( displaySteps_str );
+            fprintf( DRDP_str );
+            fprintf( DRDY_str );
+            fprintf( FacMax_str );
+            fprintf( FacMin_str );
+            fprintf( FacRej_str );
+            fprintf( FacSafe_str);
+            fprintf( Hmax_str );
+            fprintf( Hmin_str );
+            fprintf( Hstart_str );
+            fprintf( ITOL_str );
+            fprintf( Jacobian_str );
+            fprintf( Jacp_str );
+            fprintf( Lambda_str );
+            fprintf( Max_no_steps_str );
+            fprintf( Method_str );
+            fprintf( Mu_str );
+            fprintf( QFun_str );
+            fprintf( Quadrature_str );
+            fprintf( RelTol_str );
+            fprintf( RelTol_TLM_str );
+            fprintf( storeCheckpoint_str );
+            fprintf( TLMtruncErr_str );
+            fprintf( WarningConfig_str );
+            fprintf( Y_TLM_str );
+            fprintf( '\n' );
+        case 'RK'
+        case 'ROS'
+        case 'SDIRK'
+        case 'FWD'
+        case 'TLM'
+        case 'ADJ'
+        otherwise
+            disp('ERROR_1: see fatOde_OPTIONS_Set');
+    end
+    return;
+end
+
+if (nargin == 2) && (nargout == 0)
+    firstArg = varargin{1};
+    secondArg = varargin{2};
+    if ( strcmp(firstArg,'ERK') ||  strcmp(firstArg,'RK') ||  strcmp(firstArg,'ROS') ||  strcmp(firstArg,'SDIRK') )
+        if ( strcmp(secondArg,'FWD') || strcmp(secondArg,'TLM') || strcmp(secondArg,'ADJ') )
+            family = firstArg;
+            implementation = secondArg;
+        else
+            error('Internal Error: Input parameters must be (family,implementation) or (implementation,family)');
+        end
+    elseif ( strcmp(secondArg,'ERK') ||  strcmp(secondArg,'RK') ||  strcmp(secondArg,'ROS') ||  strcmp(secondArg,'SDIRK') )
+        if ( strcmp(firstArg,'FWD') || strcmp(firstArg,'TLM') || strcmp(firstArg,'ADJ') ) 
+            family = secondArg;
+            implementation = firstArg;
+        else
+            error('Internal Error: Input parameters must be (family,implementation) or (implementation,family)');
+        end
+    end
+    
+    switch ( family )
+        case 'ERK'
+            switch ( implementation )
+                case 'FWD'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( ChunkSize_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( RelTol_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                case 'TLM'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_TLM_str );
+                    fprintf( ChunkSize_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( FDAprox_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( RelTol_str );
+                    fprintf( RelTol_TLM_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( TLMtruncErr_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( Y_TLM_str );
+                    fprintf( '\n' );
+                case 'ADJ'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_ADJ_str );
+                    fprintf( ChunkSize_str );
+                    
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( DRDP_str );
+                    fprintf( DRDY_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Jacp_str );
+                    fprintf( Lambda_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( Mu_str );
+                    fprintf( QFun_str );
+                    fprintf( Quadrature_str );
+                    fprintf( RelTol_str );
+                    fprintf( RelTol_ADJ_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                otherwise
+                    error('Input parameter implementation is invalid. This error should never occur.');
+            end
+        case 'RK'
+            switch ( implementation )
+                case 'FWD'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( ChunkSize_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );                    
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );                    
+                    fprintf( Gustafsson_str );                    
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );                    
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( NewtonMaxit_str );
+                    fprintf( NewtonTol_str );
+                    fprintf( Qmax_str );
+                    fprintf( Qmin_str );                     
+                    fprintf( RelTol_str );
+                    fprintf( RelTol_TLM_str );                   
+                    fprintf( SdirkError_str );
+                    fprintf( StartNewton_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( ThetaMin_str );
+                    fprintf( '\n' );
+                case 'TLM'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_TLM_str );
+                    fprintf( ChunkSize_str );
+                    fprintf( DirectTLM_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Gustafsson_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( NewtonMaxit_str );
+                    fprintf( NewtonTol_str );
+                    fprintf( Qmax_str );
+                    fprintf( Qmin_str );
+                    fprintf( RelTol_str );
+                    fprintf( RelTol_TLM_str );
+                    fprintf( SdirkError_str );
+                    fprintf( StartNewton_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( ThetaMin_str );
+                    fprintf( TLMNewtonEst_str );
+                    fprintf( TLMtruncErr_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( Y_TLM_str );
+                    fprintf( '\n' );
+                case 'ADJ'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_ADJ_str );
+                    fprintf( ChunkSize_str );
+                    
+                    fprintf( DirectADJ_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );  
+                    fprintf( DRDP_str );
+                    fprintf( DRDY_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Gustafsson_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );                    
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Jacp_str );
+                    fprintf( Lambda_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( Mu_str );
+                    fprintf( NewtonMaxit_str );
+                    fprintf( QFun_str );
+                    fprintf( Qmax_str );
+                    fprintf( Qmin_str );
+                    fprintf( Quadrature_str );                    
+                    fprintf( RelTol_str );
+                    fprintf( SaveLU_str );
+                    fprintf( SdirkError_str );                    
+                    fprintf( StartNewton_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                otherwise
+                    error('Input parameter implementation is invalid. This error should never occur.');
+            end            
+        case 'ROS'
+            switch ( implementation )
+                case 'FWD'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );                    
+                    fprintf( ChunkSize_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( RelTol_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                case 'TLM'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_TLM_str );
+                    fprintf( ChunkSize_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( RelTol_str );
+                    fprintf( RelTol_TLM_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( TLMtruncErr_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( Y_TLM_str );
+                    fprintf( '\n' );
+                case 'ADJ'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_ADJ_str );
+                    fprintf( ChunkSize_str );
+                    
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( DRDP_str );
+                    fprintf( DRDY_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );
+                    fprintf( Hess_vec_str );
+                    fprintf( Hesstr_vec_str );
+                    fprintf( Hesstr_vec_f_py_str );
+                    fprintf( Hesstr_vec_r_str );
+                    fprintf( Hesstr_vec_r_py_str );
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );                    
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Jacp_str );
+                    fprintf( Lambda_str );                    
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( Mu_str );
+                    fprintf( QFun_str );
+                    fprintf( Quadrature_str );                    
+                    fprintf( RelTol_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                otherwise
+                    error('Input parameter implementation is invalid. This error should never occur.');
+            end            
+        case 'SDIRK'
+            switch ( implementation )
+                case 'FWD'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );                    
+                    fprintf( ChunkSize_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );                    
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );                    
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( MatrixFree_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( NewtonMaxit_str );
+                    fprintf( Qmax_str );
+                    fprintf( Qmin_str );
+                    fprintf( RelTol_str );
+                    fprintf( StartNewton_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( ThetaMin_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                case 'TLM'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_TLM_str );
+                    fprintf( ChunkSize_str );
+                    fprintf( DirectTLM_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );                    
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );                    
+                    fprintf( ITOL_str );
+                    fprintf( Jacobian_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( NewtonMaxit_str );
+                    fprintf( RelTol_str );
+                    fprintf( RelTol_TLM_str );
+                    fprintf( StartNewton_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( TLMNewtonEst_str );
+                    fprintf( TLMtruncErr_str ); 
+                    fprintf( WarningConfig_str );
+                    fprintf( Y_TLM_str );
+                    fprintf( '\n' );
+                case 'ADJ'
+                    fprintf( '\n' );
+                    fprintf( AbsTol_str );
+                    fprintf( AbsTol_ADJ_str );
+                    fprintf( ChunkSize_str );
+                    
+                    fprintf( DirectADJ_str );
+                    fprintf( displayStats_str );
+                    fprintf( displaySteps_str );
+                    fprintf( DRDP_str );
+                    fprintf( DRDY_str );
+                    fprintf( FacMax_str );
+                    fprintf( FacMin_str );
+                    fprintf( FacRej_str );
+                    fprintf( FacSafe_str );                    
+                    fprintf( Hmax_str );
+                    fprintf( Hmin_str );
+                    fprintf( Hstart_str );                    
+                    fprintf( ITOL_str );
+                    fprintf( Lambda_str );                    
+                    fprintf( Jacobian_str );
+                    fprintf( Jacp_str );
+                    fprintf( MatrixFree_str );
+                    fprintf( Max_no_steps_str );
+                    fprintf( Method_str );
+                    fprintf( Mu_str );
+                    fprintf( NewtonMaxit_str );
+                    fprintf( QFun_str );
+                    fprintf( Quadrature_str );                    
+                    fprintf( RelTol_str );
+                    fprintf( SaveLU_str );
+                    fprintf( StartNewton_str );
+                    fprintf( storeCheckpoint_str );
+                    fprintf( WarningConfig_str );
+                    fprintf( '\n' );
+                otherwise
+                    error('Input parameter implementation is invalid. This error should never occur.');
+            end            
+        otherwise
+            error('Input parameter family is invalid. This error should never occur.');
+    end
+        
+    return;
+end
+
+Names = [
+    'AbsTol           '
+    'AbsTol_ADJ       '
+    'AbsTol_TLM       '
+    'Autonomous       '
+    'ChunkSize        '
+    'Desired_Mode     '
+    'DirectADJ        '
+    'DirectTLM        '
+    'displayStats     '
+    'displaySteps     '
+    'DRDP             '
+    'DRDY             '
+    'FacMax           '
+    'FacMin           '
+    'FacRej           '
+    'FacSafe          '
+    'FDAprox          '
+    'FDIncrement      '
+    'GMRES_TOL        '
+    'Gustafsson       '
+    'Hess_vec         '
+    'Hesstr_vec       '
+    'Hesstr_vec_f_py  '
+    'Hesstr_vec_r     '     
+    'Hesstr_vec_r_py  '
+    'Hmax             '
+    'Hmin             '
+    'Hstart           '
+    'Jacp             '
+    'TLMNewtonEst     '
+    'ITOL             '
+    'Jacobian         '
+    'Lambda           '
+    'MatrixFree       '
+    'Max_no_steps     '
+    'Method           '
+    'Mu               '
+    'NADJ             '
+    'NBasisVectors    '
+    'NewtonMaxIt      '
+    'NewtonTol        '
+    'NP               '
+    'NTLM             '
+    'QFun             '
+    'Qmax             '
+    'Qmin             '
+    'Quadrature       '
+    'RelTol           '
+    'RelTol_ADJ       '
+    'RelTol_TLM       '
+    'SaveLU           '
+    'SdirkError       '
+    'OneStepIntegrator'
+    'storeCheckpoint  '
+    'StartNewton      '
+    'ThetaMin         '
+    'TLMTruncErr      '
+    'WarningConfig    '
+    'Y_TLM            '
+    ];
+m = size(Names,1);
+names = lower(Names);
+
+% Combine all leading options structures o1, o2, ... in odeset(o1,o2,...).
+options = [];
+for j = 1:m
+  options.(deblank(Names(j,:))) = [];
+end
+i = 1;
+while i <= nargin
+  arg = varargin{i};
+  if ischar(arg)                         % arg is an option name
+    break;
+  end
+  if ~isempty(arg)                      % [] is a valid options argument
+    if ~isa(arg,'struct')
+      error(message('MATLAB:odeset:NoPropNameOrStruct', i));
+    end
+    for j = 1:m
+      if any(strcmp(fieldnames(arg),deblank(Names(j,:))))
+        val = arg.(deblank(Names(j,:)));
+      else
+        val = [];
+      end
+      if ~isempty(val)
+        options.(deblank(Names(j,:))) = val;
+      end
+    end
+  end
+  i = i + 1;
+end
+
+% A finite state machine to parse name-value pairs.
+if rem(nargin-i+1,2) ~= 0
+  error(message('MATLAB:odeset:ArgNameValueMismatch'));
+end
+expectval = 0;                          % start expecting a name, not a value
+while i <= nargin
+  arg = varargin{i};
+    
+  if ~expectval
+    if ~ischar(arg)
+      error(message('MATLAB:odeset:NoPropName', i));
+    end
+    
+    lowArg = lower(arg);
+    j = strmatch(lowArg,names);
+    if isempty(j)                       % if no matches
+      error(message('MATLAB:odeset:InvalidPropName', arg));
+    elseif length(j) > 1                % if more than one match
+      % Check for any exact matches (in case any names are subsets of others)
+      k = strmatch(lowArg,names,'exact');
+      if length(k) == 1
+        j = k;
+      else
+            matches = deblank(Names(j(1),:));
+        for k = j(2:length(j))'
+                matches = [matches ', ' deblank(Names(k,:))]; %#ok<AGROW>
+        end
+            error(message('MATLAB:odeset:AmbiguousPropName',arg,matches));
+      end
+    end
+    expectval = 1;                      % we expect a value next
+    
+  else
+    options.(deblank(Names(j,:))) = arg;
+    expectval = 0;
+      
+  end
+  i = i + 1;
+end
+
+if expectval
+  error(message('MATLAB:odeset:NoValueForProp', arg));
+end
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt,edu</td>
+%       <td>Release MATLODE</td>
+%   </tr>
+% </table>
+% </html>
+% 
+
+##### SOURCE END #####
+--></body></html>

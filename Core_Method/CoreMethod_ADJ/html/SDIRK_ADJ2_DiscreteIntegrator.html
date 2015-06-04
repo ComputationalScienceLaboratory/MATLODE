@@ -1,0 +1,354 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>SDIRK_ADJ2_DiscreteIntegrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-06"><meta name="DC.source" content="SDIRK_ADJ2_DiscreteIntegrator.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>SDIRK_ADJ2_DiscreteIntegrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p> Up: <a href="../../../Library/html/Library.html">Library</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Contact Information</a></li><li><a href="#9">Reference</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>  [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_ADJ2_DiscreteIntegrator( OdeFunction, Tspan, Y, OPTIONS, Coefficient, stack_ptr )</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>OdeFunction</tt>: ODE function function handle</p><p><tt>Tspan</tt>: Time interval</p><p><tt>OPTIONS</tt>: Option struct</p><p><tt>Coefficients</tt>: Constant coefficients associated with method</p><p><tt>stack_ptr</tt>: pointer for global snapshot stack</p><p><tt>adjQuadFlag</tt>: Adjoint quadrature stack flag</p><h2>Output Parameters<a name="3"></a></h2><p><tt>Lambda</tt>: Sensitivity matrix</p><p><tt>ISTATUS</tt>: Integer statistics</p><p><tt>RSTATUS</tt>: Real statistics</p><p><tt>Ierr</tt>: Error flag</p><h2>Description<a name="4"></a></h2><p>Singly Diagonally Implicit Runge-Kutta discrete 2 adjoint core method.</p><h2>Contact Information<a name="5"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="9"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% SDIRK_ADJ2_DiscreteIntegrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
+%
+%% Syntax
+%    [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_ADJ2_DiscreteIntegrator( OdeFunction, Tspan, Y, OPTIONS, Coefficient, stack_ptr )
+%
+%% Input Parameters
+% |OdeFunction|: ODE function function handle
+%
+% |Tspan|: Time interval
+%
+% |OPTIONS|: Option struct
+%
+% |Coefficients|: Constant coefficients associated with method
+%
+% |stack_ptr|: pointer for global snapshot stack
+%
+% |adjQuadFlag|: Adjoint quadrature stack flag
+%
+%% Output Parameters
+% |Lambda|: Sensitivity matrix
+%
+% |ISTATUS|: Integer statistics 
+%
+% |RSTATUS|: Real statistics
+%
+% |Ierr|: Error flag
+%
+%% Description
+% Singly Diagonally Implicit Runge-Kutta discrete 2 adjoint core method.
+%
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+% [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
+%     tangent linear integration of ODEs, SIAM Journal on Scientific 
+%     Computing, 36(5), C504-C523, 2014.
+%
+function [ Lambda, ISTATUS, RSTATUS, Ierr ] = SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Global variables
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    global rkA rkB rkC
+    global rkGamma
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Local variables
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    TYindex = 1;
+    Lambda = OPTIONS.Lambda;
+    
+    SkipJac = false;
+    SkupLU = false;
+    Reject = false;
+    
+    ISTATUS = ISTATUS_Struct('default');
+    RSTATUS = RSTATUS_Struct('default');    
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Time loop begins
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    while ( stack_ptr > 0 )
+        % Recover checkpoints for stage values and vectors
+        [ T, H, Y, Z, stack_ptr ] = sdirkPop( NVAR, Coefficient.NStage, stack_ptr );
+%         Yout(:,TYindex) = Y;
+%         Tout(TYindex,1) = T;        
+%         TYindex = TYindex + 1;
+        
+        % Compute E = 1/(h*gamma)-Jac and its LU decomposition
+        if ( ~OPTIONS.SaveLU )
+            SkipJac = false;
+            SkipLU = false;
+            [ H, e1, SkipJac, SkipLU, Reject, ISTATUS, ISING ] = SDIRK_PrepareMatrix ( NVAR, H, T, Y, SkipJac, SkipLU, Reject, OPTIONS.Jacobian, ISTATUS );
+            if ( ISING ~= 0 )
+                warning('Matrix is repeatedly singular');
+            end
+        end
+        ISTATUS.Nstp = ISTATUS.Nstp + 1;
+        
+        for istage=Coefficient.NStage:-1:1
+            % Jacobian of the current solution
+            TMP = Y + Z(:,istage);
+            fjac = OPTIONS.Jacobian(T+rkC(istage)*H, TMP);
+            ISTATUS.Njac = ISTATUS.Njac + 1;
+            
+            if ( adjQuadFlag )
+                WY = OPTIONS.DRDY(T+rkC(istage),TMP);
+            end
+            
+            if ( OPTIONS.DirectADJ )
+                HGamma = 1.0/(H*rkGamma);
+                [ ISING, e1 ] = lss_decomp( NVAR, HGamma, fjac );
+                ISTATUS.Ndec = ISTATUS.Ndec + 1;
+                if ( ISING ~= 0 )
+                    str = [ 'At stage ', num2str(istage), ' the matrix used in adjoint', ...
+                        ' computation is singular' ];
+                    disp(str);
+                    warning('Matrix is repeatedly singular');
+                end
+            end
+            
+            for iadj=1:OPTIONS.NADJ
+                % Update scaling coefficients
+                SCAL = 1.0 ./ ( OPTIONS.AbsTol_ADJ + OPTIONS.RelTol_ADJ .* abs(Lambda(:,iadj)) );
+                
+                % Prepare the loop-independent part of the right-hand side
+                % G(:) = H*Jac^T*( B(i)*Lambda + sum_j A(j,i)*Uj(:) )
+                G = rkB(istage)*Lambda(:,iadj);
+                if ( istage < Coefficient.NStage )
+                    for j=istage+1:Coefficient.NStage
+                        G = G + rkA(j,istage)*U(:,iadj,j);
+                    end
+                end
+                
+                TMP = fjac'*G;
+                if ( adjQuadFlag )
+                    TMP = TMP + rkB(istage)*WY(:,iadj);
+                end
+                G = H*TMP;
+                
+                if ( OPTIONS.DirectADJ )
+                    trans = true;
+                    [ G, ISTATUS ] = SDIRK_Solve(trans, H, NVAR, e1, G, ISTATUS );
+                    U(:,iadj,istage) = G;
+                    
+                else
+                    % Initializations for Newton iterations
+                    U(:,iadj,istage) = zeros(NVAR,1,1);
+                    
+                    for NewtonIter=1:OPTIONS.NewtonMaxIt
+                        % Prepare hte loop-dependent part of the right-hand
+                        % side
+                        TMP = fjac'*U(:,iadj,istage);
+                        DU = U(:,iadj,istage) - (H*rkGamma)*TMP - G;
+                        
+                        % Solve the linear system
+                        trans = true;
+                        [ DU, ISTATUS ] = SDIRK_Solve(trans, H, NVAR, e1, DU, ISTATUS );
+                        
+                        % Check convergence of Newton iterations
+                        NewtonIncrement = errorNorm(NVAR,DU,SCAL);
+                        if ( NewtonIter == 1 ) 
+                            Theta = abs(OPTIONS.ThetaMin);
+                            NewtonRate = 2.0;
+                        else
+                            Theta = NewtonIncrement/NewtonIncrementOld;
+                            if ( Theta < 0.99 )
+                                NewtonRate = Theta/(1-Theta);
+                                % Predict error at the end of Newton process
+                                NewtonPredictedErr = NewtonIncrement*Theta^(OPTIONS.NewtonMaxIt-NewtonIter)/(1.0-Theta);
+                                
+                                % Non-convergence of Newton: predicted error too large
+                                if ( NewtonPredictedErr >= OPTIONS.NewtonTol )
+                                    break; % NewtonLoop
+                                end
+                            else % non-convergence of Newton: Theta too large
+                                break;
+                            end
+                        end
+                        NewtonIncrementOld = NewtonIncrement;
+                        
+                        % Update Solution
+                        U(:,iadj,istage) = U(:,iadj,istage) - DU;
+                        
+                        % Check error in Newton iterations
+                        NewtonDone = (NewtonRate*NewtonIncrement <= OPTIONS.NewtonTol);
+                        
+                        if ( (NewtonIter >= 4) && NewtonDone )
+                            break; % NewtonLoop
+                        end
+                        
+                    end
+                    
+                    % If Newton iterations fail emply the direct solution
+                    if ( ~NewtonDone )
+                        HGamma = 1.0/(H*rkGamma);
+                        [ ISING, e1 ] = lss_decomp( NVAR, HGamma, fjac );
+                        ISTATUS.Ndec = ISTATUS.Ndec + 1;
+                        if ( ISING ~= 0 )
+                            str = [ 'At stage ', num2str(istage), ' the matrix used in adjoint', ...
+                                ' computation is singular' ];
+                            disp(str);
+                            warning('Matrix is repeatedly singular');
+                        end
+                        trans = true;
+                        [ G, ISTATUS ] = SDIRK_Solve(trans, H, NVAR, e1, G, ISTATUS );
+                        U(:,iadj,istage) = G;
+                    end
+                    
+                end
+            end  
+        end
+        
+        % Update adjoint Solution
+        for istage=1:Coefficient.NStage
+            for iadj=1:OPTIONS.NADJ
+                Lambda(:,iadj) = Lambda(:,iadj) + U(:,iadj,istage);
+            end
+        end
+                
+    end
+    
+    % Successful return
+    Ierr = 1;
+
+return;
+
+function [ RHS, ISTATUS ] = SDIRK_Solve( Transp, H, NVAR, e1, RHS, ISTATUS )
+    
+
+    global HGammaInv rkGamma
+    
+    HGammaInv = 1.0/(H*rkGamma);
+    RHS = RHS.*HGammaInv;
+    if ( Transp == true )
+        RHS = transpose(e1)\RHS;
+    elseif ( Transp == false )
+        RHS = e1\RHS;
+    else
+        disp( 'ERROR: SDIRK_Solve (Transp)' );    
+    end
+    ISTATUS.Nsol = ISTATUS.Nsol + 1;
+
+return;
+
+function [ H, e1, SkipJac, SkipLU, Reject, ISTATUS, ISING ] = SDIRK_PrepareMatrix ( NVAR, H, T, Y, SkipJac, SkipLU, Reject, Jacobian, ISTATUS )
+
+    global HGammaInv rkGamma
+
+    ConsecutiveSng = 0;
+    ISING = 1;
+    
+    while ( ISING ~= 0 )
+        HGammaInv = 1.0/(H*rkGamma);
+        
+        if ( ~SkipJac )
+            fjac = Jacobian(T,Y);
+            ISTATUS.Njac = ISTATUS.Njac + 1;
+        end
+        [ ISING, e1 ] = lss_decomp( NVAR, HGammaInv, fjac );
+        ISTATUS.Ndec = ISTATUS.Ndec + 1;
+        
+        if ( ISING ~= 0 )
+            str = [ 'MATRIX IS SINGULAR , ISING=', num2str(ISING), ...
+                ';     T=', num2str(T), ';     H=', num2str(H) ];
+            disp(str);
+            ISTATUS.Nsng = ISTATUS.Nsng + 1;
+            ConsecutiveSng = ConsecutiveSng + 1;
+            if ( ConsecutiveSng >= 6 )
+                return; % Failure
+            end
+            H = 0.5*H;
+            SkipJac = false;
+            SkipLU = false;
+            Reject = true;
+        end
+    end
+    
+return; 
+
+##### SOURCE END #####
+--></body></html>
