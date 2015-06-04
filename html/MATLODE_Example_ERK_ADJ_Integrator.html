@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_Example_ERK_ADJ_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_Example_ERK_ADJ_Integrator.m"><style type="text/css">
+      --><title>MATLODE_Example_ERK_ADJ_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-04"><meta name="DC.source" content="MATLODE_Example_ERK_ADJ_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -90,11 +90,11 @@ disp(Y(end,:));
 disp(<span class="string">'sensitivity at Time_Interval(2)'</span>);
 disp(Sens);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.915917919541740  -0.071517190084573
+    1.9159   -0.0715
 
 sensitivity at Time_Interval(2)
-   1.407593904619354   0.120981445147537
-   0.046975605274666   0.004037511525276
+    1.4076    0.1210
+    0.0470    0.0040
 
 </pre><h2>Advanced Features<a name="4"></a></h2><p>Calculating Mu and Quadrature depends on the input parameters to the option struct. Below are three examples illustrating the required input parameters to obtain the desired output.</p><p><b>Example 1:</b> Mu: false | Quadrature: true</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda,<span class="string">'Quadrature'</span>,Ode_Quadrature,<span class="string">'QFun'</span>,Ode_QFun,<span class="string">'DRDY'</span>,Ode_DRDY);
 [ ~, Y, Sens, Quad, ~ ] = MATLODE_ERK_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
@@ -105,15 +105,15 @@ disp(Sens);
 disp(<span class="string">'quadrature at Time_Interval(2)'</span>);
 disp(Quad);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.915917919541740  -0.071517190084573
+    1.9159   -0.0715
 
 sensitivity at Time_Interval(2)
-  -0.270970492866846   0.528575349766836
-  -0.010176365399861   0.051013116799940
+   -0.2710    0.5286
+   -0.0102    0.0510
 
 quadrature at Time_Interval(2)
-   3.582025228523746
-  -0.146837597447187
+    3.5820
+   -0.1468
 
 </pre><p><b>Example 2:</b> Mu: true | Quadrature: false</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda,<span class="string">'Jacp'</span>,Ode_Jacp,<span class="string">'Mu'</span>,Ode_Mu);
 [ ~, Y, Sens, ~, Mu ] = MATLODE_ERK_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
@@ -124,14 +124,14 @@ disp(Sens);
 disp(<span class="string">'mu at Time_Interval(2)'</span>);
 disp(Mu);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.915917919541740  -0.071517190084573
+    1.9159   -0.0715
 
 sensitivity at Time_Interval(2)
-   1.407593904619354   0.120981445147537
-   0.046975605274666   0.004037511525276
+    1.4076    0.1210
+    0.0470    0.0040
 
 mu at Time_Interval(2)
-   0.147526470413483   0.019899119504068
+    0.1475    0.0199
 
 </pre><p><b>Example 3:</b> Mu: true | Quadrature: true</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'Jacobian'</span>,Ode_Jacobian,<span class="string">'Lambda'</span>,Ode_Lambda,<span class="string">'Jacp'</span>,Ode_Jacp,<span class="string">'Mu'</span>,Ode_Mu,<span class="string">'Quadrature'</span>,Ode_Quadrature,<span class="string">'QFun'</span>,Ode_QFun,<span class="string">'DRDY'</span>,Ode_DRDY,<span class="string">'DRDP'</span>,Ode_DRDP);
 [ ~, Y, Sens, Quad, Mu ] = MATLODE_ERK_ADJ_Integrator(Ode_Function,Time_Interval,Y0,Options);
@@ -144,20 +144,22 @@ disp(Quad);
 disp(<span class="string">'mu at Time_Interval(2)'</span>);
 disp(Mu);
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-   1.915917919541740  -0.071517190084573
+    1.9159   -0.0715
 
 sensitivity at Time_Interval(2)
-  -0.270970492866846   0.528575349766836
-  -0.010176365399861   0.051013116799940
+   -0.2710    0.5286
+   -0.0102    0.0510
 
 quadrature at Time_Interval(2)
-   3.582025228523746
-  -0.146837597447187
+    3.5820
+   -0.1468
 
 mu at Time_Interval(2)
-  -2.905989528485228   0.167425589917545
+   -2.9060    0.1674
 
-</pre><p>Copyright 2015 Computational Science Laboratory</p><p>
+</pre><pre>Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+Computational Science Laboratory, Virginia Tech.
+&copy;2015 Virginia Tech Intellectual Properties, Inc.</pre><p>
   <div>
       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
   </div>
@@ -260,7 +262,10 @@ disp('mu at Time_Interval(2)');
 disp(Mu);
 
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 
 %%
 % <html>

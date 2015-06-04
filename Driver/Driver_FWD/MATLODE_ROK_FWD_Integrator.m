@@ -82,7 +82,12 @@
 % [2] P. Tranquilli and A. Sandu, 'Rosenbrock-Krylov Methods for Large
 %     Systems of Differential Equations,' SIAM Journal on Scientific 
 %     Computing 36(3), A1313–A1338 
-% 
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function  [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_ROK_FWD_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

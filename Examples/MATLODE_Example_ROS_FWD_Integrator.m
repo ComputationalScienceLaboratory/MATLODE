@@ -47,7 +47,10 @@ Options = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'displaySteps',true,'Hstart',0
 [ ~, Y ] = MATLODE_ROS_FWD_Integrator(Ode_Function,[Time_Interval(1) Time_Interval(1)+0.0029],Y0,Options);
 
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 
 %%
 % <html>

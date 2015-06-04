@@ -77,6 +77,13 @@
 % For addition examples, see Help -> Supplemental Software -> Examples ->
 % Sensitivity Analysis -> MATLODE_Example_ROS_TLM_Integrator.
 %
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
 % [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
 %     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
@@ -86,7 +93,10 @@
 %     Computing, 36(5), C504–C523, 2014
 %
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] =  MATLODE_ROS_TLM_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U)
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

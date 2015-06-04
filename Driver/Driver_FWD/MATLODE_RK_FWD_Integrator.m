@@ -84,6 +84,11 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504–C523, 2014
 %
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_RK_FWD_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U)
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

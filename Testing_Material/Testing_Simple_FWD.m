@@ -1,6 +1,12 @@
 %% Testing Material: Testing_Simple_FWD
 %
 % <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html>
 % Up: <a href="Testing_Material.html">Testing Material</a>
 % </html>
 % 
@@ -92,3 +98,13 @@ Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Method',5);
 [steps, errorSolution] = TEST_General_Forward(@MATLODE_SDIRK_FWD_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref);
 loglog(steps,errorSolution);
 title('Van Der Pol (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

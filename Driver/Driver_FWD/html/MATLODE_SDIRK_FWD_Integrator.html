@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_SDIRK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_SDIRK_FWD_Integrator.m"><style type="text/css">
+      --><title>MATLODE_SDIRK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-04"><meta name="DC.source" content="MATLODE_SDIRK_FWD_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -70,7 +70,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
   <div>
       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
   </div>
-</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#12">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                 MATLODE_SDIRK_FWD_Integrator
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Example</a></li><li><a href="#6">Contact Information</a></li><li><a href="#10">Reference</a></li><li><a href="#13">Major Modification History</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>                 MATLODE_SDIRK_FWD_Integrator
         [T, Y] = MATLODE_SDIRK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)
  [T, Y, Stats] = MATLODE_SDIRK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>Ode_Function</tt>: model function</p><p><tt>Time_Interval</tt>: time span</p><p><tt>Y0</tt>: initial model state vector</p><p><tt>Options</tt>: MATLODE option struct</p><h2>Output Parameters<a name="3"></a></h2><p><tt>T</tt>: saved time snapshots</p><p><tt>Y</tt>: saved model state vectors</p><p><tt>Stats</tt>: integrator statistics</p><h2>Description<a name="4"></a></h2><p>Driver file to solve the system y' = F(t,y) using a Singly Diagonally Implicit Runge Kutta (SDIRK) method.</p><p>MATLODE_SDIRK_FWD_Integrator displays the available methods associated with the Singly Diagonally Implicit Runge Kutta forward integrator.</p><p>[T, Y] = MATLODE_SDIRK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options) computes the ODE solution with respect to the user supplied options configuration.</p><p>[T, Y, Stats] = MATLODE_SDIRK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options) computes the ODE solution with respect to the user supplied options configuration and returns the computation statistics.</p><h2>Example<a name="5"></a></h2><p>For the following examples we will use Arenstorf Orbit as a toy problem to illustrate <tt>MATLODE_SDIRK_FWD_Integrator</tt> functionalities and features. To initially setup Arenstorf Orbit, execute the MATLAB commands below to load our input parameters into our workspace.</p><pre class="language-matlab">Ode_Function        = @arenstorfOrbit_Function;
 Ode_Jacobian        = @arenstorfOrbit_Jacobian;
@@ -80,7 +80,9 @@ Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
 [ T, Y ] = MATLODE_SDIRK_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
 </pre><p>Printing out our results, we can analyze our model state at our final time.</p><pre class="language-matlab">disp(<span class="string">'solution at Time_Interval(2)'</span>);
 disp(Y);
-</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Forward Integration -&gt; MATLODE_Example_SDIRK_FWD_Integrator.</p><h2>Contact Information<a name="6"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="10"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504&#8211;C523, 2014</p><h2>Major Modification History<a name="12"></a></h2><p>
+</pre><p>For addition examples, see Help -&gt; Supplemental Software -&gt; Examples -&gt; Forward Integration -&gt; MATLODE_Example_SDIRK_FWD_Integrator.</p><h2>Contact Information<a name="6"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="10"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504&#8211;C523, 2014</p><pre>Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+Computational Science Laboratory, Virginia Tech.
+&copy;2015 Virginia Tech Intellectual Properties, Inc.</pre><h2>Major Modification History<a name="13"></a></h2><p>
 <table border=1>
   <tr>
       <td><b>Date</b></td>
@@ -187,6 +189,11 @@ disp(Y);
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504–C523, 2014
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_SDIRK_FWD_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
     % Display input/output parameters

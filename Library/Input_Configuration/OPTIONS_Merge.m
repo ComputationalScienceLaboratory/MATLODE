@@ -26,7 +26,10 @@
 %     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
 
     if ( ~isempty(OPTIONS_U.AbsTol) == true )

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Testing Material: Testing_Simple_ADJ</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-29"><meta name="DC.source" content="Testing_Simple_ADJ.m"><style type="text/css">
+      --><title>Testing Material: Testing_Simple_ADJ</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-04"><meta name="DC.source" content="Testing_Simple_ADJ.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,6 +67,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>Testing Material: Testing_Simple_ADJ</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p>
 Up: <a href="Testing_Material.html">Testing Material</a>
 </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Methodology</a></li><li><a href="#4">Test Case 1A: MATLODE_ERK_ADJ_Integrator (Default)</a></li><li><a href="#5">Test Case 1B: MATLODE_ERK_ADJ_Integrator</a></li><li><a href="#6">Test Case 1C: MATLODE_ERK_ADJ_Integrator</a></li><li><a href="#7">Test Case 1D: MATLODE_ERK_ADJ_Integrator</a></li><li><a href="#8">Test Case 2A: MATLODE_RK_ADJ_Integrator (Default)</a></li><li><a href="#9">Test Case 3A: MATLODE_ROS_ADJ_Integrator (Default)</a></li><li><a href="#10">Test Case 4A: MATLODE_SDIRK_ADJ_Integrator (Default)</a></li></ul></div><p>The adjoint test cases make ose of the following ODE test problem.</p><pre class="codeinput">Ode_DRDP       = @vanDerPol_DRDP;
 Ode_DRDY       = @vanDerPol_DRDY;
@@ -159,9 +163,19 @@ title(<span class="string">'Van Der Pol (Solution)'</span>); ylabel(<span class=
 figure(2);
 loglog(steps,errorSensitivity);
 title(<span class="string">'Van Der Pol (Sensitivity)'</span>); ylabel(<span class="string">'RMS Relative Error'</span>); xlabel(<span class="string">'Number of Steps'</span>);
-</pre><img vspace="5" hspace="5" src="Testing_Simple_ADJ_17.png" alt=""> <img vspace="5" hspace="5" src="Testing_Simple_ADJ_18.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="Testing_Simple_ADJ_17.png" alt=""> <p>Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang. Computational Science Laboratory, Virginia Tech. (R)2015 Virginia Tech Intellectual Properties, Inc.</p><p>
+  <div>
+      <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+  </div>
+</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Testing Material: Testing_Simple_ADJ
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html>
 % Up: <a href="Testing_Material.html">Testing Material</a>
@@ -305,5 +319,16 @@ figure(2);
 loglog(steps,errorSensitivity);
 title('Van Der Pol (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
 
+%%
+% Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+% Computational Science Laboratory, Virginia Tech.
+% (R)2015 Virginia Tech Intellectual Properties, Inc.
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
 ##### SOURCE END #####
 --></body></html>

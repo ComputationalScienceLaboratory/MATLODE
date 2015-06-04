@@ -8,3 +8,9 @@
 %
 % Publishing Tools
 %   Publish_FineTuned_ADJ       - Publish_FineTuned_ADJ
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%

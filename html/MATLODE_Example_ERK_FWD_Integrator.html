@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>MATLODE_Example_ERK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="MATLODE_Example_ERK_FWD_Integrator.m"><style type="text/css">
+      --><title>MATLODE_Example_ERK_FWD_Integrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-04"><meta name="DC.source" content="MATLODE_Example_ERK_FWD_Integrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -79,13 +79,7 @@ Y0                  = [0.994; 0; 0; -2.00158510637908252240537862224];
 </pre><p>Execute the following commands to analyze the final model state.</p><pre class="codeinput">disp(<span class="string">'solution at Time_Interval(2)'</span>);
 disp(Y(end,:));
 </pre><pre class="codeoutput">solution at Time_Interval(2)
-  Columns 1 through 3
-
-   0.989365398322643  -0.008118074065802  -1.113854858951780
-
-  Column 4
-
-  -1.347375530505811
+    0.9894   -0.0081   -1.1139   -1.3474
 
 </pre><h2>Advanced Features<a name="4"></a></h2><p>To <b>save the model state at each time step</b>, one needs to initialize a MATLODE&reg; option struct to store the fine tuning settings. The <tt>(key,value)</tt> pair associated for saving the model state at each time step is denoted as <tt>('storeCheckpoint',true)</tt> or <tt>('storeCheckpoint',false)</tt> depending on whether or not one wants to explicitly fine tune the integrator. In this case, the intermediary time step values are stored executing the command below.</p><pre class="codeinput">Options = MATLODE_OPTIONS(<span class="string">'storeCheckpoint'</span>,true);
 </pre><p>To run <tt>MATLODE_ERK_FWD_Integrator</tt> using the fine tuning, one needs to insert the option struct into the integrator's fourth parameter position.</p><pre class="codeinput">[ ~, Y ] = MATLODE_ERK_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
@@ -101,7 +95,9 @@ plot(Y(:,1),Y(:,2));
 title(<span class="string">'Arenstorf Orbit'</span>);
 xlabel(<span class="string">'Y(:,1)'</span>);
 ylabel(<span class="string">'Y(:,2)'</span>);
-</pre><img vspace="5" hspace="5" src="MATLODE_Example_ERK_FWD_Integrator_02.png" alt=""> <p>Copyright 2015 Computational Science Laboratory</p><p>
+</pre><img vspace="5" hspace="5" src="MATLODE_Example_ERK_FWD_Integrator_02.png" alt=""> <pre>Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+Computational Science Laboratory, Virginia Tech.
+&copy;2015 Virginia Tech Intellectual Properties, Inc.</pre><p>
   <div>
       <img style="float: right" src="../CSL_LogoWithName_1.png" height="50px"></img>
   </div>
@@ -176,7 +172,10 @@ xlabel('Y(:,1)');
 ylabel('Y(:,2)');
 
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 
 %%
 % <html>

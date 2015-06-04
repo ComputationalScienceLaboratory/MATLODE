@@ -1,4 +1,5 @@
-% MATLODE: A MATLAB ODE Solver and Sensitivity Analysis Toolbox
+% MATLODE
+%: A MATLAB ODE Solver and Sensitivity Analysis Toolbox
 % Commands for forward integration and sensitivity analysis
 %
 % Forward Integrators

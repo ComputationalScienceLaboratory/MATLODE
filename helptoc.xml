@@ -30,31 +30,20 @@
                     <tocitem target="Driver/Driver_TLM/html/MATLODE_SDIRK_TLM_Integrator.html" image="HelpIcon.FUNCTION">MATLODE_SDIRK_TLM_Integrator</tocitem>
                 </tocitem>                    
             </tocitem>
-            <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">Option Struct
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">AbsTol</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">AbsTol_ADJ</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">AbsTol_TLM</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">ChunkSize</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">Desired_Mode</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">DirectADJ</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">DirectTLM</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">displayStats</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">displaySteps</tocitem>
-                <tocitem target="nothing.html" image="HelpIcon.USER_GUIDE">DRDP</tocitem>
-            </tocitem>
+            <tocitem target="Library/Structs/html/MATLODE_OPTIONS.html" image="HelpIcon.USER_GUIDE">MATLODE OPTIONS</tocitem>
         </tocitem>
         
         <tocitem target="Library/html/Library.html" image="HelpIcon.FUNCTION">Library
             <tocitem target="Library/html/Library.html#1">Core Integrators
                 <tocitem target="Library/html/Library.html#1">Core Integrators ADJ
-                    <tocitem target="nothing.html">ERK ADJ1 Discrete Integrator</tocitem>
-                    <tocitem target="nothing.html">ERK ADJ2 Discrete Integrator</tocitem>
-                    <tocitem target="nothing.html">RK ADJ1 Discrete Integrator</tocitem>
-                    <tocitem target="nothing.html">RK ADJ2 Discrete Integrator</tocitem>
-                    <tocitem target="nothing.html">ROS ADJ1 Discrete Integrator</tocitem> 
-                    <tocitem target="nothing.html">ROS ADJ2 Discrete Integrator</tocitem>
-                    <tocitem target="nothing.html">SDIRK ADJ1 Discrete Integrator</tocitem>
-                    <tocitem target="nothing.html">SDIRK ADJ2 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/ERK_ADJ1_DiscreteIntegrator.html">ERK ADJ1 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/ERK_ADJ2_DiscreteIntegrator.html">ERK ADJ2 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/RK_ADJ1_DiscreteIntegrator.html">RK ADJ1 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/RK_ADJ2_DiscreteIntegrator.html">RK ADJ2 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/ROS_ADJ1_DiscreteIntegrator.html">ROS ADJ1 Discrete Integrator</tocitem> 
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/ROS_ADJ2_DiscreteIntegrator.html">ROS ADJ2 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/SDIRK_ADJ1_DiscreteIntegrator.html">SDIRK ADJ1 Discrete Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_ADJ/html/SDIRK_ADJ2_DiscreteIntegrator.html">SDIRK ADJ2 Discrete Integrator</tocitem>
                 </tocitem>
                 <tocitem target="Library/html/Library.html#1">Core Integrators FWD
                     <tocitem target="Core_Method/CoreMethod_FWD/html/ERK_FWD_Integrator.html">ERK FWD Integrator</tocitem>
@@ -66,10 +55,10 @@
                     <tocitem target="Core_Method/CoreMethod_FWD/html/SDIRK_FWD_Integrator.html">SDIRK FWD Integrator</tocitem>
                 </tocitem>
                 <tocitem target="Library/html/Library.html#1">Core Integrators TLM
-                    <tocitem target="nothing.html">ERK TLM Integrator</tocitem>
-                    <tocitem target="nothing.html">RK TLM Integrator</tocitem>
-                    <tocitem target="nothing.html">ROS TLM Integrator</tocitem>
-                    <tocitem target="nothing.html">SDIRK TLM Integrator</tocitem>                
+                    <tocitem target="Core_Method/CoreMethod_TLM/html/ERK_TLM_Integrator.html">ERK TLM Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_TLM/html/RK_TLM_Integrator.html">RK TLM Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_TLM/html/ROS_TLM_Integrator.html">ROS TLM Integrator</tocitem>
+                    <tocitem target="Core_Method/CoreMethod_TLM/html/SDIRK_TLM_Integrator.html">SDIRK TLM Integrator</tocitem>             
                 </tocitem>
             </tocitem>            
             <tocitem target="Library/html/Library.html#3">Input Configuration</tocitem>

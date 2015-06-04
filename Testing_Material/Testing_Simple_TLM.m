@@ -1,6 +1,12 @@
 %% Testing Material: Testing_Simple_TLM
 %
 % <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html>
 % Up: <a href="Testing_Material.html">Testing Material</a>
 % </html>
 % 
@@ -153,3 +159,13 @@ title('Van Der Pol (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of
 figure(2);
 loglog(steps,errorSensitivity);
 title('Van Der Pol (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%%
+% Copyright 2015 Computational Science Laboratory
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

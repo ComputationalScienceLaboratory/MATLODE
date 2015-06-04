@@ -1,3 +1,10 @@
+%% rRMS
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ err ] = rRMS( y, y_ref )
 
     n = size(y,1);

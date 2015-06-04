@@ -1,59 +1,59 @@
+%% ERK_TLM_Integrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+% <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
+%
+%% Syntax
+%    [ Tout, Yout, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( OdeFunction, Tspan, Y0, OPTIONS, Coefficient)
+%
+%% Input Parameters
+% |OdeFunction|: ODE function function handle
+%
+% |Tspan|: Time interval
+%
+% |Y0|: Initial state vector
+%
+% |OPTIONS|: Option struct
+%
+% |Coefficients|: Constant coefficients associated with method
+%
+%% Output Parameters
+% |Tout|: Time vector
+%
+% |Yout|: State vector
+%
+% |ISTATUS|: Integer statistics 
+%
+% |RSTATUS|: Real statistics
+%
+% |Ierr|: Error flag
+%
+%% Description
+% Explicit Runge-Kutta tangent linear core method.
+%
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+% [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
+%     tangent linear integration of ODEs, SIAM Journal on Scientific 
+%     Computing, 36(5), C504-C523, 2014.
+%
 function [ Tout, Yout, Y_TLM, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( OdeFunction,...
         Tspan, Y, OPTIONS, Coefficient )
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Filename: ERK_TLM_Integrator.m
-%
-% Original Author:
-%
-% File Create Date:
-%
-% Input Arguments:
-%   Name            Type
-%   NVAR            integer
-%   OdeFunction     function handler
-%   Tspan           double array
-%   Y               double array
-%   OPTIONS         struct
-%   OPTIONS          struct
-%   OPTIONS          struct
-%   Coefficient     struct
-%
-% Output Arguments:
-%   Name        Type 
-%   Tout        double array
-%   Yout        double array
-%   ISTATUS     struct
-%   RSTATUS     struct
-%   Ierr        integer
-%
-% Modification History:
-%   Date        Developer         Email             Action  
-%   7/17/2012   Tony D'Augustine  adaug13@vt.edu    
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% ERK_TLM_Integrator:
-%   Explict Runge-Kutta Tangent Linear Modeal integrator core method.
-%
-% ERK_TLM_Integrator: INPUT ARGUMENTS
-%                   NVAR (integer):
-%   OdeFunction (function handler):
-%             Tspan (double array):
-%                 Y (double array):
-%                 OPTIONS (struct):
-%                  OPTIONS (struct):
-%                  OPTIONS (struct):
-%             Coefficient (struct):
-%
-% ERK_TLM_Integrator: OUTPUT ARGUMENTS
-%   Tout (double array):
-%   Yout (double array):
-%      ISTATUS (struct):
-%      RSTATUS (struct):
-%        Ierr (integer):
-%
-% ERK_TLM_Integrator: GLOBAL VARIABLES
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     % Force initial value matrix to be N X 1.
     if ( size(Y,2) == 1 )
         % DO NOTHING

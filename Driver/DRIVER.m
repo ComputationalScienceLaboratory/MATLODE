@@ -2,6 +2,7 @@
 % <html>
 % Up: <a href="../../index.html">MATLODE Toolbox</a>
 % </html>
+%
 %% Directory
 % <html>
 %   <h3>Forward Integrator</h3>
@@ -14,3 +15,9 @@
 %       <li><a href="../Driver_TLM/html/DRIVER_TLM.html">Driver TLM</a></li>
 %   </ul>
 % </html>
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%

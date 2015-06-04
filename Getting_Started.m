@@ -6,6 +6,10 @@
 %   </div>
 % </html>
 %
+% <html>
+% Up: <a href="../index.html">MATLODE Toolbox</a>
+% </html>
+%
 %% Installation (Recommended)
 % # Download MATLODE.mltbx
 % # Navigate to MATLODE.mltbx in directory

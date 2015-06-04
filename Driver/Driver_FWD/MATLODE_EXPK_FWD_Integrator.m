@@ -81,6 +81,11 @@
 %
 % [2] P. Tranquilli, A. Sandu, 'Exponential-Krylov methods for ordinary differential equations,' Journal of Computational Physics, 278, 31-46
 %
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function  [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_EXPK_FWD_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

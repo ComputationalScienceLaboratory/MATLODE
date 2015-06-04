@@ -1,5 +1,11 @@
 %% Examples: Examples
 %
+% <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
 % <html>Up: <a href="../../index.html">MATLODE Toolbox</a></html>
 %
 %% MATLODE In Action
@@ -62,4 +68,16 @@
 %       <li><a href="../../html/MATLODE_Example_ROS_TLM_Integrator.html">MATLODE_Example_ROS_TLM_Integrator</a></li>
 %       <li><a href="../../html/MATLODE_Example_SDIRK_TLM_Integrator.html">MATLODE_Example_SDIRK_TLM_Integrator</a></li>
 %   </ul>
+% </html>
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
+
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
 % </html>

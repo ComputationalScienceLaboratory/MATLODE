@@ -1,21 +1,59 @@
 %% RK_FWD_Integrator
 %
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
 % <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
 %
 %% Syntax
-%
+%    [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = RK_FWD_Integrator( OdeFunction, Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr )
 %
 %% Input Parameters
+% |OdeFunction|: ODE function function handle
 %
+% |Tspan|: Time interval
+%
+% |OPTIONS|: Option struct
+%
+% |Coefficients|: Constant coefficients associated with method
+%
+% |adjStackFlag|: Adjoint snapshot stack flag
+%
+% |adjQuadFlag|: Adjoint quadrature stack flag
+%
+% |stack_ptr|: pointer for global snapshot stack
 %
 %% Output Parameters
+% |Tout|: Time vector
 %
+% |Yout|: State vector
+%
+% |ISTATUS|: Integer statistics 
+%
+% |RSTATUS|: Real statistics
+%
+% |Ierr|: Error flag
+%
+% |stack_ptr|: Pointer for global snapshot stack
+%
+% |quadrature|: Adjoint quadrature
 %
 %% Description
+% Implicit Runge-Kutta forward core method.
 %
-%
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 

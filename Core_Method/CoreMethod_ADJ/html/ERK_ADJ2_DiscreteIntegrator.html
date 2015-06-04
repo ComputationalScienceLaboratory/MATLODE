@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ERK_ADJ2_DiscreteIntegrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-27"><meta name="DC.source" content="ERK_ADJ2_DiscreteIntegrator.m"><style type="text/css">
+      --><title>ERK_ADJ2_DiscreteIntegrator</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-06"><meta name="DC.source" content="ERK_ADJ2_DiscreteIntegrator.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,26 +66,61 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>ERK_ADJ2_DiscreteIntegrator</h1><!--introduction--><p> Up: <a href="../../../Library/html/Library.html">Library</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Reference</a></li></ul></div><h2>Syntax<a name="1"></a></h2><h2>Input Parameters<a name="2"></a></h2><h2>Output Parameters<a name="3"></a></h2><h2>Description<a name="4"></a></h2><h2>Reference<a name="5"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+  </style></head><body><div class="content"><h1>ERK_ADJ2_DiscreteIntegrator</h1><!--introduction--><p>
+  <div>
+      <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+  </div>
+</p><p> Up: <a href="../../../Library/html/Library.html">Library</a> </p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Input Parameters</a></li><li><a href="#3">Output Parameters</a></li><li><a href="#4">Description</a></li><li><a href="#5">Contact Information</a></li><li><a href="#9">Reference</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>  [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ERK_ADJ2_DiscreteIntegrator( OdeFunction, Tspan, Y, OPTIONS, Coefficient, stack_ptr )</pre><h2>Input Parameters<a name="2"></a></h2><p><tt>OdeFunction</tt>: ODE function function handle</p><p><tt>Tspan</tt>: Time interval</p><p><tt>OPTIONS</tt>: Option struct</p><p><tt>Coefficients</tt>: Constant coefficients associated with method</p><p><tt>stack_ptr</tt>: pointer for global snapshot stack</p><p><tt>adjQuadFlag</tt>: Adjoint quadrature stack flag</p><h2>Output Parameters<a name="3"></a></h2><p><tt>Lambda</tt>: Sensitivity matrix</p><p><tt>ISTATUS</tt>: Integer statistics</p><p><tt>RSTATUS</tt>: Real statistics</p><p><tt>Ierr</tt>: Error flag</p><h2>Description<a name="4"></a></h2><p>Explicit Runge-Kutta discrete 2 adjoint core method.</p><h2>Contact Information<a name="5"></a></h2><p>Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: <a href="mailto:sandu@cs.vt.edu">sandu@cs.vt.edu</a></p><p>Tony D'Augustine                 | Phone: (540) 231-6186 | Email: <a href="mailto:adaug13@vt.edu">adaug13@vt.edu</a></p><p>Computational Science Laboratory | Phone: (540) 231-6186</p><h2>Reference<a name="9"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><p>[2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and     tangent linear integration of ODEs, SIAM Journal on Scientific     Computing, 36(5), C504-C523, 2014.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% ERK_ADJ2_DiscreteIntegrator
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
 %
 % <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
 %
 %% Syntax
-%
+%    [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ERK_ADJ2_DiscreteIntegrator( OdeFunction, Tspan, Y, OPTIONS, Coefficient, stack_ptr )
 %
 %% Input Parameters
+% |OdeFunction|: ODE function function handle
 %
+% |Tspan|: Time interval
+%
+% |OPTIONS|: Option struct
+%
+% |Coefficients|: Constant coefficients associated with method
+%
+% |stack_ptr|: pointer for global snapshot stack
+%
+% |adjQuadFlag|: Adjoint quadrature stack flag
 %
 %% Output Parameters
 %
+% |Lambda|: Sensitivity matrix
+%
+% |ISTATUS|: Integer statistics 
+%
+% |RSTATUS|: Real statistics
+%
+% |Ierr|: Error flag
 %
 %% Description
+% Explicit Runge-Kutta discrete 2 adjoint core method.
 %
-%
+%% Contact Information
+%%
+% Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
+%%
+% Tony D'Augustine                 | Phone: (540) 231-6186 | Email: adaug13@vt.edu 
+%%
+% Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 % [2] Hong Zhang, Adrian Sandu. FATODE: a library for forward, adjoint and 
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 

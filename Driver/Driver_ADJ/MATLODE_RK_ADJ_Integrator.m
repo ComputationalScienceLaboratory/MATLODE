@@ -98,7 +98,10 @@
 %     Computational Mathematics, Berlin, 1991.
 %
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )

@@ -94,7 +94,10 @@
 %     Computing, 36(5), C504–C523, 2014
 %
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
  MATLODE_ERK_ADJ_Integrator( OdeFunction, tspan, Y0, OPTIONS_U )    
     % Display input/output parameters

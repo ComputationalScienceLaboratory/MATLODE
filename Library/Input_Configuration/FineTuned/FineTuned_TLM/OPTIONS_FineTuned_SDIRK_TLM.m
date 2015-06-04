@@ -51,6 +51,11 @@ function OPTIONS = OPTIONS_FineTuned_SDIRK_TLM
 end
 
 %%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
+%%
 % <html>
 %   <div>
 %       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>

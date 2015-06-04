@@ -19,7 +19,6 @@
 % corresponding setting must be fined to 0 or an appropriate value as
 % desired.  
 %
-% Copyright 2015 Computational Science Laboratory
 function OPTIONS = OPTIONS_FineTuned_RK_TLM
     OPTIONS = MATLODE_OPTIONS(...
         'AbsTol',          0, ...
@@ -53,6 +52,11 @@ function OPTIONS = OPTIONS_FineTuned_RK_TLM
 
 end
 
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 %%
 % <html>
 %   <div>

@@ -1,3 +1,10 @@
+%% Publish_Examples
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 options = struct('outputDir','html','maxHeight',500,'maxWidth',500);
 
 publish('MATLODE_Example_ERK_ADJ_Integrator.m',options);

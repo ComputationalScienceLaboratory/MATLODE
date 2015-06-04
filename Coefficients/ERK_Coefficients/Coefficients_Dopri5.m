@@ -44,6 +44,11 @@ function [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 )
 %   rkD (double):
 %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%%
+% Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+% Computational Science Laboratory, Virginia Tech.
+% ©2015 Virginia Tech Intellectual Properties, Inc.
+%%
     global rkA rkB rkC rkE
     
     % Clear all global variables to ensire correct matrix size and values.

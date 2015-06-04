@@ -75,7 +75,10 @@ PrintISTATUS(Stats.ISTATUS);
 % [1] K. Gustafsson,  Control of error and convergence in ODE solvers,  1992 :Dept. of Automat. Contr., Lund Inst. Technol.
 
 %%
-% Copyright 2015 Computational Science Laboratory
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 
 %%
 % <html>

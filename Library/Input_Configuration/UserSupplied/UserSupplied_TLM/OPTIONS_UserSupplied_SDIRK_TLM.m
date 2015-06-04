@@ -1,3 +1,32 @@
+%% OPTIONS_UserSupplied_SDIRK_TLM
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%    [Options] = OPTIONS_UserSupplied_SDIRK_TLM(Options_U)
+%
+%% Input Parameters
+% |Options_U|: User supplied option struct
+%
+%% Output Parameters
+% |Options|: Option struct with only necessary option parameters
+%
+%% Description
+% Warns user if option parameter is not used.
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_TLM( OPTIONS_U )
 
     if ( ~isempty(OPTIONS_U.AbsTol_ADJ) == true )
@@ -84,3 +113,9 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_TLM( OPTIONS_U )
 
 end
 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

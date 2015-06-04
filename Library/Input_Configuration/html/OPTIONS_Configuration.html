@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>OPTIONS_Configuration</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-05-03"><meta name="DC.source" content="OPTIONS_Configuration.m"><style type="text/css">
+      --><title>OPTIONS_Configuration</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-04"><meta name="DC.source" content="OPTIONS_Configuration.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -70,13 +70,15 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
   <div>
       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
   </div>
-</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Toggle Warning Configuration</a></li><li><a href="#4">User Supplied Options and Fine Tuning</a></li><li><a href="#5">Merge and General Configuration</a></li></ul></div><p>Copyright 2015 Computational Science Laboratory</p><pre class="codeinput"><span class="keyword">function</span> [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, implementation, y0, tspan  )
-</pre><h2>Toggle Warning Configuration<a name="3"></a></h2><p>To toggle user supplied warning system, toggle option parameter 'WarningConfig'.</p><pre class="codeinput">    <span class="keyword">if</span> ( OPTIONS_U.WarningConfig == false )
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Reference</a></li><li><a href="#4">Toggle Warning Configuration</a></li><li><a href="#5">User Supplied Options and Fine Tuning</a></li><li><a href="#6">Merge and General Configuration</a></li></ul></div><h2>Reference<a name="1"></a></h2><p>[1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.</p><pre>Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+Computational Science Laboratory, Virginia Tech.
+&copy;2015 Virginia Tech Intellectual Properties, Inc.</pre><pre class="codeinput"><span class="keyword">function</span> [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, implementation, y0, tspan  )
+</pre><h2>Toggle Warning Configuration<a name="4"></a></h2><p>To toggle user supplied warning system, toggle option parameter 'WarningConfig'.</p><pre class="codeinput">    <span class="keyword">if</span> ( OPTIONS_U.WarningConfig == false )
         warning(<span class="string">'off'</span>,<span class="string">'MatlODE:configuration'</span>);
     <span class="keyword">else</span>
         warning(<span class="string">'on'</span>,<span class="string">'MatlODE:configuration'</span>);
     <span class="keyword">end</span>
-</pre><h2>User Supplied Options and Fine Tuning<a name="4"></a></h2><p>Each integrator is combed to guarentee applicable option settings are used and available by the user. Then required settings are fined tuned in prepartion for merging to the official option setting.</p><pre class="codeinput">    <span class="keyword">switch</span> ( implementation )
+</pre><h2>User Supplied Options and Fine Tuning<a name="5"></a></h2><p>Each integrator is combed to guarentee applicable option settings are used and available by the user. Then required settings are fined tuned in prepartion for merging to the official option setting.</p><pre class="codeinput">    <span class="keyword">switch</span> ( implementation )
         <span class="keyword">case</span> <span class="string">'FWD'</span>
             <span class="keyword">switch</span> ( family )
                 <span class="keyword">case</span> <span class="string">'ERK'</span>
@@ -140,7 +142,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">otherwise</span>
             error(<span class="string">'Internal Error: Implementation parameter is invalid.'</span>);
     <span class="keyword">end</span>
-</pre><h2>Merge and General Configuration<a name="5"></a></h2><p>All integrator user option settings must merge with fine tuning. Once merged, default settings configuration will run to guarentee uniform default configurations across all integrators.</p><pre class="codeinput">    [ OPTIONS ]               = OPTIONS_Merge(OPTIONS_U,OPTIONS);
+</pre><h2>Merge and General Configuration<a name="6"></a></h2><p>All integrator user option settings must merge with fine tuning. Once merged, default settings configuration will run to guarentee uniform default configurations across all integrators.</p><pre class="codeinput">    [ OPTIONS ]               = OPTIONS_Merge(OPTIONS_U,OPTIONS);
     [ OPTIONS, Coefficient ]  = OPTIONS_GeneralConfiguration(OPTIONS,family,implementation,y0,tspan);
 </pre><pre class="codeinput"><span class="keyword">end</span>
 </pre><p>
@@ -157,7 +159,15 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 %   </div>
 % </html>
 %%
-% Copyright 2015 Computational Science Laboratory
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, implementation, y0, tspan  )
 
     %% Toggle Warning Configuration
