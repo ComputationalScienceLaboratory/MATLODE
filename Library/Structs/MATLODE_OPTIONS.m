@@ -1,5 +1,11 @@
 %% MATLODE_OPTIONS
 %
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
 %% Syntax
 %            MATLODE_OPTIONS
 %  Options = MATLODE_OPTIONS('key1',value1,'key2',value2,...,'keyN',valueN)
@@ -48,6 +54,11 @@
 %% Reference
 % [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
 %     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function options = MATLODE_OPTIONS(varargin)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -334,73 +345,7 @@ end
 
 options = orderfields(options);
 
-% i = 1;
-% while i <= nargin
-%   arg = varargin{i};
-%   if ischar(arg)                         % arg is an option name
-%     break;
-%   end
-%   if ~isempty(arg)                      % [] is a valid options argument
-%     if ~isa(arg,'struct')
-%       error(message('MATLAB:odeset:NoPropNameOrStruct', i));
-%     end
-%     for j = 1:m
-%       if any(strcmp(fieldnames(arg),deblank(Names(j,:))))
-%         val = arg.(deblank(Names(j,:)));
-%       else
-%         val = [];
-%       end
-%       if ~isempty(val)
-%         options.(deblank(Names(j,:))) = val;
-%       end
-%     end
-%   end
-%   i = i + 1;
-% end
-% 
-% % A finite state machine to parse name-value pairs.
-% if rem(nargin-i+1,2) ~= 0
-%   error(message('MATLAB:odeset:ArgNameValueMismatch'));
-% end
-% expectval = 0;                          % start expecting a name, not a value
-% while i <= nargin
-%   arg = varargin{i};
-%     
-%   if ~expectval
-%     if ~ischar(arg)
-%       error(message('MATLAB:odeset:NoPropName', i));
-%     end
-%     
-%     lowArg = lower(arg);
-%     j = strmatch(lowArg,names);
-%     if isempty(j)                       % if no matches
-%       error(message('MATLAB:odeset:InvalidPropName', arg));
-%     elseif length(j) > 1                % if more than one match
-%       % Check for any exact matches (in case any names are subsets of others)
-%       k = strmatch(lowArg,names,'exact');
-%       if length(k) == 1
-%         j = k;
-%       else
-%             matches = deblank(Names(j(1),:));
-%         for k = j(2:length(j))'
-%                 matches = [matches ', ' deblank(Names(k,:))]; %#ok<AGROW>
-%         end
-%             error(message('MATLAB:odeset:AmbiguousPropName',arg,matches));
-%       end
-%     end
-%     expectval = 1;                      % we expect a value next
-%     
-%   else
-%     options.(deblank(Names(j,:))) = arg;
-%     expectval = 0;
-%       
-%   end
-%   i = i + 1;
-% end
-% 
-% if expectval
-%   error(message('MATLAB:odeset:NoValueForProp', arg));
-% end
+
 %% Major Modification History
 % <html>
 % <table border=1>
@@ -413,9 +358,16 @@ options = orderfields(options);
 %   <tr>
 %       <td>1/1/2014</td>
 %       <td>Tony D'Augustine</td>
-%       <td>adaug13@vt,edu</td>
-%       <td>Release MATLODE</td>
+%       <td>adaug13@vt.edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
 %   </tr>
 % </table>
 % </html>
 % 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
+

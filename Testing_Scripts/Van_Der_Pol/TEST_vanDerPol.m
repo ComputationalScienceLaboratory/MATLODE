@@ -12,21 +12,21 @@ analysis = -1;
 %        -3: absolute error
 error_mode = -2;
 
-% integrator: -1: ERK_FWD_DRIVER_Integrator
-%             -2: ROS_FWD_DRIVER_Integrator
-%             -3: RK_FWD_DRIVER_Integrator
-%             -4: SDIRK_FWD_DRIVER_Integrator
+% integrator: -1: ERK_FWD_Integrator
+%             -2: ROS_FWD_Integrator
+%             -3: RK_FWD_Integrator
+%             -4: SDIRK_FWD_Integrator
 %
-%             -5: ERK_TLM_DRIVER_Integrator
-%             -6: ROS_TLM_DRIVER_Integrator
-%             -7: RK_TLM_DRIVER_Integrator
-%             -8: SDIRK_TLM_DRIVER_Integrator
+%             -5: ERK_TLM_Integrator
+%             -6: ROS_TLM_Integrator
+%             -7: RK_TLM_Integrator
+%             -8: SDIRK_TLM_Integrator
 %
-%              -9: ERK_ADJ_DRIVER_Integrator
-%             -10: ROS_ADJ_DRIVER_Integrator
-%             -11: RK_ADJ_DRIVER_Integrator
-%             -12: SDIRK_ADJ_DRIVER_Integrator              
-integrator = -11;
+%              -9: ERK_ADJ_Integrator
+%             -10: ROS_ADJ_Integrator
+%             -11: RK_ADJ_Integrator
+%             -12: SDIRK_ADJ_Integrator              
+integrator = -1;
 
 % Adjoint: -1: xxxxADJ1 w/ Quadrature
 %          -2: xxxxADJ1 no Quadrature
@@ -68,7 +68,7 @@ Ode_Hesstr_vec_r    = @vanDerPol_Hesstr_vec_r;
 
 % Save Output variables?
 enableSave = false;
-% resultsPath = '/home/adaug/Git_Repository/MatlODE/Testing_Scripts/Van_Der_Pol/VanDerPol_Results';
+% resultsPath = '/home/adaug/Git_Repository/MATLODE/Testing_Scripts/Van_Der_Pol/VanDerPol_Results';
 resultsPath = './VanDerPol_Results';
 
 disp( 'Ver Der Pol Problem: ' );
@@ -83,13 +83,13 @@ y0 = [2.0; -0.66];
 %   5: Sdirk4B              5: Verme            5: Lobatto3A        5: Rodas4
 %                           6: Dopri853
 
-RelTol = [ 1e-7; 1e-7 ];
-AbsTol = [ 1e-7; 1e-7 ];
+RelTol = [ 1e-1; 1e-1 ];
+AbsTol = [ 1e-1; 1e-1 ];
 
 yDimension = length(y0);
 
 % Full jacobian
-% Options = MatlOde_OPTIONS( 'AbsTol',          AbsTol, ...
+% Options = MATLODE_OPTIONS( 'AbsTol',          AbsTol, ...
 %                            'RelTol',          RelTol, ...
 %                            'Jacobian',        Ode_Jacobian, ...
 %                            'AbsTol_TLM',      ones(yDimension,yDimension).*AbsTol(1).*10, ...
@@ -130,7 +130,7 @@ yDimension = length(y0);
 %                            'ChunkSize',       50 );
 
 % Exact Jacobian Vector Products
-% Options = MatlOde_OPTIONS( 'AbsTol',          AbsTol, ...
+% Options = MATLODE_OPTIONS( 'AbsTol',          AbsTol, ...
 %                            'RelTol',          RelTol, ...
 %                            'Jacobian',        @(T,Y,v)(Ode_Jacobian(T,Y)*v), ...
 %                            'AbsTol_TLM',      ones(yDimension,yDimension).*AbsTol(1).*10, ...
@@ -171,7 +171,7 @@ yDimension = length(y0);
 %                            'ChunkSize',       50 );
 
 % finite difference Jacobian Vector Product.
-Options = MatlOde_OPTIONS( 'AbsTol',          AbsTol, ...
+Options = MATLODE_OPTIONS( 'AbsTol',          AbsTol, ...
                            'RelTol',          RelTol, ...
                            'AbsTol_TLM',      ones(yDimension,yDimension).*AbsTol(1).*10, ...
                            'RelTol_TLM',      ones(yDimension,yDimension).*RelTol(1).*10, ...
@@ -197,7 +197,7 @@ Options = MatlOde_OPTIONS( 'AbsTol',          AbsTol, ...
                            'Autonomous',      0, ... % 1
                            'ITOL',            0, ... % 2
                            'MatrixFree',      0, ...
-                           'Method',          0, ... % 3
+                           'Method',          7, ... % 3
                            'Max_no_steps',    0, ... % 4
                            'NewtonMaxit',     0, ... % 5
                            'StartNewton',     0, ... % 6
@@ -211,24 +211,24 @@ Options = MatlOde_OPTIONS( 'AbsTol',          AbsTol, ...
                            'ChunkSize',       50 );
    
 if ( integrator == -3 )
-    Options = MatlOde_OPTIONS(Options, 'Jacobian', Ode_Jacobian );
+    Options = MATLODE_OPTIONS(Options, 'Jacobian', Ode_Jacobian );
 end
                        
 if ( integrator == -5 )
-    Options = MatlOde_OPTIONS( Options, ...
+    Options = MATLODE_OPTIONS( Options, ...
                                'FDIncrement', 0, ...
                                'FDAprox',     0, ...
                                'NTLM',        yDimension );
 end
                        
 if ( integrator == -6 ) 
-    Options = MatlOde_OPTIONS( Options, ...
+    Options = MATLODE_OPTIONS( Options, ...
                                   'Hess_vec', Ode_Hess_vec );
 end
          
 
 if ( integrator == -7 )
-    Options = MatlOde_OPTIONS( Options, ...
+    Options = MATLODE_OPTIONS( Options, ...
                                'FDIncrement', 10^-6, ...
                                'FDAprox',     1, ...
                                'NTLM',        yDimension );
@@ -238,7 +238,7 @@ if ( integrator == -10 )
     switch ( adj_mode )
         case -1
             disp( 'RosenbrockADJ1 w/ Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'NP', 1, ...
                                           'Hesstr_vec', Ode_Hesstr_vec, ...
                                           'Jacp', Ode_Jacp, ...
@@ -253,7 +253,7 @@ if ( integrator == -10 )
                                           'Hesstr_vec_r', Ode_Hesstr_vec_r );
         case -2
             disp( 'RosenbrockADJ1 no Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'Hesstr_vec', Ode_Hesstr_vec, ...
                                           'NP', 1, ...
                                           'Jacp', Ode_Jacp, ...
@@ -262,7 +262,7 @@ if ( integrator == -10 )
                                           'Mu', Ode_Mu ); 
         case -3
             disp( 'RosenbrockADJ2 w/ Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'Hesstr_vec', Ode_Hesstr_vec, ...
                                           'Lambda', eye(yDimension), ...
                                           'QFun', Ode_QFun, ...
@@ -271,7 +271,7 @@ if ( integrator == -10 )
                                           'Hesstr_vec_r', Ode_Hesstr_vec_r );
         case -4
             disp( 'RosenbrockADJ2 no Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'Jacobian', Ode_Jacobian, ...
                                           'Lambda', eye(yDimension), ...
                                           'Hesstr_vec', Ode_Hesstr_vec );
@@ -284,7 +284,7 @@ if ( (integrator == -9) || (integrator == -11) || (integrator == -12) )
     switch ( adj_mode )
         case -1
             disp( 'ERK/RK/SDIRK ADJ1 w/ Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'NP', 1, ...
                                           'Jacp', Ode_Jacp, ...
                                           'Lambda', eye(yDimension), ...
@@ -295,14 +295,14 @@ if ( (integrator == -9) || (integrator == -11) || (integrator == -12) )
                                           'DRDY', Ode_DRDY );
         case -2
             disp( 'ERK/RK/SDIRK ADJ1 no Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'NP', 1, ...
                                           'Jacp', Ode_Jacp, ...
                                           'Lambda', eye(yDimension), ...
                                           'Mu', Ode_Mu );
         case -3
             disp( 'ERK/RK/SDIRK ADJ2 w/ Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                           'NP', 1, ...
                                           'Lambda', eye(yDimension), ...
                                           'QFun', Ode_QFun, ...
@@ -310,7 +310,7 @@ if ( (integrator == -9) || (integrator == -11) || (integrator == -12) )
                                           'DRDY', Ode_DRDY );
         case -4
             disp( 'ERK/RK/SDIRK ADJ2 no Quadrature' );
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                                         'NP', 1, ...
                                         'Jacobian', Ode_Jacobian, ...
                                         'Lambda', eye(yDimension) );
@@ -322,125 +322,113 @@ switch ( analysis )
     case -1 % solution
         switch ( integrator )
             case -1
-                disp( 'Solving problem with MatlOde_ERK_FWD_DRIVER_Integrator: ' );
-                [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_ERK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );
+                disp( 'Solving problem with MATLODE_ERK_FWD_Integrator: ' );
+                [ T, Y, Stats ] = ...
+                    MATLODE_ERK_FWD_Integrator( Ode_Function, Tspan, y0, Options  );
                 
                 implementation = 'FWD';
                 family = 'ERK';
                            
             case -2
-                disp( 'Solving problem with MatlOde_ROS_FWD_DRIVER_Integrator: ' );
+                disp( 'Solving problem with MATLODE_ROS_FWD_Integrator: ' );
                 [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_ROS_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );  
+                    MATLODE_ROS_FWD_Integrator( Ode_Function, Tspan, y0, Options  );  
                 
                 implementation = 'FWD';
                 family = 'ROS';                 
 
             case -3
-                disp( 'Solving problem with MatlOde_RK_FWD_DRIVER_Integrator: ' );
+                disp( 'Solving problem with MATLODE_RK_FWD_Integrator: ' );
                 [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_RK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );  
+                    MATLODE_RK_FWD_Integrator( Ode_Function, Tspan, y0, Options  );  
                 
                 implementation = 'FWD';
                 family = 'RK';                  
 
             case -4
-                disp( 'Solving problem with MatlOde_SDIRK_FWD_DRIVER_Integrator: ');
+                disp( 'Solving problem with MATLODE_SDIRK_FWD_Integrator: ');
                 [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_SDIRK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );
+                    MATLODE_SDIRK_FWD_Integrator( Ode_Function, Tspan, y0, Options  );
                 
                 implementation = 'FWD';
                 family = 'SDIRK';                  
 
             case -5
-                disp( 'Solving problem with MatlOde_ERK_TLM_DRIVER_Integrator: ' );
+                disp( 'Solving problem with MATLODE_ERK_TLM_Integrator: ' );
                 [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_ERK_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                    MATLODE_ERK_TLM_Integrator( Ode_Function, Tspan, y0, Options );
   
                 implementation = 'TLM';
                 family = 'ERK';
                 
             case -6 
-                disp( 'Solving problem with ROS_TLM_DRIVER_Integrator: ');
+                disp( 'Solving problem with ROS_TLM_Integrator: ');
                 [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_ROS_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );               
+                    MATLODE_ROS_TLM_Integrator( Ode_Function, Tspan, y0, Options );               
                 
                 implementation = 'TLM';
                 family = 'ROS';
                 
             case -7
-                disp( 'Solving problem with RK_TLM_DRIVER_Integrator: ');
+                disp( 'Solving problem with RK_TLM_Integrator: ');
                 [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_RK_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                    MATLODE_RK_TLM_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'TLM';
                 family = 'RK';
  
             case -8
-                disp( 'Solving problem with SDIRK_TLM_DRIVER_Integrator: ');
+                disp( 'Solving problem with SDIRK_TLM_Integrator: ');
                 [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_SDIRK_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                    MATLODE_SDIRK_TLM_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'TLM';
                 family = 'SDIRK';
 
             case -9
-                disp( 'Solving problem with ERK_ADJ_DRIVER_Integrator: ');
+                disp( 'Solving problem with ERK_ADJ_Integrator: ');
                 [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_ERK_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                    MATLODE_ERK_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'ADJ';
                 family = 'ERK';                
 
             case -10
-                disp( 'Solving problem with ROS_ADJ_DRIVER_Integrator: ');
+                disp( 'Solving problem with ROS_ADJ_Integrator: ');
                 [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_ROS_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                    MATLODE_ROS_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'ADJ';
                 family = 'ROS';
 
             case -11
-                disp( 'Solving problem with RK_ADJ_DRIVER_Integrator: ');
+                disp( 'Solving problem with RK_ADJ_Integrator: ');
                 [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_RK_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options);
+                    MATLODE_RK_ADJ_Integrator( Ode_Function, Tspan, y0, Options);
                 
                 implementation = 'ADJ';
                 family = 'RK';                
 
             case -12
-                disp( 'Solving problem with SDIRK_ADJ_DRIVER_Integrator: ');
+                disp( 'Solving problem with SDIRK_ADJ_Integrator: ');
                 [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                    MatlOde_SDIRK_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                    MATLODE_SDIRK_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'ADJ';
                 family = 'SDIRK';   
 
         end
         
-        if ( Ierr(:) >= 0.0 )
-            saveVariable([resultsPath, '/VanDerPol_Results_', implementation, ...
-                '/VanDerPol_Results_', implementation, '_', family, '/', Coefficient.Name, '/'], ...
-                ['Solution_' family '_' implementation '_VDP_T'], T, ...            
-               ['Solution_', family, '_', implementation, '_VDP_Y'], Y, ...
-               ['Solution_' family '_' implementation '_VDP_ISTATUS'], ISTATUS, ...
-               ['Solution_' family '_' implementation '_VDP_RSTATUS'], RSTATUS, ...
-               ['Solution_' family '_' implementation '_VDP_Ierr'], Ierr, enableSave );
-            
+        titleName = {['Solution: ' family ' ' implementation ' Integrator (Van Der Pol)']};        
 
-            titleName = {['Solution: ' family ' ' implementation ' Integrator (Van Der Pol)'], ...
-                ['Coefficient: ' num2str(Coefficient.Name) ] };        
-        
-            plot( T, Y );
-            xlabel('Time');
-            ylabel('Y1 & Y2');
-            title(titleName);
-            if (enableSave == true )
-                saveas(gcf, [resultsPath, '/VanDerPol_Results_', implementation, ...
-                    '/VanDerPol_Results_', implementation, '_', family, '/', Coefficient.Name, ...
-                    '/Solution_', family, '_', implementation,'_VDP_', Coefficient.Name, '.fig']);
-            end
+        plot( T, Y );
+        xlabel('Time');
+        ylabel('Y1 & Y2');
+        title(titleName);
+        if (enableSave == true )
+            saveas(gcf, [resultsPath, '/VanDerPol_Results_', implementation, ...
+                '/VanDerPol_Results_', implementation, '_', family, '/', Coefficient.Name, ...
+                '/Solution_', family, '_', implementation,'_VDP_', Coefficient.Name, '.fig']);
         end
         
     case -2 % analysis
@@ -455,7 +443,7 @@ switch ( analysis )
         for ipt=1:Npoints
             RelTol=TOLS(ipt);
             AbsTol = RelTol;
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                               'displaySteps', 0, ...
                               'storeCheckpoint', 0, ...
                               'RelTol',     ones(yDimension,1)*RelTol, ...
@@ -471,97 +459,95 @@ switch ( analysis )
                               'NADJ',       yDimension );
             switch ( integrator )
                 case -1
-                    disp( 'Solving problem with MatlOde_ERK_FWD_DRIVER_Integrator: ' );
-                    [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_ERK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );
+                    disp( 'Solving problem with MATLODE_ERK_FWD_Integrator: ' );
+                    [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator( Ode_Function, Tspan, y0, Options  );
 
                     implementation = 'FWD';
                     family = 'ERK';
 
                 case -2
-                    disp( 'Solving problem with MatlOde_ROS_FWD_DRIVER_Integrator: ' );
-                    [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_ROS_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );  
+                    disp( 'Solving problem with MATLODE_ROS_FWD_Integrator: ' );
+                    [ T, Y, Stats ] = MATLODE_ROS_FWD_Integrator( Ode_Function, Tspan, y0, Options  );  
 
                     implementation = 'FWD';
                     family = 'ROS';                 
 
                 case -3
-                    disp( 'Solving problem with MatlOde_RK_FWD_DRIVER_Integrator: ' );
+                    disp( 'Solving problem with MATLODE_RK_FWD_Integrator: ' );
                     [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_RK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );  
+                        MATLODE_RK_FWD_Integrator( Ode_Function, Tspan, y0, Options  );  
 
                     implementation = 'FWD';
                     family = 'RK';                  
 
                 case -4
-                    disp( 'Solving problem with MatlOde_SDIRK_FWD_DRIVER_Integrator: ');
+                    disp( 'Solving problem with MATLODE_SDIRK_FWD_Integrator: ');
                     [ T, Y, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_SDIRK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options  );
+                        MATLODE_SDIRK_FWD_Integrator( Ode_Function, Tspan, y0, Options  );
 
                     implementation = 'FWD';
                     family = 'SDIRK';                  
 
                 case -5
-                    disp( 'Solving problem with MatlOde_ERK_TLM_DRIVER_Integrator: ' );
+                    disp( 'Solving problem with MATLODE_ERK_TLM_Integrator: ' );
                     [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_ERK_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                        MATLODE_ERK_TLM_Integrator( Ode_Function, Tspan, y0, Options );
 
                     implementation = 'TLM';
                     family = 'ERK';
 
                 case -6 
-                    disp( 'Solving problem with ROS_TLM_DRIVER_Integrator: ');
+                    disp( 'Solving problem with ROS_TLM_Integrator: ');
                     [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_ROS_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );               
+                        MATLODE_ROS_TLM_Integrator( Ode_Function, Tspan, y0, Options );               
 
                     implementation = 'TLM';
                     family = 'ROS';
 
                 case -7
-                    disp( 'Solving problem with RK_TLM_DRIVER_Integrator: ');
+                    disp( 'Solving problem with RK_TLM_Integrator: ');
                     [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_RK_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                        MATLODE_RK_TLM_Integrator( Ode_Function, Tspan, y0, Options );
 
                     implementation = 'TLM';
                     family = 'RK';
 
                 case -8
-                    disp( 'Solving problem with SDIRK_TLM_DRIVER_Integrator: ');
+                    disp( 'Solving problem with SDIRK_TLM_Integrator: ');
                     [ T, Y, Y_TLM, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_SDIRK_TLM_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                        MATLODE_SDIRK_TLM_Integrator( Ode_Function, Tspan, y0, Options );
 
                     implementation = 'TLM';
                     family = 'SDIRK';
 
                 case -9
-                    disp( 'Solving problem with ERK_ADJ_DRIVER_Integrator: ');
+                    disp( 'Solving problem with ERK_ADJ_Integrator: ');
                     [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_ERK_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                        MATLODE_ERK_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
 
                     implementation = 'ADJ';
                     family = 'ERK';                
 
                 case -10
-                    disp( 'Solving problem with ROS_ADJ_DRIVER_Integrator: ');
+                    disp( 'Solving problem with ROS_ADJ_Integrator: ');
                     [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_ROS_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                        MATLODE_ROS_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
 
                     implementation = 'ADJ';
                     family = 'ROS';
 
                 case -11
-                    disp( 'Solving problem with RK_ADJ_DRIVER_Integrator: ');
+                    disp( 'Solving problem with RK_ADJ_Integrator: ');
                     [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_RK_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options);
+                        MATLODE_RK_ADJ_Integrator( Ode_Function, Tspan, y0, Options);
 
                     implementation = 'ADJ';
                     family = 'RK';                
 
                 case -12
-                    disp( 'Solving problem with SDIRK_ADJ_DRIVER_Integrator: ');
+                    disp( 'Solving problem with SDIRK_ADJ_Integrator: ');
                     [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
-                        MatlOde_SDIRK_ADJ_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );
+                        MATLODE_SDIRK_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
 
                     implementation = 'ADJ';
                     family = 'SDIRK';  
@@ -622,7 +608,7 @@ switch ( analysis )
         % Compute Reference
         disp('Reference');
         options = odeset('AbsTol', 1d-13,'RelTol',1d-13,'Jacobian',Ode_Jacobian);
-%         options = MatlOde_OPTIONS( Options, ...
+%         options = MATLODE_OPTIONS( Options, ...
 %             'displaySteps', false, ...
 %             'displayStats', false, ...
 %             'storeCheckpoint', false, ...
@@ -633,7 +619,7 @@ switch ( analysis )
 %             'WarningConfig', 0);
        [ T_Ref, Y_Ref ] = ode15s(Ode_Function,Tspan,y0, options);
 %         [ T_Ref, Y_Ref ] = ode113(Ode_Function,Tspan,y0, options);
-%         [ T_Ref, Y_Ref ] = MatlOde_RK_FWD_DRIVER_Integrator(Ode_Function,Tspan,y0,options);
+%         [ T_Ref, Y_Ref ] = MATLODE_RK_FWD_Integrator(Ode_Function,Tspan,y0,options);
                 
         Npoints = 11;
         TOLS = logspace(-11,-1,Npoints);
@@ -687,7 +673,7 @@ switch ( analysis )
         for ipt=1:Npoints
             RelTol=TOLS(ipt);
             AbsTol = RelTol;
-            Options = MatlOde_OPTIONS( Options, ...
+            Options = MATLODE_OPTIONS( Options, ...
                               'displaySteps', false, ...
                               'displayStats', false, ...
                               'storeCheckpoint', false, ...
@@ -698,102 +684,106 @@ switch ( analysis )
                               'WarningConfig', 0);
             Options_MATLAB = odeset('AbsTol',AbsTol,'RelTol',RelTol,'Jacobian',Ode_Jacobian);
                           
-%             tic;
-%             output_ode45 = ode45(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode45(ipt) = toc;
-%             T = transpose(output_ode45.x);
-%             Y = transpose(output_ode45.y);
-%             nsteps_ode45(ipt) = output_ode45.stats.nsteps;
-%             error_ode45(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
+            tic;
+            output_ode45 = ode45(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode45(ipt) = toc;
+            T = transpose(output_ode45.x);
+            Y = transpose(output_ode45.y);
+            nsteps_ode45(ipt) = output_ode45.stats.nsteps;
+            error_ode45(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
             
-%             disp('ode15s');
-%             tic;
-%             output_ode15s = ode15s(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode15s(ipt) = toc;
-%             T = transpose(output_ode15s.x);
-%             Y = transpose(output_ode15s.y);
-%             nsteps_ode15s(ipt) = output_ode15s.stats.nsteps;            
-%             error_ode15s(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
+            disp('ode15s');
+            tic;
+            output_ode15s = ode15s(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode15s(ipt) = toc;
+            T = transpose(output_ode15s.x);
+            Y = transpose(output_ode15s.y);
+            nsteps_ode15s(ipt) = output_ode15s.stats.nsteps;            
+            error_ode15s(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
             
-%             tic;
-%             output_ode23 = ode23(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode23(ipt) = toc;
-%             T = transpose(output_ode23.x);
-%             Y = transpose(output_ode23.y);
-%             nsteps_ode23(ipt) = output_ode23.stats.nsteps;            
-%             error_ode23(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
-%             
-%             tic;
-%             output_ode113 = ode113(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode113(ipt) = toc;
-%             T = transpose(output_ode113.x);
-%             Y = transpose(output_ode113.y);
-%             nsteps_ode113(ipt) = output_ode113.stats.nsteps;            
-%             error_ode113(ipt) = relativeError(Y(end,:),Y_Ref(end,:));            
+            disp('ode23');
+            tic;
+            output_ode23 = ode23(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode23(ipt) = toc;
+            T = transpose(output_ode23.x);
+            Y = transpose(output_ode23.y);
+            nsteps_ode23(ipt) = output_ode23.stats.nsteps;            
+            error_ode23(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
             
-%             disp('ode23s');
-%             tic;
-%             output_ode23s = ode23s(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode23s(ipt) = toc;
-%             T = transpose(output_ode23s.x);
-%             Y = transpose(output_ode23s.y);
-%             nsteps_ode23s(ipt) = output_ode23s.stats.nsteps;            
-%             error_ode23s(ipt) = relativeError(Y(end,:),Y_Ref(end,:));  
+            disp('ode113');
+            tic;
+            output_ode113 = ode113(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode113(ipt) = toc;
+            T = transpose(output_ode113.x);
+            Y = transpose(output_ode113.y);
+            nsteps_ode113(ipt) = output_ode113.stats.nsteps;            
+            error_ode113(ipt) = relativeError(Y(end,:),Y_Ref(end,:));            
             
-%             tic;
-%             output_ode23t = ode23t(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode23t(ipt) = toc;
-%             T = transpose(output_ode23t.x);
-%             Y = transpose(output_ode23t.y);
-%             nsteps_ode23t(ipt) = output_ode23t.stats.nsteps;            
-%             error_ode23t(ipt) = relativeError(Y(end,:),Y_Ref(end,:));   
-%             
-%             tic;
-%             output_ode23tb = ode23tb(Ode_Function,Tspan,y0,Options_MATLAB);
-%             elapsedTime_ode23tb(ipt) = toc;
-%             T = transpose(output_ode23tb.x);
-%             Y = transpose(output_ode23tb.y);
-%             nsteps_ode23tb(ipt) = output_ode23tb.stats.nsteps;            
-%             error_ode23tb(ipt) = relativeError(Y(end,:),Y_Ref(end,:));             
+            disp('ode23s');
+            tic;
+            output_ode23s = ode23s(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode23s(ipt) = toc;
+            T = transpose(output_ode23s.x);
+            Y = transpose(output_ode23s.y);
+            nsteps_ode23s(ipt) = output_ode23s.stats.nsteps;            
+            error_ode23s(ipt) = relativeError(Y(end,:),Y_Ref(end,:));  
+            
+            disp('ode23t');
+            tic;
+            output_ode23t = ode23t(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode23t(ipt) = toc;
+            T = transpose(output_ode23t.x);
+            Y = transpose(output_ode23t.y);
+            nsteps_ode23t(ipt) = output_ode23t.stats.nsteps;            
+            error_ode23t(ipt) = relativeError(Y(end,:),Y_Ref(end,:));   
+            
+            disp('ode23tb');
+            tic;
+            output_ode23tb = ode23tb(Ode_Function,Tspan,y0,Options_MATLAB);
+            elapsedTime_ode23tb(ipt) = toc;
+            T = transpose(output_ode23tb.x);
+            Y = transpose(output_ode23tb.y);
+            nsteps_ode23tb(ipt) = output_ode23tb.stats.nsteps;            
+            error_ode23tb(ipt) = relativeError(Y(end,:),Y_Ref(end,:));             
             
             disp('ERK_FWD');
-            Options = MatlOde_OPTIONS(Options,'Method',1);
-            [ T, Y, ISTATUS, RSTATUS ] = MatlOde_ERK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );            
-            elapsedTime_ERK_FWD_1(ipt) = RSTATUS.Etime;
-            nsteps_ERK_FWD_1(ipt) = ISTATUS.Nstp;
+            Options = MATLODE_OPTIONS(Options,'Method',0);
+            [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator( Ode_Function, Tspan, y0, Options );            
+            elapsedTime_ERK_FWD_1(ipt) = Stats.RSTATUS.Etime;
+            nsteps_ERK_FWD_1(ipt) = Stats.ISTATUS.Nstp;
             error_ERK_FWD_1(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
             
-            disp('ERK_FWD');
-            Options = MatlOde_OPTIONS(Options,'Method',4);
-            [ T, Y, ISTATUS, RSTATUS ] = MatlOde_ERK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );            
-            elapsedTime_ERK_FWD_4(ipt) = RSTATUS.Etime;
-            nsteps_ERK_FWD_4(ipt) = ISTATUS.Nstp;
-            error_ERK_FWD_4(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
-            
-            disp('ERK_FWD');
-            Options = MatlOde_OPTIONS(Options,'Method',5);
-            [ T, Y, ISTATUS, RSTATUS ] = MatlOde_ERK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );            
-            elapsedTime_ERK_FWD_5(ipt) = RSTATUS.Etime;
-            nsteps_ERK_FWD_5(ipt) = ISTATUS.Nstp;
-            error_ERK_FWD_5(ipt) = relativeError(Y(end,:),Y_Ref(end,:));            
+%             disp('ERK_FWD');
+%             Options = MATLODE_OPTIONS(Options,'Method',4);
+%             [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator( Ode_Function, Tspan, y0, Options );            
+%             elapsedTime_ERK_FWD_4(ipt) = Stats.RSTATUS.Etime;
+%             nsteps_ERK_FWD_4(ipt) = Stats.ISTATUS.Nstp;
+%             error_ERK_FWD_4(ipt) = relativeError(Y(end,:),Y_Ref(end,:));
+%             
+%             disp('ERK_FWD');
+%             Options = MATLODE_OPTIONS(Options,'Method',5);
+%             [ T, Y, Stats ] = MATLODE_ERK_FWD_Integrator( Ode_Function, Tspan, y0, Options );            
+%             elapsedTime_ERK_FWD_5(ipt) = Stats.RSTATUS.Etime;
+%             nsteps_ERK_FWD_5(ipt) = Stats.ISTATUS.Nstp;
+%             error_ERK_FWD_5(ipt) = relativeError(Y(end,:),Y_Ref(end,:));            
             
             disp('ROS_FWD');
-            Options = MatlOde_OPTIONS(Options,'Method',0);
-            [ T, Y, ISTATUS, RSTATUS ] = MatlOde_ROS_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );            
-            elapsedTime_ROS_FWD(ipt) = RSTATUS.Etime;
-            nsteps_ROS_FWD(ipt) = ISTATUS.Nstp;
+            Options = MATLODE_OPTIONS(Options,'Method',0);
+            [ T, Y, Stats ] = MATLODE_ROS_FWD_Integrator( Ode_Function, Tspan, y0, Options );            
+            elapsedTime_ROS_FWD(ipt) = Stats.RSTATUS.Etime;
+            nsteps_ROS_FWD(ipt) = Stats.ISTATUS.Nstp;
             error_ROS_FWD(ipt) = relativeError(Y(end,:),Y_Ref(end,:));    
             
             disp('RK_FWD');
-            [ T, Y, ISTATUS, RSTATUS ] = MatlOde_RK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );            
-            elapsedTime_RK_FWD(ipt) = RSTATUS.Etime;
-            nsteps_RK_FWD(ipt) = ISTATUS.Nstp;
+            [ T, Y, Stats ] = MATLODE_RK_FWD_Integrator( Ode_Function, Tspan, y0, Options );            
+            elapsedTime_RK_FWD(ipt) = Stats.RSTATUS.Etime;
+            nsteps_RK_FWD(ipt) = Stats.ISTATUS.Nstp;
             error_RK_FWD(ipt) = relativeError(Y(end,:),Y_Ref(end,:)); 
             
             disp('SDIRK_FWD');
-            [ T, Y, ISTATUS, RSTATUS ] = MatlOde_SDIRK_FWD_DRIVER_Integrator( Ode_Function, Tspan, y0, Options );            
-            elapsedTime_SDIRK_FWD(ipt) = RSTATUS.Etime;
-            nsteps_SDIRK_FWD(ipt) = ISTATUS.Nstp;
+            [ T, Y, Stats ] = MATLODE_SDIRK_FWD_Integrator( Ode_Function, Tspan, y0, Options );            
+            elapsedTime_SDIRK_FWD(ipt) = Stats.RSTATUS.Etime;
+            nsteps_SDIRK_FWD(ipt) = Stats.ISTATUS.Nstp;
             error_SDIRK_FWD(ipt) = relativeError(Y(end,:),Y_Ref(end,:));            
         end
         
@@ -809,33 +799,63 @@ switch ( analysis )
 %                elapsedTime_ROS_FWD,error_ROS_FWD, '-+', ...
 %                elapsedTime_RK_FWD,error_RK_FWD, '-*', ...
 %                elapsedTime_SDIRK_FWD,error_SDIRK_FWD, '-^');
-        loglog(elapsedTime_ode45,error_ode15s,'--o', ...
-               elapsedTime_ERK_FWD_1,error_ERK_FWD_1, '-+', ...
-               elapsedTime_ERK_FWD_4,error_ERK_FWD_4, '-*', ...
-               elapsedTime_ERK_FWD_5,error_ERK_FWD_5, '-^', ...
-               elapsedTime_ROS_FWD,error_ROS_FWD, '-x', ...
-               elapsedTime_RK_FWD,error_RK_FWD, '-s', ...
-               elapsedTime_SDIRK_FWD,error_SDIRK_FWD, '-d');           
+%         loglog(elapsedTime_ode45,error_ode45,'--o', ...
+%                elapsedTime_ode15s,error_ode15s,'--+', ...
+%                elapsedTime_ode23,error_ode23, '--*', ...
+%                elapsedTime_ode113,error_ode113, '--^', ...
+%                elapsedTime_ode23s,error_ode23s, '--x', ...
+%                elapsedTime_ode23t,error_ode23t, '--s', ...
+%                elapsedTime_ode23tb,error_ode23tb, '--d', ...
+%                elapsedTime_ERK_FWD_1,error_ERK_FWD_1, '-o', ...               
+%                elapsedTime_ROS_FWD,error_ROS_FWD, '-+', ...
+%                elapsedTime_RK_FWD,error_RK_FWD, '-*', ...
+%                elapsedTime_SDIRK_FWD,error_SDIRK_FWD, '-^');
+        loglog(elapsedTime_ode15s,error_ode15s,'--+', ...
+               elapsedTime_ode23s,error_ode23s, '--x', ...
+               elapsedTime_ode23t,error_ode23t, '--s', ...
+               elapsedTime_ode23tb,error_ode23tb, '--d', ...
+               elapsedTime_ERK_FWD_1,error_ERK_FWD_1, '-o', ...               
+               elapsedTime_ROS_FWD,error_ROS_FWD, '-+', ...
+               elapsedTime_RK_FWD,error_RK_FWD, '-*', ...
+               elapsedTime_SDIRK_FWD,error_SDIRK_FWD, '-^');
+%         loglog(elapsedTime_ode45,error_ode15s,'--o', ...
+%                elapsedTime_ERK_FWD_1,error_ERK_FWD_1, '-+', ...
+%                elapsedTime_ERK_FWD_4,error_ERK_FWD_4, '-*', ...
+%                elapsedTime_ERK_FWD_5,error_ERK_FWD_5, '-^', ...
+%                elapsedTime_ROS_FWD,error_ROS_FWD, '-x', ...
+%                elapsedTime_RK_FWD,error_RK_FWD, '-s', ...
+%                elapsedTime_SDIRK_FWD,error_SDIRK_FWD, '-d');           
 %                'ode15s', ...           
 %                'ode23s', ...
 %                'ode23t', ...
 %                'ode23tb', ...                   
-%                'MatlODE\_ROS\_FWD', ...
-%                'MatlODE\_RK\_FWD', ...
-%                'MatlODE\_SDIRK\_FWD');
+%                'MATLODE\_ROS\_FWD', ...
+%                'MATLODE\_RK\_FWD', ...
+%                'MATLODE\_SDIRK\_FWD');
 %         legend('ode45', ...
 %                'ode23', ...
 %                'ode113', ...
-%                'MatlODE\_ERK\_FWD (Erk23)', ...
-%                'MatlODE\_ERK\_FWD (Dopri5)',...
-%                'MatlODE\_ERK\_FWD (Dopri853)');
-        legend('ode15s', ...
-               'MatlODE\_ERK\_FWD (Erk23)', ...
-               'MatlODE\_ERK\_FWD (Dopri5)',...
-               'MatlODE\_ERK\_FWD (Dopri853)', ...
-               'MatlODE\_ROS\_FWD (Lobatto3C)', ...
-               'MatlODE\_RK\_FWD (Ros4)',...
-               'MatlODE\_SDIRK\_FWD (Sdirk4A)');           
+%                'MATLODE\_ERK\_FWD (Erk23)', ...
+%                'MATLODE\_ERK\_FWD (Dopri5)',...
+%                'MATLODE\_ERK\_FWD (Dopri853)');
+%         legend('ode45', ...
+%                'ode15s', ...
+%                'ode23', ...
+%                'ode113', ...               
+%                'ode23s', ...
+%                'ode23t', ...
+%                'ode23tb', ...
+%                'MATLODE\_ERK\_FWD (Dopri5)',...
+%                'MATLODE\_ROS\_FWD (Lobatto3C)', ...
+%                'MATLODE\_RK\_FWD (Ros4)',...
+%                'MATLODE\_SDIRK\_FWD (Sdirk4A)');
+        legend('ode15s', ...          
+               'ode23s', ...
+               'ode23t', ...
+               'ode23tb', ...
+               'MATLODE\_ROS\_FWD (Lobatto3C)', ...
+               'MATLODE\_RK\_FWD (Ros4)',...
+               'MATLODE\_SDIRK\_FWD (Sdirk4A)');             
         xlabel('CPU Time (sec)');
         ylabel('Relative Error');
         title('CPU vs. Relative Error (Van Der Pol)');
@@ -845,46 +865,46 @@ switch ( analysis )
         saveas(gcf,strcat(resultsPath,'/VanDerPol_Implicit_CpuResults.fig'),'fig');
          
         figure;
-%         loglog(nsteps_ode45,error_ode45,'--o', ...
-%                nsteps_ode15s,error_ode15s,'--+', ...
-%                nsteps_ode23,error_ode23, '--*', ...
-%                nsteps_ode113,error_ode113, '--^', ...
-%                nsteps_ode23s,error_ode23s, '--x', ...
-%                nsteps_ode23t,error_ode23t, '--s', ...
-%                nsteps_ode23tb,error_ode23tb, '--d', ...
-%                nsteps_ERK_FWD,error_ERK_FWD, '-o', ...
-%                nsteps_ROS_FWD,error_ROS_FWD, '-+', ...
-%                nsteps_RK_FWD,error_RK_FWD, '-*', ...
-%                nsteps_SDIRK_FWD,error_SDIRK_FWD, '-^');
-        loglog(nsteps_ode15s,error_ode15s,'--o', ...
-               nsteps_ERK_FWD_1,error_ERK_FWD_1, '-+', ...
-               nsteps_ERK_FWD_4,error_ERK_FWD_4, '-*', ...
-               nsteps_ERK_FWD_5,error_ERK_FWD_5, '-^', ...
-               nsteps_ROS_FWD,error_ROS_FWD, '-x', ...
-               nsteps_RK_FWD,error_RK_FWD, '-s', ...
-               nsteps_SDIRK_FWD,error_SDIRK_FWD, '-d');
+        loglog(nsteps_ode45,error_ode45,'--o', ...
+               nsteps_ode15s,error_ode15s,'--+', ...
+               nsteps_ode23,error_ode23, '--*', ...
+               nsteps_ode113,error_ode113, '--^', ...
+               nsteps_ode23s,error_ode23s, '--x', ...
+               nsteps_ode23t,error_ode23t, '--s', ...
+               nsteps_ode23tb,error_ode23tb, '--d', ...
+               nsteps_ERK_FWD_1,error_ERK_FWD_1, '-o', ...
+               nsteps_ROS_FWD,error_ROS_FWD, '-+', ...
+               nsteps_RK_FWD,error_RK_FWD, '-*', ...
+               nsteps_SDIRK_FWD,error_SDIRK_FWD, '-^');
+%         loglog(nsteps_ode15s,error_ode15s,'--o', ...
+%                nsteps_ERK_FWD_1,error_ERK_FWD_1, '-+', ...
+%                nsteps_ERK_FWD_4,error_ERK_FWD_4, '-*', ...
+%                nsteps_ERK_FWD_5,error_ERK_FWD_5, '-^', ...
+%                nsteps_ROS_FWD,error_ROS_FWD, '-x', ...
+%                nsteps_RK_FWD,error_RK_FWD, '-s', ...
+%                nsteps_SDIRK_FWD,error_SDIRK_FWD, '-d');
 %                'ode15s', ...           
 %                'ode23s', ...
 %                'ode23t', ...
 %                'ode23tb', ...                   
-%                'MatlODE\_ROS\_FWD', ...
-%                'MatlODE\_RK\_FWD', ...
-%                'MatlODE\_SDIRK\_FWD');
+%                'MATLODE\_ROS\_FWD', ...
+%                'MATLODE\_RK\_FWD', ...
+%                'MATLODE\_SDIRK\_FWD');
 %         legend('ode45', ...
 %                'ode23', ...
 %                'ode15s', ...
 %                'ode23s', ...
 %                'ode113', ...
-%                'MatlODE\_ERK\_FWD (Erk23)', ...
-%                'MatlODE\_ERK\_FWD (Dopri5)',...
-%                'MatlODE\_ERK\_FWD (Dopri853)');
+%                'MATLODE\_ERK\_FWD (Erk23)', ...
+%                'MATLODE\_ERK\_FWD (Dopri5)',...
+%                'MATLODE\_ERK\_FWD (Dopri853)');
         legend('ode15s', ...
-               'MatlODE\_ERK\_FWD (Erk23)', ...
-               'MatlODE\_ERK\_FWD (Dopri5)', ...
-               'MatlODE\_ERK\_FWD (Dopri853)', ...             
-               'MatlODE\_ROS\_FWD (Lobatto3C)', ...
-               'MatlODE\_RK\_FWD (Ros4)',...
-               'MatlODE\_SDIRK\_FWD (Sdirk4A)');  
+               'MATLODE\_ERK\_FWD (Erk23)', ...
+               'MATLODE\_ERK\_FWD (Dopri5)', ...
+               'MATLODE\_ERK\_FWD (Dopri853)', ...             
+               'MATLODE\_ROS\_FWD (Lobatto3C)', ...
+               'MATLODE\_RK\_FWD (Ros4)',...
+               'MATLODE\_SDIRK\_FWD (Sdirk4A)');  
         xlabel('Number of Steps');
         ylabel('Relative Error');
         title('Number of Steps vs. Relative Error (Van Der Pol)');

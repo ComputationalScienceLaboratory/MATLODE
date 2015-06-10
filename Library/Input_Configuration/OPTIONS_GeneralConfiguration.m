@@ -328,7 +328,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                 case 6
                     [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri853( RK8 );
                 case 7
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_ForwardEuler( 1 ); % temp
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Fehlberg78( 1 ); % temp
                 otherwise
                     [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
             end

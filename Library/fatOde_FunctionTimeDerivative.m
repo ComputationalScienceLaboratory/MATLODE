@@ -1,51 +1,29 @@
+%% fatOde_FunctionTimeDerivative
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%
+%% Input Parameters
+%
+%% Output Parameters
+%
+%% Description
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ dFdT ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, OdeFunction, ISTATUS )
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Filename: fatOde_FunctionTimeDerivative.m
-%
-% Original Author: 
-%
-% File Creation Date: 
-%
-% Input Arguments:
-%   Name        Type
-%   T           double
-%   Roundoff    double
-%   Y           double
-%   Fcn0        double
-%   ISTATUS     struct
-%
-% Output Arguments:
-%   Name        Type
-%   dFdT        double
-%   ISTATUS     struct
-% 
-% Modification History:
-%   Date        Developer         Email             Action  
-%   7/17/2012   Tony D'Augustine  adaug13@vt.edu    Translated Fortran90
-%                                                   ros_FunTimeDerivative() to MATLAB.
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% fatOde_FunctionTimeDerivative:
-%   Calculate the time partial derivative of the function by finite
-%   differences.
-%
-% fatOde_FunctionTimeDerivative: INPUT ARGUMENTS
-%          T (double):
-%   Roundoff (double):
-%          Y (double):
-%       Fcn0 (double):
-%    ISTATUS (struct):
-%
-% fatOde_FunctionTimeDerivative: OUTPUT ARGUMENTS
-%      dFdT (double):
-%   ISTATUS (struct):
-%
-% fatOde_FunctionTimeDerivative: SYNTAX
-%   [ dFdT ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, ISTATUS )
-%
-% fatOde_FunctionTimeDerivative: EXAMPLE
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     % local variables
     DeltaMin = 1.0d-6;
@@ -57,3 +35,28 @@ function [ dFdT ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0,
     dFdT = dFdT/Delta;
 
 return;
+
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt.edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+% 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

@@ -1,37 +1,30 @@
+%% fatOde_ErrorNorm_TLM
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%
+%% Input Parameters
+%
+%% Output Parameters
+%
+%% Description
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ FWD_Err ] = fatOde_ErrorNorm_TLM( NVAR, FWD_Err, Yerr_TLM, OPTIONS )
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Filename: fatOde_ErrorNorm_TLM.m
-%
-% Original Author: 
-%
-% File Creation Date: 
-%
-% Input Arguments:
-%
-% Output Arguments:
-% 
-% Modification History:
-%   Date        Developer         Email             Action  
-%   7/17/2012   Tony D'Augustine  adaug13@vt.edu    Translated Fortran90
-%                                                   ErrorNorm_TLM() to MATLAB.
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% fatOde_ErrorNorm_TLM:
-%   Calculate the error norm for the tangent linear model implementation.
-%
-% fatOde_ErrorNorm_TLM: INPUT ARGUMENTS
-%   NVAR (integer):
-%   NTLM (integer):
-%   Y_TLM (integer):
-%
-% fatOde_ErrorNorm_TLM: OUTPUT ARGUMENTS
-%   FWD_Err (double):
-%
-% fatOde_ErrorNorm_TLM: SYNTAX
-%
-% fatOde_ErrorNorm_TLM: EXAMPLE
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 %     SCAL = 1.0 ./ OPTIONS.AbsTol_TLM+OPTIONS.RelTol_TLM .* abs(Yerr_TLM);
 %     FWD_Err = max([FWD_Err, sqrt(sum((OPTIONS.Y_TLM.*SCAL).^2,1)./NVAR), 1.0d-10] );
     
@@ -51,3 +44,27 @@ function [ FWD_Err ] = fatOde_ErrorNorm_TLM( NVAR, FWD_Err, Yerr_TLM, OPTIONS )
 
 return;
 
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt.edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+% 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>

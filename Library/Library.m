@@ -9,6 +9,7 @@
 % <html>
 % Up: <a href="../../index.html">MATLODE Toolbox</a>
 % </html>
+%
 
 %% Driver Integrators
 % <html>
@@ -138,6 +139,7 @@
 %       <a href="nothing.html">Left4 FD JacV</a><br>
 %       <a href="nothing.html">Matrix Free Jac</a>
 %   </p>
+% <p>Return to <a href="Library.html">Top</a></p>
 % </html>
 
 %% Memory
@@ -145,6 +147,7 @@
 %       <a href="nothing.html">MATLODE Allocate Memory</a><br>
 %       <a href="nothing.html">MATLODE Append Memory</a><br>
 %       <a href="nothing.html">MATLODE Deallocate Memory</a>
+% <p>Return to <a href="Library.html">Top</a></p>
 % </html>
 
 %% Single Step Method
@@ -153,6 +156,7 @@
 %       <a href="nothing.html">Erow4 Adapt Matrix Free</a><br>
 %       <a href="nothing.html">Exp4 Adapt Marix Free</a><br>
 %       <a href="nothing.html">Exp4 Single Step</a>
+% <p>Return to <a href="Library.html">Top</a></p>
 % </html>
 
 %% Structs
@@ -163,7 +167,32 @@
 %       <a href="nothing.html">RSTATUS Struct</a>
 % <p>Return to <a href="Library.html">Top</a></p>
 % </html>
+%
 
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
+
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt.edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+% 
 %%
 % <html>
 %   <div>

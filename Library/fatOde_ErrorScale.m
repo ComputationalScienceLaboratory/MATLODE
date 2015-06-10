@@ -1,49 +1,29 @@
+%% fatOde_ErrorScale
+%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../MATLODE_LOGO.png" height="150px"></img>
+%   </div>
+% </html>
+%
+%% Syntax
+%
+%% Input Parameters
+%
+%% Output Parameters
+%
+%% Description
+%
+%% Reference
+% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
+%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
+%
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function SCAL = fatOde_ErrorScale( NVAR, ITOL, AbsTol, RelTol, Y0 )
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Filename: fatOde_ErrorScale.m
-%
-% Original Author: 
-%
-% File Creation Date: 
-%
-% Input Arguments:
-%   Name    Type
-%   NVAR    integer
-%   ITOL    
-%   AbsTol  double
-%   RelTol  double
-%   Y0      double
-%
-% Output Arguments:
-%   Name    Type
-%   SCAL    double
-% 
-% Modification History:
-%   Date        Developer         Email             Action  
-%   7/17/2012   Tony D'Augustine  adaug13@vt.edu    Translated Fortran90
-%                                                   ErrorScale() to MATLAB.
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% fatOde_ErrorNorm:
-%   Calculate the error norm.
-%
-% fatOde_ErrorNorm: INPUT ARGUMENTS
-%    NVAR (integer):
-%          ITOL ( ):
-%   AbsTol (double):
-%   RelTol (double):
-%       Y0 (double):
-%   
-% fatOde_ErrorNorm: OUTPUT ARGUMENT
-%   SCAL (double):
-%
-% fatOde_ErrorNorm: SYNTAX
-%   [ SCAL ] = fatOde_ErrorScale( NVAR, ITOL, AbsTol, RelTol, Y0 )
-%
-% fatOde_ErrorNorm: EXAMPLE
-%   SCAL = fatOde)ErrorScale( NVAR, OPTIONS.ITOL, OPTIONS.AbsTol, OPTIONS.RelTol, Y0 );
-%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     SCAL = zeros(NVAR,1);
 
     if ( ITOL == 0 )
@@ -59,3 +39,27 @@ function SCAL = fatOde_ErrorScale( NVAR, ITOL, AbsTol, RelTol, Y0 )
 
 return; 
 
+%% Major Modification History
+% <html>
+% <table border=1>
+%   <tr>
+%       <td><b>Date</b></td>
+%       <td>Developer</td>
+%       <td>Email</td>
+%       <td>Action</td>
+%   </tr>
+%   <tr>
+%       <td>1/1/2014</td>
+%       <td>Tony D'Augustine</td>
+%       <td>adaug13@vt.edu</td>
+%       <td>Release MATLODE_v2.0.00</td>
+%   </tr>
+% </table>
+% </html>
+% 
+%%
+% <html>
+%   <div>
+%       <img style="float: right" src="../../CSL_LogoWithName_1.png" height="50px"></img>
+%   </div>
+% </html>
