@@ -1,7 +1,10 @@
 %% Testing Material: TEST_General_Sensitivity
 %
-%
 %%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ steps, errorSolution, errorSensitivity, errorQuadrature, errorMu ] = TEST_General_Sensitivity( MATLODE_Integrator, Ode_Function, Tspan, y0, Option, MaxTolerance, MinTolerance, T_Ref, Y_Ref, Sens_Ref, Quad_Ref, Mu_Ref )
 
     Npoints = 7;

@@ -1,7 +1,10 @@
 %% Testing Material: Testing_General_Forward
 %
-%
 %%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ steps, errorSolution ] = TEST_General_Forward( MATLODE_Integrator, Ode_Function, Tspan, y0, Option, MaxTolerance, MinTolerance, T_Ref, Y_Ref )
 
     Npoints = 7;

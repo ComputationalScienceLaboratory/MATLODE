@@ -1,3 +1,8 @@
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ ISING, e2 ] = lss_decomp_cmp( NVAR, Alpha, Beta, fjac )
 % Based off of lapack_decomp_cmp( alpha, beta, ising ) [LS_Solver.F90]
     

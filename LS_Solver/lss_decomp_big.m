@@ -1,3 +1,8 @@
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ e_big ] = lss_decomp_big( NVAR, H, fjac1, fjac2, fjac3 )
 %LSS_DECOMP_BIG Summary of this function goes here
 %   Detailed explanation goes here

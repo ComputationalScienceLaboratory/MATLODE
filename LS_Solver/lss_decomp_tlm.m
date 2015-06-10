@@ -1,3 +1,8 @@
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
 function [ ISING e_tlm ] = lss_decomp_tlm( NVAR, hgamma, ISING, fjac1 )
 % Based off of lapack_decomp_tlm( hgamma, ising )
 

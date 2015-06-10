@@ -31,3 +31,9 @@
 %       <li><a href="TEST_MATLODE_SDIRK_TLM_Integrator.html">TEST_MATLODE_SDIRK_TLM_Integrator</a></li>
 %   </ul>
 % </html>
+
+%%
+%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
+%  Computational Science Laboratory, Virginia Tech.
+%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%
