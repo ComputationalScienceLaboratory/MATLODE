@@ -26,10 +26,7 @@
 %     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
 %
 %%
-%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
-%  Computational Science Laboratory, Virginia Tech.
-%  ©2015 Virginia Tech Intellectual Properties, Inc.
-%
+% Copyright 2015 Computational Science Laboratory
 function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
 
     if ( ~isempty(OPTIONS_U.AbsTol) == true )
@@ -94,6 +91,16 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     end
     if ( ~isempty(OPTIONS_U.GMRES_TOL) == true )
         OPTIONS.GMRES_TOL = OPTIONS_U.GMRES_TOL;
+    end
+    
+    if ( ~isempty(OPTIONS_U.GMRES_MaxIt) == true )
+        OPTIONS.GMRES_MaxIt = OPTIONS_U.GMRES_MaxIt;
+    end
+    if ( ~isempty(OPTIONS_U.GMRES_Restart) == true )
+        OPTIONS.GMRES_Restart = OPTIONS_U.GMRES_Restart;
+    end
+    if ( ~isempty(OPTIONS_U.GMRES_P) == true )
+        OPTIONS.GMRES_P = OPTIONS_U.GMRES_P;
     end
     if ( ~isempty(OPTIONS_U.Hess_vec) == true )
         OPTIONS.Hess_vec = OPTIONS_U.Hess_vec;

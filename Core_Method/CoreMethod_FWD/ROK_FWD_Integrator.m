@@ -71,7 +71,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
     
     K = zeros(NVAR,Coefficient.NStage);
-    lambda = zeros(OPTIONS.NBasisVectors,Coefficient.NStage);
+%     lambda = zeros(OPTIONS.NBasisVectors,Coefficient.NStage);
     
     
     quadrature = OPTIONS.Quadrature();    
@@ -114,6 +114,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         ISTATUS.Nfun = ISTATUS.Nfun + 1;
         
         % Compute the function derivative with respect to T
+        dFdT=0;
         if ( ~OPTIONS.Autonomous )
             [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, OdeFunction, ISTATUS );
         end
@@ -133,13 +134,23 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         
         % Repeat step calculation until current step accepted
         accepted = false;
+        enrich = false;
         while ( ~accepted ) % accepted
             
-            [Varn, Harn, w] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.MatrixFree); % M should be an option!!!!!!!1
-
-            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( OPTIONS.NBasisVectors, H, Direction, gam, Harn, ISTATUS );
+            if(~enrich)
+                [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.MatrixFree); % M should be an option!!!!!!!1
+                M = OPTIONS.NBasisVectors;
+            else
+%                 [Varn, Harn, w, HEnrich] = Arnoldi_MF_Enrich(NVAR, M, Varn, Harn, w, HEnrich, Yerr);
+%                 M = M + 1; % The increment needs to be the number of vectors added.  Here it is 1, since Yerr is (N,1);
+            end
+            
+            lambda = zeros(M,Coefficient.NStage);
+            
+            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
             
             if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
+                keyboard
                 Ierr = fatOde_ROS_ErrorMessage( -8, T, H );
                 return;
             end
@@ -150,16 +161,18 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             for istage=1:Coefficient.NStage % stages
                 
                 insum = Y;
-                outsum = zeros(OPTIONS.NBasisVectors, 1);
+                outsum = zeros(M, 1);
                 if (istage > 1)
                     for j = 1:istage-1
                         insum = insum + alpha(istage,j)*K(:,j);
                         outsum = outsum + gamma(istage,j)*Harn*lambda(:,j);
                     end
+                    locF = OdeFunction(T + H*c(istage), insum);
+                else
+                    locF = Fcn0;
                 end
-                locF = OdeFunction(T + H*c(istage), insum);
                 phi = transpose(Varn)*locF + w;
-                locLHS = eye(OPTIONS.NBasisVectors)-H*gam*Harn; 
+                locLHS = eye(M)-H*gam*Harn; 
                 locRHS = H*(phi + outsum);
                 lambda(:,istage) = locLHS\locRHS;
                 K(:,istage) = Varn*lambda(:,istage) + H*(locF - Varn*phi);
@@ -227,7 +240,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 RejectMoreH = false;
                 H = Hnew;
                 accepted = true;                
-                
+                enrich = false;
                 % for debugging
                 if ( OPTIONS.displaySteps == true )
                     str = ['Accepted step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
@@ -252,6 +265,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                     str = ['Rejected step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
                     disp(str);
                 end
+                enrich = true;
                 
             end
         end
@@ -274,7 +288,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
 return;
 
-function [Varn, Harn, w] = Arnoldi_MF(J, f, dFdT, N, M, matrixFree)
+function [Varn, Harn, w, HEnrich] = Arnoldi_MF(J, f, dFdT, N, M, matrixFree)
 
 Varn = zeros(N, M);
 Harn = zeros(M, M);
@@ -294,28 +308,86 @@ for i = 1:M
     end
     
     xi = 0;
-    tau = sqrt(zeta'*zeta);
+
     for j = 1:i
         Harn(j,i) = zeta'*Varn(:,j) + xi*w(j);
         zeta = zeta - Harn(j,i)*Varn(:,j);
         xi = xi - Harn(j,i)*w(j);
     end
-    bignorm = sqrt(zeta'*zeta + xi^2);
-    if bignorm/tau <= .25
-        for j = 1:i
-            rho = zeta'*Varn(:,j) + xi*w(j);
-            zeta = zeta - rho*Varn(:,j);
-            xi = xi - rho*w(j);
-            Harn(j,i) = Harn(j,i) - rho;
-        end
-    end
+%     bignorm = sqrt(zeta'*zeta + xi^2);
+%     if bignorm/tau <= .25
+%         for j = 1:i
+%             rho = zeta'*Varn(:,j) + xi*w(j);
+%             zeta = zeta - rho*Varn(:,j);
+%             xi = xi - rho*w(j);
+%             Harn(j,i) = Harn(j,i) - rho;
+%         end
+%     end
     if i < M
        bignorm = sqrt(zeta'*zeta + xi^2);
        Harn(i+1,i) = bignorm;
        Varn(:, i+1) = zeta/Harn(i+1,i);
        w(i+1) = xi/Harn(i+1,i);
+    else
+       bignorm = sqrt(zeta'*zeta + xi^2);
+       HEnrich = bignorm;
+%        Varn(:, i+1) = zeta/Harn(i+1,i);
+       HEnrich = xi/HEnrich; 
     end
 end
+
+return
+
+function [Varn, Harn, W, Henrich] = Arnoldi_MF_Enrich(N, M, ...
+                                V, H, w, HEnrich, newVec)
+
+K = size(newVec,2);
+Varn = zeros(N, M+K);
+Harn = zeros(M, M+K);
+W = zeros(M+K, 1);
+
+Harn(1:M,1:M) = H(:,:);
+Harn(M+1,M) = HEnrich;
+Varn(:,1:M) = V(:,:);
+W(1:M) = w(:);
+
+%keyboard
+for i = M+1:M+K
+    
+    zeta = newVec(:,i-M);
+    zeta = zeta/norm(zeta);
+    xi = 0;
+    tau = sqrt(zeta'*zeta);
+    
+    for j = 1:i
+        Harn(j,i) = zeta'*Varn(:,j) + xi*W(j);
+        zeta = zeta - Harn(j,i)*Varn(:,j);
+        xi = xi - Harn(j,i)*W(j);
+    end
+    bignorm = sqrt(zeta'*zeta + xi^2);
+%     if bignorm/tau <= .25
+%         for j = 1:i
+%             rho = zeta'*Varn(:,j) + xi*W(j);
+%             zeta = zeta - rho*Varn(:,j);
+%             xi = xi - rho*W(j);
+%             Harn(j,i) = Harn(j,i) - rho;
+%         end 
+%     end
+    bignorm = sqrt(zeta'*zeta + xi^2);
+    if(i+1 > M+K);
+        Henrich = bignorm;
+        Varn(:, i) = zeta/Henrich;
+        W(i) = xi/Henrich;
+  
+    else
+        Harn(i+1,i) = bignorm;
+        Varn(:, i) = zeta/Harn(i+1,i);
+        W(i) = xi/Harn(i+1,i);
+    end
+    
+end
+
+return
 
 %% Major Modification History
 % <html>

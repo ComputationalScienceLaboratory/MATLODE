@@ -1,43 +1,3 @@
-%% OPTIONS_GeneralConfiguration
-%
-% <html>
-%   <div>
-%       <img style="float: right" src="../../../MATLODE_LOGO.png" height="150px"></img>
-%   </div>
-% </html>
-%
-%% Syntax
-%    [ Options, Coefficient ] = OPTIONS_GeneralConfiguration( Options, family, implementation, y0, tspan )
-%
-%% Input Parameters
-% |Options|: option struct
-%
-% |family|: i.e. ERK, RK, ROS, SDIRK
-%
-% |implementation|: i.e. FWD, TLM, ADJ
-%
-% |y0|: initial state vector
-%
-% |tspan|: Time interval
-%
-%% Output Parameters
-% |Options|: option struct configured to Toolbox default
-%
-% |Coefficient|: Associated coefficients determined by 'method' option
-% parameter
-%
-%% Description
-% Configures the option struct to the Toolbox's default tuning.
-%
-%% Reference
-% [1] Tony D'Augustine, Adrian Sandu. MATLODE: A MATLAB ODE Solver and
-%     Sensitivity Analysis Toolbox. Submitted to ACM TOMS.
-%
-%%
-%  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
-%  Computational Science Laboratory, Virginia Tech.
-%  ©2015 Virginia Tech Intellectual Properties, Inc.
-%
 function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, family, implementation, y0, tspan )
     
     roundOff = eps/2;
@@ -328,7 +288,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                 case 6
                     [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri853( RK8 );
                 case 7
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Fehlberg78( 1 ); % temp
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_ForwardEuler( 1 ); % temp
                 otherwise
                     [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
             end
@@ -359,8 +319,12 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             Coefficient.Name = rkName;
         case 'ROK'
             switch( OPTIONS.Method )
-                otherwise
+                case 1
+                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4a( 0 );
+                case 2
                     [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
+                otherwise
+                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4a( 0 );
             end
             Coefficient.Method = rokMethod;
             Coefficient.ELO = rokELO;
@@ -575,7 +539,19 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     if( strcmp(implementation,'ADJ') )
         switch( family )
             case 'ERK'
-            case 'RK'              
+            case 'RK'
+            switch( OPTIONS.AdjointSolve )
+                case 0
+                    % disp('Solve_fixed');
+                case 1
+                    % disp('Solve_fixed');
+                case 2
+                    % disp('Solve_direct');
+                case 3
+                    % disp('Solve_adaptive');
+                otherwise
+                    disp('ERROR: REGISTER 14');
+            end                
             case 'ROS'
             case 'SDIRK'
             otherwise
@@ -628,9 +604,3 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
 
 end
 
-%%
-% <html>
-%   <div>
-%       <img style="float: right" src="../../../CSL_LogoWithName_1.png" height="50px"></img>
-%   </div>
-% </html>
