@@ -151,13 +151,30 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
         end
         
         % Compute the Jacobian at current time
-        fjac = OPTIONS.Jacobian(T,Y);
-        ISTATUS.Njac = ISTATUS.Njac + 1;
+        if ( ~OPTIONS.MatrixFree )
+            fjac = OPTIONS.Jacobian(T,Y);
+            ISTATUS.Njac = ISTATUS.Njac + 1;
+        else
+            if( ~isempty(OPTIONS.Jacobian) )
+                fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+            else
+                Fcn0 = OdeFunction(T,Y);
+                normy = norm(Y);
+                fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
+            end
+        end
         
         % Repeat step calculation until current step accepted
         accepted = false;
         while ( ~accepted ) % accepted
-            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( NVAR, H, Direction, ros_Gamma(1), fjac, ISTATUS );
+            
+            if ( ~OPTIONS.MatrixFree )
+                [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( NVAR, H, Direction, ros_Gamma(1), fjac, ISTATUS );
+            else
+                hgaminv = 1.0/(Direction*H*ros_Gamma(1));
+                e = @(v)(hgaminv*v - fjac(v));
+                ISING = 0;
+            end
             
             if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
                 error('Matrix is repeatedly singular');
@@ -205,7 +222,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 end
                 
                 % Solve the system
-                K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+                if ( ~OPTIONS.MatrixFree )
+                    K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+                else
+                    [ K(ioffset+1:ioffset+NVAR), gmresFlag, ~, iter ] = ...
+                        gmres(e, K(ioffset+1:ioffset+NVAR), ...
+                        OPTIONS.GMRES_Restart,...
+                        OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
+                    ISTATUS.Nfun = ISTATUS.Nfun + iter(1);
+                end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
             end % stages
