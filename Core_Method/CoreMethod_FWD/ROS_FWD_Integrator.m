@@ -146,6 +146,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
         ISTATUS.Nfun = ISTATUS.Nfun + 1;
         
         % Compute the function derivative with respect to T
+        dFdT=0;
         if ( ~OPTIONS.Autonomous )
             [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, OdeFunction, ISTATUS );
         end

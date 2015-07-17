@@ -75,9 +75,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
     SkipJac = false;
     Reject = false;
     FirstStep = true;
-    
-    Transp = false;
-    
+   
     SCAL = 1.0 ./ ( OPTIONS.AbsTol + OPTIONS.RelTol .* abs(Y) );
     
    if ( OPTIONS.storeCheckpoint == true )
