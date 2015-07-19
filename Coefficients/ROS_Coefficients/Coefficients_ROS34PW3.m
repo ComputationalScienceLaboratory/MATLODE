@@ -1,6 +1,6 @@
-function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW2( ROW1 )
+function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW3( ROW2 )
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Filename: Coefficients_ROS34PW2.m
+% Filename: Coefficients_ROS34PW3.m
 %
 % Original Author:
 %
@@ -8,7 +8,7 @@ function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW2( ROW1 )
 %
 % Input Arguments:
 %   Name        Type
-%   ROW1        integer
+%   ROW2        integer
 %
 % Output Arguments:
 %   Name        Type
@@ -28,10 +28,10 @@ function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW2( ROW1 )
 %" BIT Numerical Mathematics 45.4 (2005): 761-787.
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Coefficients_Ros34PW2:
-%   Initializes coefficients for ROS34PW2 Rosenbrock-w method.
+%   Initializes coefficients for ROS34PW3 Rosenbrock-w method.
 % 
 %       Stages  Order   Stability Property
-%       4       3       L-stable, Stiffly accurate
+%       4       4       A-stable 
 %
 % Coefficients_Ros34PW2: INPUT ARGUMENTS
 %   ROW (integer):
@@ -55,42 +55,42 @@ function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW2( ROW1 )
     global ros_A ros_C ros_M ros_E
     global ros_NewF
 
-    rosMethod = ROW1;
+    rosMethod = ROW2;
 	% Method name
-    rosName = 'ROS34PW2';
+    rosName = 'ROS34PW3';
     % Number of stages
     rosS = 4;
     
     % Gamma Matrix
-    Gamma_ii=4.3586652150845900e-01;
-    Gamma=Gamma_ii*diag(ones(1,rosS));
-    Gamma(2,1)=-8.7173304301691801e-01;
-    Gamma(3,1)=-9.0338057013044082e-01;
-    Gamma(3,2)= 5.4180672388095326e-02;
-    Gamma(4,1)= 2.4212380706095346e-01;
-    Gamma(4,2)=-1.2232505839045147e+00;
-    Gamma(4,3)= 5.4526025533510214e-01;
+    Gamma_ii=  1.0685790213016289e+001;
+    Gamma= Gamma_ii*diag(ones(1,rosS));
+    Gamma(2,1)=-2.5155456020628817e+00;
+    Gamma(3,1)=-8.7991339217106512e-01;
+    Gamma(3,2)=-9.6014187766190695e-01;
+    Gamma(4,1)=-4.1731389379448741e-01;
+    Gamma(4,2)= 4.1091047035857703e-01;
+    Gamma(4,3)=-1.3558873204765276e+00;
     
     %%%% Alpha Matrix
     Alpha=zeros(rosS);
-    Alpha(2,1)= 8.7173304301691801e-01;
-    Alpha(3,1)= 8.4457060015369423e-01;
-    Alpha(3,2)=-1.1299064236484185e-01;
-    Alpha(4,1)= 0.0000000000000000e+00;
-    Alpha(4,2)= 0.0000000000000000e+00;
-    Alpha(4,3)= 1.0000000000000000e+00;
+    Alpha(2,1)= 2.5155456020628817e+00;
+    Alpha(3,1)= 5.0777280103144085e-01;
+    Alpha(3,2)= 7.5000000000000000e-01;
+    Alpha(4,1)= 1.3959081404277204e-01;
+    Alpha(4,2)=-3.3111001065419338e-01;
+    Alpha(4,3)= 8.2040559712714178e-01;
     
     %%%% Coefficients for new step solution bi
-    b(1) = 2.4212380706095346d-01;
-    b(2) =-1.2232505839045147d+00;
-    b(3) = 1.5452602553351020d+00;
-    b(4) = 4.3586652150845900d-01;
+    b(1) = 2.2047681286931747e-01;
+    b(2) = 2.7828278331185935e-03;
+    b(3) = 7.1844787635140066e-03;
+    b(4) = 7.6955588053404989e-01;
     
     %%%% Coefficients for error estimator \hat b_i
-    b_hat(1) = 3.7810903145819369d-01;
-    b_hat(2) =-9.6042292212423178d-02;
-    b_hat(3) = 5.0000000000000000d-01;
-    b_hat(4) = 2.1793326075422950d-01;
+    b_hat(1) = 3.1300297285209688e-01;
+    b_hat(2) =-2.8946895245112692e-01;
+    b_hat(3) = 9.7646597959903003e-01;
+    b_hat(4) = 0.0000000000000000e+00;
     b_hat=b_hat';
     b=b';
     
@@ -149,6 +149,6 @@ function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW2( ROW1 )
     ros_NewF(4)  = true; 
     %~~~> ros_ELO  = estimator of local order - the minimum between the
     %    main and the embedded scheme orders plus 1
-    rosELO  = 3.0d0;
+    rosELO  = 4.0d0;
 
 return;
