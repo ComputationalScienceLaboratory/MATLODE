@@ -112,7 +112,7 @@ function [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_SDIRK_FWD_Integrator( OdeFu
     adjStackFlag = false;
     adjQuadFlag  = false;
     
-    % Configure Options (check this)
+    % Configure Options (check this)f
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,'SDIRK','FWD',Y0,Tspan);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

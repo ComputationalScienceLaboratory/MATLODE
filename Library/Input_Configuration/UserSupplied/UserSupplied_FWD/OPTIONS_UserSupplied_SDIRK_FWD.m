@@ -105,10 +105,10 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_FWD( OPTIONS_U )
         warning('MatlODE:configuration','Mu is not used in integrator.');
         OPTIONS_U.Mu = [];
     end
-    if ( ~isempty(OPTIONS_U.NewtonTol) == true )
-        warning('MatlODE:configuration','NewtonTol is not used in integrator.');
-        OPTIONS_U.NewtonTol = [];
-    end
+%     if ( ~isempty(OPTIONS_U.NewtonTol) == true )
+%         warning('MatlODE:configuration','NewtonTol is not used in integrator.');
+%         OPTIONS_U.NewtonTol = [];
+%     end
     if ( ~isempty(OPTIONS_U.QFun) == true )
         warning('MatlODE:configuration','QFun is not used in integrator.');
         OPTIONS_U.QFun = [];
