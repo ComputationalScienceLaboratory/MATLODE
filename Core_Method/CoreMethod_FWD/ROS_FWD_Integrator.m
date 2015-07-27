@@ -384,6 +384,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
         Yout = Y;
     end
     Yout = transpose(Yout);
+    Tout = transpose(Tout);
     
 return;
 

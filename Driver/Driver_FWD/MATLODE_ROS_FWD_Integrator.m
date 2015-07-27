@@ -130,7 +130,7 @@ function  [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_ROS_FWD_Integrator( OdeFun
             ROS_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Yout_FWD_interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag );
         elapsedTime(interval) = toc;
         ISTATUS_FWD = ISTATUS_Add(ISTATUS_FWD,ISTATUS_FWD_interval);
-        Tout_FWD = [Tout_FWD; Tout_FWD_interval];
+        Tout_FWD = [Tout_FWD Tout_FWD_interval];
         Yout_FWD = [Yout_FWD; Yout_FWD_interval];
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
