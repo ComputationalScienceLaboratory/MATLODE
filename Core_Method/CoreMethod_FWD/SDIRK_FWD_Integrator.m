@@ -24,11 +24,28 @@
 function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_FWD_Integrator( OdeFunction,...
     Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr )
 
+
+
+    % Force initial value matrix to be N X 1.
+    if ( size(Y,2) == 1 )
+        % DO NOTHING
+    else
+        Y = transpose(Y);
+    end  
+
     % Get Problem Size
     NVAR = max(size(Y));
 
     Tinitial = Tspan(1);
     Tfinal = Tspan(2);
+    
+   if ( OPTIONS.storeCheckpoint == true )
+        Yout = zeros(NVAR,OPTIONS.Max_no_steps);
+        Tout = zeros(OPTIONS.Max_no_steps,1);
+        TYindex = 1;
+        Yout(:,TYindex) = Y;
+        Tout(TYindex,1) = Tinitial; 
+    end   
 
     Roundoff = 1.11022302462515654E-016;
         
@@ -42,7 +59,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
     global rkAlpha
     global rkE
     global rkD
-
+    global istage    % Added by Arash to test JacVec convergence
+    istage=1;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -225,7 +243,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                    [ DZ, gmresFlag, ~, iter ] = gmres(e, DZ, ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Nfun = ISTATUS.Nfun + iter(1);
+                    ISTATUS.Njac = ISTATUS.Njac + iter(1); 
                     switch(gmresFlag)
                         case 1
                             warning('GMRES: iterated MAXIT times but did not converge');
@@ -449,7 +467,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
         Tout = T;
         Yout = Y;
     end
-    Tout = Tout';
+    Tout = Tout;
     Yout = Yout';
             
 return;

@@ -131,8 +131,8 @@ function [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_SDIRK_FWD_Integrator( OdeFu
             SDIRK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag );
         elapsedTime(interval) = toc;
         ISTATUS_FWD = ISTATUS_Add(ISTATUS_FWD,FWD_ISTATUS_interval);
-        Tout_FWD = [Tout_FWD FWD_Tout_interval];
-        Yout_FWD = [Yout_FWD; FWD_Yout_interval];
+        Tout_FWD = [Tout_FWD ;FWD_Tout_interval];
+        Yout_FWD = [Yout_FWD ;FWD_Yout_interval];
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     

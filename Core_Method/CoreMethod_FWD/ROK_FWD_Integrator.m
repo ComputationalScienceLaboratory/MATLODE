@@ -60,7 +60,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %   Global Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     global alpha gamma c gam ROK_E b
-    % M = 4;
+    global istage    % Added by Arash to test JacVec convergence
+    istage=1;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initial Settings
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,6 +101,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             || ( Direction < 0 ) && ( (Tfinal-T)+Roundoff <= 0.0 ) )
         
         if ( ISTATUS.Nstp >= OPTIONS.Max_no_steps )
+
             error('Number of steps exceeds maximum buffer bound \n T= %f;     H= %f', T, H );
         end
         if ( ( ( T+0.1*H ) == T) || ( H <= Roundoff ) )
@@ -364,7 +366,7 @@ for i = M+1:M+K
         zeta = zeta - Harn(j,i)*Varn(:,j);
         xi = xi - Harn(j,i)*W(j);
     end
-    bignorm = sqrt(zeta'*zeta + xi^2);
+    %bignorm = sqrt(zeta'*zeta + xi^2);
 %     if bignorm/tau <= .25
 %         for j = 1:i
 %             rho = zeta'*Varn(:,j) + xi*W(j);

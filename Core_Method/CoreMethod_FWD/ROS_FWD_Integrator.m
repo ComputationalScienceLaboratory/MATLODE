@@ -95,7 +95,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
     global ros_A ros_C ros_M ros_E
     global ros_Alpha ros_Gamma
     global ros_NewF
-    
+    global istage    % Added by Arash to test JacVec convergence
+    istage=0;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initial Settings
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,7 +231,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                         gmres(e, K(ioffset+1:ioffset+NVAR), ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Nfun = ISTATUS.Nfun + iter(1);
+                     ISTATUS.Njac = ISTATUS.Njac + iter(1); 
                 end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
