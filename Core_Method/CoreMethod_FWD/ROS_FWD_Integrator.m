@@ -160,7 +160,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
             if( ~isempty(OPTIONS.Jacobian) )
                 if( nargin(OPTIONS.Jacobian) == 3 )
                     fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
-                elseif( nargin( OPTIONS.Jacobian == 2 ) )
+                elseif( nargin( OPTIONS.Jacobian )== 2 )
                     Jac = OPTIONS.Jacobian(T,Y);
                     ISTATUS.Njac = ISTATUS.Njac + 1;
                     fjac = @(vee)(Jac*vee);
