@@ -158,7 +158,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
             ISTATUS.Njac = ISTATUS.Njac + 1;
         else
             if( ~isempty(OPTIONS.Jacobian) )
-                fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+                if( nargin(OPTIONS.Jacobian) == 3 )
+                    fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+                elseif( nargin( OPTIONS.Jacobian == 2 ) )
+                    Jac = OPTIONS.Jacobian(T,Y);
+                    ISTATUS.Njac = ISTATUS.Njac + 1;
+                    fjac = @(vee)(Jac*vee);
+                else
+                    error('Jacobian function takes a fucked up number of variables.')
+                end
             else
                 Fcn0 = OdeFunction(T,Y);
                 normy = norm(Y);

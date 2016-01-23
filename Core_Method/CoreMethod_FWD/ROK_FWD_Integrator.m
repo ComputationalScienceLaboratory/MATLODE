@@ -122,15 +122,24 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         end
         
         % Compute the Jacobian at current time
-        if ( ~OPTIONS.MatrixFree && ~isempty(OPTIONS.Jacobian) )
+        if ( ~OPTIONS.MatrixFree )
             fjac = OPTIONS.Jacobian(T,Y);
             ISTATUS.Njac = ISTATUS.Njac + 1;
         else
             if( ~isempty(OPTIONS.Jacobian) )
-                fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+                if( nargin(OPTIONS.Jacobian) == 3 )
+                    fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+                elseif( nargin( OPTIONS.Jacobian == 2 ) )
+                    Jac = OPTIONS.Jacobian(T,Y);
+                    ISTATUS.Njac = ISTATUS.Njac + 1;
+                    fjac = @(vee)(Jac*vee);
+                else
+                    error('Jacobian function takes a fucked up number of variables.')
+                end
             else
+                Fcn0 = OdeFunction(T,Y);
                 normy = norm(Y);
-                fjac = @(vee)Mat_Free_Jac(T,Y,vee,OdeFunction,Fcn0,normy);
+                fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
             end
         end
         

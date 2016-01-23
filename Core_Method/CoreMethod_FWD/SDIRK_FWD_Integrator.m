@@ -47,8 +47,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
         Tout(TYindex,1) = Tinitial; 
     end   
 
-    Roundoff = 1.11022302462515654E-016;
-        
+    %Roundoff = 1.11022302462515654E-016;
+    Roundoff = 10*eps;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Global Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,18 +125,26 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 
                 % Compute the Jacobian
                 if ( ~SkipJac )
-                    if ( ~OPTIONS.MatrixFree )
-                        fjac = OPTIONS.Jacobian(T,Y);
-                        ISTATUS.Njac = ISTATUS.Njac + 1;
-                    else
-                        if( ~isempty(OPTIONS.Jacobian) )
-                            fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
-                        else
-                            Fcn0 = OdeFunction(T,Y);
-                            normy = norm(Y);
-                            fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
-                        end
-                    end
+                            if ( ~OPTIONS.MatrixFree )
+         		        fjac = OPTIONS.Jacobian(T,Y);
+          		  	ISTATUS.Njac = ISTATUS.Njac + 1;
+        		    else
+            			if( ~isempty(OPTIONS.Jacobian) )
+                			if( nargin(OPTIONS.Jacobian) == 3 )
+                    				fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+                			elseif( nargin( OPTIONS.Jacobian == 2 ) )
+                    				Jac = OPTIONS.Jacobian(T,Y);
+                    				ISTATUS.Njac = ISTATUS.Njac + 1;
+                    				fjac = @(vee)(Jac*vee);
+                			else
+                    			error('Jacobian function takes an unvalid up number of variables.')
+                			end
+            			else
+                			Fcn0 = OdeFunction(T,Y);
+                			normy = norm(Y);
+                			fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
+            			end
+        		   end
                 end
                 
                 % Decomposition
