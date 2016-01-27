@@ -125,16 +125,16 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 
                 % Compute the Jacobian
                 if ( ~SkipJac )
-                            if ( ~OPTIONS.MatrixFree )
+                   if ( ~OPTIONS.MatrixFree )
          		        fjac = OPTIONS.Jacobian(T,Y);
-          		  	ISTATUS.Njac = ISTATUS.Njac + 1;
-        		    else
+          		  	    ISTATUS.Njac = ISTATUS.Njac + 1;
+        		   else
             			if( ~isempty(OPTIONS.Jacobian) )
                 			if( nargin(OPTIONS.Jacobian) == 3 )
                     				fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
                 			elseif( nargin( OPTIONS.Jacobian )== 2 )
                     				Jac = OPTIONS.Jacobian(T,Y);
-                    				ISTATUS.Njac = ISTATUS.Njac + 1;
+                    				%ISTATUS.Njac = ISTATUS.Njac + 1;
                     				fjac = @(vee)(Jac*vee);
                 			else
                     			error('Jacobian function takes an unvalid up number of variables.')
@@ -251,7 +251,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                    [ DZ, gmresFlag, ~, iter ] = gmres(e, DZ, ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Njac = ISTATUS.Njac + iter(1); 
+                    ISTATUS.Njac = ISTATUS.Njac + (iter(1) - 1)*OPTIONS.GMRES_Restart + iter(2); 
                     switch(gmresFlag)
                         case 1
                             warning('GMRES: iterated MAXIT times but did not converge');
@@ -357,7 +357,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                     warning('GMRES: stagnated (two consecutive iterates were the same)');
                     break;
             end            
-            ISTATUS.Nfun = ISTATUS.Nfun + iter(1);
+            ISTATUS.Njac = ISTATUS.Njac + (iter(1) - 1)*OPTIONS.GMRES_Restart + iter(2); 
         end
         ISTATUS.Nsol = ISTATUS.Nsol + 1;       
 

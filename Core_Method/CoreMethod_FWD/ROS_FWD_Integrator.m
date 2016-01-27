@@ -162,7 +162,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                     fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
                 elseif( nargin( OPTIONS.Jacobian )== 2 )
                     Jac = OPTIONS.Jacobian(T,Y);
-                    ISTATUS.Njac = ISTATUS.Njac + 1;
+                    %ISTATUS.Njac = ISTATUS.Njac + 1;
                     fjac = @(vee)(Jac*vee);
                 else
                     error('Jacobian function takes a fucked up number of variables.')
@@ -239,7 +239,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                         gmres(e, K(ioffset+1:ioffset+NVAR), ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                     ISTATUS.Njac = ISTATUS.Njac + iter(1); 
+                        ISTATUS.Njac = ISTATUS.Njac + (iter(1) - 1)*OPTIONS.GMRES_Restart + iter(2);  
                 end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
