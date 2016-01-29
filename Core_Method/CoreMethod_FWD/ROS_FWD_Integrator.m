@@ -61,7 +61,7 @@
 %
 function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD_Integrator( OdeFunction,...
         Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr )
-
+    
     % Force initial value matrix to be N X 1.
     if ( size(Y,2) == 1 )
         % DO NOTHING
@@ -177,6 +177,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
         
         % Repeat step calculation until current step accepted
         accepted = false;
+        gmresFlag = 0;
+        singCount = 0;
         while ( ~accepted ) % accepted
             
             if ( ~OPTIONS.MatrixFree )
@@ -187,7 +189,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 ISING = 0;
             end
             
-            if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
+            if ( ISING ~= 0 || singCount >= 5 ) % More than 5 consecutive failed decompositions
                 error('Matrix is repeatedly singular');
             end
             
@@ -242,6 +244,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
                     ISTATUS.Njac = ISTATUS.Njac + iter(2);  
                     if( gmresFlag ~= 0 )
+                        singCount = singCount + 1;
                         break;
                     end
                 end

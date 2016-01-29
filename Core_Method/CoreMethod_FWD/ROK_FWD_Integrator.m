@@ -92,7 +92,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
     RejectLastH = false;
     RejectMoreH = false;
-    
+   M = OPTIONS.NBasisVectors; 
         
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Time loop
@@ -155,7 +155,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %                 M = M + 1; % The increment needs to be the number of vectors added.  Here it is 1, since Yerr is (N,1);
             end
             
-            lambda = zeros(M,Coefficient.NStage);
+            lambda = zeros(OPTIONS.NBasisVectors,Coefficient.NStage);
             
             [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
             
