@@ -240,11 +240,19 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                         gmres(e, K(ioffset+1:ioffset+NVAR), ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                        ISTATUS.Njac = ISTATUS.Njac + iter(2);  
+                    ISTATUS.Njac = ISTATUS.Njac + iter(2);  
+                    if( gmresFlag ~= 0 )
+                        break;
+                    end
                 end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
             end % stages
+            
+            if( gmresFlag ~= 0 )
+                H = 0.5*H;
+                continue;
+            end
             
             Ynew = Y;
             for j=1:Coefficient.NStage

@@ -137,7 +137,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                     error('Jacobian function takes a fucked up number of variables.')
                 end
             else
-                Fcn0 = OdeFunction(T,Y);
                 normy = norm(Y);
                 fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
             end
@@ -149,9 +148,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         while ( ~accepted ) % accepted
             
             if(~enrich)
-                [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.MatrixFree); % M should be an option!!!!!!!1
-                M = OPTIONS.NBasisVectors;
-                ISTATUS.Njac = ISTATUS.Njac + M;
+                [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.MatrixFree);
+                ISTATUS.Njac = ISTATUS.Njac + OPTIONS.NBasisVectors;
             else
 %                 [Varn, Harn, w, HEnrich] = Arnoldi_MF_Enrich(NVAR, M, Varn, Harn, w, HEnrich, Yerr);
 %                 M = M + 1; % The increment needs to be the number of vectors added.  Here it is 1, since Yerr is (N,1);
@@ -182,6 +180,7 @@ ISTATUS.Nfun = ISTATUS.Nfun + 1;
                         outsum = outsum + gamma(istage,j)*Harn*lambda(:,j);
                     end
                     locF = OdeFunction(T + H*c(istage), insum);
+                    ISTATUS.Nfun = ISTATUS.Nfun + 1;
                 else
                     locF = Fcn0;
                 end

@@ -141,7 +141,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 			end
             			else
                 			Fcn0 = OdeFunction(T,Y);
-					ISTATUS.Nfun = ISTATUS.Nfun+1;
+                            ISTATUS.Nfun = ISTATUS.Nfun+1;
                 			normy = norm(Y);
                 			fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
             			end
