@@ -141,6 +141,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 			end
             			else
                 			Fcn0 = OdeFunction(T,Y);
+					ISTATUS.Nfun = ISTATUS.Nfun+1;
                 			normy = norm(Y);
                 			fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
             			end
@@ -251,7 +252,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                    [ DZ, gmresFlag, ~, iter ] = gmres(e, DZ, ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Njac = ISTATUS.Njac + (iter(1) - 1)*OPTIONS.GMRES_Restart + iter(2); 
+                    ISTATUS.Njac =  ISTATUS.Njac + iter(2); 
                     switch(gmresFlag)
                         case 1
                             warning('GMRES: iterated MAXIT times but did not converge');
@@ -357,7 +358,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                     warning('GMRES: stagnated (two consecutive iterates were the same)');
                     break;
             end            
-            ISTATUS.Njac = ISTATUS.Njac + (iter(1) - 1)*OPTIONS.GMRES_Restart + iter(2); 
+            ISTATUS.Njac = ISTATUS.Njac + iter(2); 
         end
         ISTATUS.Nsol = ISTATUS.Nsol + 1;       
 

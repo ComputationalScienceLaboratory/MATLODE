@@ -151,6 +151,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             if(~enrich)
                 [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.MatrixFree); % M should be an option!!!!!!!1
                 M = OPTIONS.NBasisVectors;
+                ISTATUS.Njac = ISTATUS.Njac + M;
             else
 %                 [Varn, Harn, w, HEnrich] = Arnoldi_MF_Enrich(NVAR, M, Varn, Harn, w, HEnrich, Yerr);
 %                 M = M + 1; % The increment needs to be the number of vectors added.  Here it is 1, since Yerr is (N,1);
@@ -169,6 +170,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Stages
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ISTATUS.Nfun = ISTATUS.Nfun + 1;
             for istage=1:Coefficient.NStage % stages
                 
                 insum = Y;

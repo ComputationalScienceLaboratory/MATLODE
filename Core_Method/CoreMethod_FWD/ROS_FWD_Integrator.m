@@ -168,7 +168,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                     error('Jacobian function takes a fucked up number of variables.')
                 end
             else
-                Fcn0 = OdeFunction(T,Y);
+               % Fcn0 = OdeFunction(T,Y);
+	       % ISTATUS.Nfun= ISTATUS.Nfun+1;
                 normy = norm(Y);
                 fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
             end
@@ -239,7 +240,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                         gmres(e, K(ioffset+1:ioffset+NVAR), ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                        ISTATUS.Njac = ISTATUS.Njac + (iter(1) - 1)*OPTIONS.GMRES_Restart + iter(2);  
+                        ISTATUS.Njac = ISTATUS.Njac + iter(2);  
                 end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
