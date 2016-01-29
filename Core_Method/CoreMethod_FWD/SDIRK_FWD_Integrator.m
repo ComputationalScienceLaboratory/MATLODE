@@ -249,21 +249,31 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 if( ~OPTIONS.MatrixFree )
                     DZ = e\DZ;
                 else
-                   [ DZ, gmresFlag, ~, iter ] = gmres(e, DZ, ...
+                   [ tempDZ, gmresFlag, ~, iter ] = gmres(e, DZ, ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
+                    disp(iter);
                     ISTATUS.Njac =  ISTATUS.Njac + iter(2); 
-                    switch(gmresFlag)
-                        case 1
-                            warning('GMRES: iterated MAXIT times but did not converge');
-                            break;
-                        case 2
-                            warning('GMRES: preconditioner M was ill-conditioned');
-                            break;
-                        case 3
-                            warning('GMRES: stagnated (two consecutive iterates were the same)');
-                            break;
+                    if( gmresFlag ~= 0 )
+                        resvec = abs(e(tempDZ) - DZ);
+                        SCAL = OPTIONS.NewtonTol + abs(DZ);
+                        if ( norm(resvec./SCAL) > sqrt(NVAR) )
+                            switch(gmresFlag)
+                                case 1
+                                    warning('GMRES: iterated MAXIT times but did not converge');
+                                    break;
+                                case 2
+                                    warning('GMRES: preconditioner M was ill-conditioned');
+                                    break;
+                                case 3
+                                    warning('GMRES: stagnated (two consecutive iterates were the same)');
+                                    break;
+                            end
+                        else
+                            gmresFlag = 0;
+                        end
                     end
+                    DZ = tempDZ;
                 end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
 

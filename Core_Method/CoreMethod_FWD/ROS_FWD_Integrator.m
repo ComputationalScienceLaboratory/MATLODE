@@ -238,15 +238,32 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 if ( ~OPTIONS.MatrixFree )
                     K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
                 else
-                    [ K(ioffset+1:ioffset+NVAR), gmresFlag, ~, iter ] = ...
+                    [ tempK, gmresFlag, ~, iter] = ...
                         gmres(e, K(ioffset+1:ioffset+NVAR), ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
                     ISTATUS.Njac = ISTATUS.Njac + iter(2);  
                     if( gmresFlag ~= 0 )
-                        singCount = singCount + 1;
-                        break;
+                        resvec = abs(e(tempK) - K(ioffset+1:ioffset+NVAR));
+                        SCAL = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(K(ioffset+1:ioffset+NVAR));
+                        if (norm(resvec./SCAL) > sqrt(NVAR))
+                            singCount = singCount + 1;
+                            switch(gmresFlag)
+                                case 1
+                                    warning('GMRES: iterated MAXIT times but did not converge');
+                                    break;
+                                case 2
+                                    warning('GMRES: preconditioner M was ill-conditioned');
+                                    break;
+                                case 3
+                                    warning('GMRES: stagnated (two consecutive iterates were the same)');
+                                    break;
+                            end
+                        else
+                            gmresFlag = 0;
+                        end
                     end
+                    K(ioffset+1:ioffset+NVAR) = tempK;
                 end
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
