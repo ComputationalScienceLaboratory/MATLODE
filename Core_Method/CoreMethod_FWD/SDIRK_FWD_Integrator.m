@@ -25,7 +25,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
     Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr )
 
 
-
     % Force initial value matrix to be N X 1.
     if ( size(Y,2) == 1 )
         % DO NOTHING
@@ -64,7 +63,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    gmresFlag = 0;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initial Settings
@@ -111,41 +109,42 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
 %   Control Flags
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     GOTO_Tloop_Flag = false;
-
+    ConsecutiveSng = 0;
+    gmresFlag = 0;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Time loop begins
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     while ( ( Tfinal-T )*Tdirection - Roundoff > 0.0 )
         % Compute E = 1/(h*gamma)-Jac and its LU decomposition
         if ( ~SkipLU )
-            ConsecutiveSng = 0;
             ISING = 1;
+%             ConsecutiveSng = 0;
             while ( ISING ~= 0.0 ) % Hloop1
                 HGammaInv = 1.0/(H*rkGamma);
                 
                 % Compute the Jacobian
                 if ( ~SkipJac )
-                   if ( ~OPTIONS.MatrixFree )
+                    if ( ~OPTIONS.MatrixFree )
          		        fjac = OPTIONS.Jacobian(T,Y);
           		  	    ISTATUS.Njac = ISTATUS.Njac + 1;
-        		   else
-            			if( ~isempty(OPTIONS.Jacobian) )
-                			if( nargin(OPTIONS.Jacobian) == 3 )
+                    else
+                        if( ~isempty(OPTIONS.Jacobian) )
+                            if( nargin(OPTIONS.Jacobian) == 3 )
                     				fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
-                			elseif( nargin( OPTIONS.Jacobian )== 2 )
+                            elseif( nargin( OPTIONS.Jacobian )== 2 )
                     				Jac = OPTIONS.Jacobian(T,Y);
                     				%ISTATUS.Njac = ISTATUS.Njac + 1;
                     				fjac = @(vee)(Jac*vee);
                 			else
                     			error('Jacobian function takes an invalid number of variables.')
-                			end
-            			else
+                            end
+                        else
                 			Fcn0 = OdeFunction(T,Y);
                             ISTATUS.Nfun = ISTATUS.Nfun+1;
                 			normy = norm(Y);
                 			fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
-            			end
-        		   end
+                        end
+                    end
                 end
                 
                 % Decomposition
@@ -161,6 +160,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                     ISING = true; % ising -> 1
                 else
                     ISING = false; % ising -> 0
+                    ConsecutiveSng = 0;
                 end                
                 ISTATUS.Ndec = ISTATUS.Ndec + 1;
                 
@@ -171,9 +171,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                    ISTATUS.Nsng = ISTATUS.Nsng + 1;
                    ConsecutiveSng = ConsecutiveSng + 1;
                    if ( ConsecutiveSng >= 6 )
-                       Ierr = 1;
                        error('Matrix is repeatedly singular');
-                       return; % Failure
                    end
                    H = 0.5*H;
                    SkipJac = true;
@@ -185,8 +183,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                        gmresFlag = 0;
                        break;
                    end
-
                end
+               
             end % Hloop1
            
             if ( ISING ~= 0 )
@@ -250,12 +248,13 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 DZ = DZ*HGammaInv;
                 if( ~OPTIONS.MatrixFree )
                     DZ = e\DZ;
+                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 else
-                   [ tempDZ, gmresFlag, residual, iter ] = gmres(e, DZ, ...
+                   [ DZ, gmresFlag, residual, iter ] = gmres(e, DZ, ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    %disp(iter);
-                    vecCount = 0;
+                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
+
                     if ( ~isempty(OPTIONS.GMRES_Restart) )
                          vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
                     else
@@ -266,7 +265,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                         %resvec = abs(e(tempDZ) - DZ);
                         %SCAL = OPTIONS.NewtonTol + abs(DZ);
                         %if ( norm(resvec./SCAL) > sqrt(NVAR) )
-                        if ( residual > sqrt(NVAR)*OPTIONS.NewtonTol )
+                        disp('269');
+                        if ( residual > 100 )%sqrt(NVAR)*OPTIONS.NewtonTol )
                             switch(gmresFlag)
                                 case 1
                                     warning('GMRES: iterated MAXIT times but did not converge');
@@ -280,9 +280,9 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                             gmresFlag = 0;
                         end
                     end
-                    DZ = tempDZ;
+                    
                 end
-                ISTATUS.Nsol = ISTATUS.Nsol + 1;
+
 
                 % Check convergence of Newton iterations
                 NewtonIncrement = errorNorm( NVAR, DZ, SCAL );
@@ -318,6 +318,10 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
             end % NewtonLoop
             
             if ( gmresFlag ~= 0 )
+                Reject = true;
+                SkipJac = true;
+                SkipLU = false;
+                GOTO_Tloop_Flag = true;
                 break;
             end
 
@@ -326,6 +330,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
 %             end
             
             if ( ~NewtonDone )
+                disp('333');
                 H = Fac*H;
                 Reject = true;
                 SkipJac = true;
@@ -334,10 +339,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 break; % Tloop
             end
         end % Stages 
-        
-        if ( gmresFlag ~= 0 )
-            continue;
-        end
         
         if ( GOTO_Tloop_Flag == true )
             GOTO_Tloop_Flag = false;
@@ -360,30 +361,39 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
         Yerr = Yerr*HGammaInv;
         if(~OPTIONS.MatrixFree)
             Yerr = e\Yerr;
+            ISTATUS.Nsol = ISTATUS.Nsol + 1;       
         else
-            [ Yerr, gmresFlag, ~, iter ] = gmres(e, Yerr, ...
+            [ tempYerr, gmresFlag, ~, iter ] = gmres(e, Yerr, ...
                 OPTIONS.GMRES_Restart,...
                 OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt);
-            vecCount = 0;
+            ISTATUS.Nsol = ISTATUS.Nsol + 1;       
+            
             if ( ~isempty(OPTIONS.GMRES_Restart) )
                 vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
             else
                 vecCount = iter(2);
             end
             ISTATUS.Njac =  ISTATUS.Njac + vecCount;
-            switch(gmresFlag)
-                case 1
-                    warning('GMRES: iterated MAXIT times but did not converge');
-                    break;
-                case 2
-                    warning('GMRES: preconditioner M was ill-conditioned');
-                    break;
-                case 3
-                    warning('GMRES: stagnated (two consecutive iterates were the same)');
-                    break;
-            end            
+            if(gmresFlag ~= 0)
+                disp('378');
+                resvec = abs(e(tempYerr) - Yerr);
+                scalar = OPTIONS.AbsTol + OPTIONS.RelTol*abs(Yerr);
+                if ( norm(resvec./scalar) > sqrt(NVAR) )
+                    switch(gmresFlag)
+                        case 1
+                            warning('GMRES: iterated MAXIT times but did not converge');
+                        case 2
+                            warning('GMRES: preconditioner M was ill-conditioned');
+                        case 3
+                            warning('GMRES: stagnated (two consecutive iterates were the same)');
+                    end            
+                else
+                    gmresFlag = 0;
+                end
+            end
+            Yerr = tempYerr;
         end
-        ISTATUS.Nsol = ISTATUS.Nsol + 1;       
+
 
         % Calculate error norm
         Err = sum((Yerr.*SCAL).^2,1);    
@@ -397,7 +407,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Accept/Reject step
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if ( Err < 1.0 )    % accepted
+        if ( Err < 1.0  && gmresFlag == 0 )    % accepted
             FirstStep = false;
             ISTATUS.Nacc = ISTATUS.Nacc + 1;
 

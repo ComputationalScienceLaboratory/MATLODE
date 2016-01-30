@@ -61,7 +61,7 @@
 %
 function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD_Integrator( OdeFunction,...
         Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr )
-    
+
     % Force initial value matrix to be N X 1.
     if ( size(Y,2) == 1 )
         % DO NOTHING
@@ -237,16 +237,25 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 % Solve the system
                 if ( ~OPTIONS.MatrixFree )
                     K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 else
                     [ tempK, gmresFlag, ~, iter] = ...
                         gmres(e, K(ioffset+1:ioffset+NVAR), ...
                         OPTIONS.GMRES_Restart,...
                         OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Njac = ISTATUS.Njac + iter(2);  
+                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
+                    
+                    if ( ~isempty(OPTIONS.GMRES_Restart) )
+                         vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
+                    else
+                         vecCount = iter(2);
+                    end
+                    ISTATUS.Njac =  ISTATUS.Njac + vecCount;
+                    
                     if( gmresFlag ~= 0 )
                         resvec = abs(e(tempK) - K(ioffset+1:ioffset+NVAR));
-                        SCAL = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(K(ioffset+1:ioffset+NVAR));
-                        if (norm(resvec./SCAL) > sqrt(NVAR))
+                        scalar = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(K(ioffset+1:ioffset+NVAR));
+                        if (norm(resvec./scalar) > sqrt(NVAR))
                             singCount = singCount + 1;
                             switch(gmresFlag)
                                 case 1
@@ -265,7 +274,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                     end
                     K(ioffset+1:ioffset+NVAR) = tempK;
                 end
-                ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
             end % stages
             
