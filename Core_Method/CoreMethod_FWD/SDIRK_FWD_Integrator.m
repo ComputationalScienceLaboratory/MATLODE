@@ -265,8 +265,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                         %resvec = abs(e(tempDZ) - DZ);
                         %SCAL = OPTIONS.NewtonTol + abs(DZ);
                         %if ( norm(resvec./SCAL) > sqrt(NVAR) )
-                        disp('269');
-                        if ( residual > 100 )%sqrt(NVAR)*OPTIONS.NewtonTol )
+                        %disp('269');
+                        if ( residual > 0.1 )
                             switch(gmresFlag)
                                 case 1
                                     warning('GMRES: iterated MAXIT times but did not converge');
@@ -330,7 +330,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
 %             end
             
             if ( ~NewtonDone )
-                disp('333');
+                %disp('333');
                 H = Fac*H;
                 Reject = true;
                 SkipJac = true;
@@ -375,7 +375,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
             end
             ISTATUS.Njac =  ISTATUS.Njac + vecCount;
             if(gmresFlag ~= 0)
-                disp('378');
+                %disp('378');
                 resvec = abs(e(tempYerr) - Yerr);
                 scalar = OPTIONS.AbsTol + OPTIONS.RelTol*abs(Yerr);
                 if ( norm(resvec./scalar) > sqrt(NVAR) )
