@@ -116,7 +116,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     while ( ( Tfinal-T )*Tdirection - Roundoff > 0.0 )
         % Compute E = 1/(h*gamma)-Jac and its LU decomposition
-        if ( ~SkipLU )
+        if ( ~SkipLU || OPTIONS.MatrixFree)
             ISING = 1;
 %             ConsecutiveSng = 0;
             while ( ISING ~= 0.0 ) % Hloop1
@@ -181,6 +181,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                    if ( gmresFlag ~= 0 )
                        ISING = 0;
                        gmresFlag = 0;
+                       e = @(v)( (1.0/(H*rkGamma))*v -fjac(v));
                        break;
                    end
                end
