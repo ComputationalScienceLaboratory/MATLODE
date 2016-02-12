@@ -62,7 +62,7 @@ function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW3( ROW2 )
     rosS = 4;
     
     % Gamma Matrix
-    Gamma_ii=  1.0685790213016289e+001;
+    Gamma_ii=  1.0685790213016289;
     Gamma= Gamma_ii*diag(ones(1,rosS));
     Gamma(2,1)=-2.5155456020628817e+00;
     Gamma(3,1)=-8.7991339217106512e-01;
@@ -99,7 +99,7 @@ function [ rosMethod rosELO rosS rosName ] = Coefficients_ROS34PW3( ROW2 )
     A=Alpha/Gamma;
     C=diag(diag(inv(Gamma)))-inv(Gamma);
     M=transpose(inv(Gamma))*b;
-    E=transpose(inv(Gamma))*b_hat;
+    E=transpose(inv(Gamma))*(b-b_hat);
     
 %~~~> The coefficient matrices A and C are strictly lower triangular.
 %   The lower triangular (subdiagonal) elements are stored in row-wise order:

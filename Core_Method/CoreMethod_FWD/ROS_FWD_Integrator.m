@@ -189,7 +189,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 ISING = 0;
             end
             
-            if ( ISING ~= 0 || singCount >= 5 ) % More than 5 consecutive failed decompositions
+            if ( ISING ~= 0 || singCount >= 15 ) % More than 5 consecutive failed decompositions
                 error('Matrix is repeatedly singular');
             end
             
