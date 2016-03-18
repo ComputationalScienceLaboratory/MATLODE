@@ -23,7 +23,12 @@
 %
 function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD_Integrator( OdeFunction,...
         Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag )
-OPTIONS.BlockSize  = 8;
+    
+    % TODO: cleanup disgusting hack: ==================================== %
+    global basis_block_size
+    OPTIONS.BlockSize  = basis_block_size;
+    % =================================================================== %
+    
     % Force initial value matrix to be 1 X N.
     if ( size(Y,2) == 1 )
         % DO NOTHING
@@ -148,6 +153,7 @@ OPTIONS.BlockSize  = 8;
         while ( ~accepted ) % accepted
             
             if(~enrich)
+%                [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.BlockSize, OPTIONS.MatrixFree);
                 [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.BlockSize, OPTIONS.MatrixFree);
                 ISTATUS.Njac = ISTATUS.Njac + OPTIONS.NBasisVectors;
             else
@@ -157,7 +163,8 @@ OPTIONS.BlockSize  = 8;
             
             lambda = zeros(OPTIONS.NBasisVectors,Coefficient.NStage);
             
-            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+%            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+            [H, ISING, L, U, p, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
             
             if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
                 keyboard
@@ -169,8 +176,32 @@ OPTIONS.BlockSize  = 8;
 %   Stages
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ISTATUS.Nfun = ISTATUS.Nfun + 1;
-            for istage=1:Coefficient.NStage % stages
+%ISTATUS.Nfun = ISTATUS.Nfun + 1;
+%Varn = zeros(size(Varn));
+%w = zeros(size(w));
+
+% Stage 1
+            locF = Fcn0;
+            phi = transpose(Varn)*locF + w;
+            locRHS = H * phi;
+            lambda(:,1) = (eye(M)-H*gam*Harn)\locRHS;
+%            lambda(:,1) = U\(L\(locRHS(p)));
+            % Compute residual.
+%            lambda(:,1)
+            residual = abs(H * gam * HEnrich) * norm(lambda(:,1))
+            
+            K(:,1) = Varn * lambda(:, 1) + H*(locF - Varn*phi);
+            %norm(K(:,1))
+            if ( OPTIONS.MatrixFree )
+                norm(K(:,1) - H*gam*fjac(K(:,1)))
+                residual_true = norm((K(:,1) - H*gam*fjac(K(:,1))) - locF)/norm(locF)
+            else
+                residual_true = norm((speye(NVAR) - H*gam*fjac)*K(:,1) - locF)/norm(locF)
+            end
+            
+
+% Stage 2 - NStage
+            for istage=2:Coefficient.NStage % stages
                 
                 insum = Y;
                 outsum = zeros(M, 1);
@@ -188,6 +219,7 @@ ISTATUS.Nfun = ISTATUS.Nfun + 1;
                 locLHS = eye(M)-H*gam*Harn; 
                 locRHS = H*(phi + outsum);
                 lambda(:,istage) = locLHS\locRHS;
+%                lambda(:,istage) = U\(L\(locRHS(p)));
                 K(:,istage) = Varn*lambda(:,istage) + H*(locF - Varn*phi);
                 
             end % stages
@@ -301,62 +333,7 @@ ISTATUS.Nfun = ISTATUS.Nfun + 1;
     
 return;
 
-% function [Varn, Harn, w, HEnrich] = Arnoldi_MF(J, f, dFdT, N, M, matrixFree)
-% 
-% Varn = zeros(N, M);
-% Harn = zeros(M, M);
-% w = zeros(M, 1);
-% 
-% w(1) = 1;
-% beta = sqrt(f'*f + w(1)^2);
-% Varn(:, 1) = f/beta;
-% w(1) = w(1)/beta;
-% 
-% 
-% for i = 1:M
-%     if ( matrixFree )
-%         zeta = J(Varn(:, i)) + dFdT*w(i);
-%     else 
-%         zeta = J*Varn(:, i) + dFdT*w(i);
-%     end
-%     
-%     xi = 0;
-% 
-%     for j = 1:i
-%         Harn(j,i) = zeta'*Varn(:,j) + xi*w(j);
-%         zeta = zeta - Harn(j,i)*Varn(:,j);
-%         xi = xi - Harn(j,i)*w(j);
-%     end
-% %     bignorm = sqrt(zeta'*zeta + xi^2);
-% %     if bignorm/tau <= .25
-% %         for j = 1:i
-% %             rho = zeta'*Varn(:,j) + xi*w(j);
-% %             zeta = zeta - rho*Varn(:,j);
-% %             xi = xi - rho*w(j);
-% %             Harn(j,i) = Harn(j,i) - rho;
-% %         end
-% %     end
-%     if i < M
-%        bignorm = sqrt(zeta'*zeta + xi^2);
-%        Harn(i+1,i) = bignorm;
-%        Varn(:, i+1) = zeta/Harn(i+1,i);
-%        w(i+1) = xi/Harn(i+1,i);
-%     else
-%        bignorm = sqrt(zeta'*zeta + xi^2);
-%        HEnrich = bignorm;
-% %        Varn(:, i+1) = zeta/Harn(i+1,i);
-%        HEnrich = xi/HEnrich; 
-%     end
-% end
-% 
-% return
-
-function [Varn, Harn, w, Henrich] = Arnoldi_MF(J, f, dFdT, ...
-                                                N, M, K, matrixFree)
-Henrich = 0;
-if( mod(M,K) ~= 0 )
-    error('Total number of vectors must be a multiple of block size');
-end
+function [Varn, Harn, w, HEnrich] = Arnoldi_MF(J, f, dFdT, N, M, BlockSize, matrixFree)
 
 Varn = zeros(N, M);
 Harn = zeros(M, M);
@@ -377,22 +354,15 @@ for i = 1:M
     
     xi = 0;
     tau = sqrt(zeta'*zeta);
-    
-    if( i <= K )
-       orthogonalVectors = 1:i; 
-    else
-        orthogonalVectors = 1:K;
-        orthogonalVectors = [orthogonalVectors (floor(i/K)*K + (1:mod(i,K)))];
-    end
 
-    for j = orthogonalVectors
+    for j = 1:i
         Harn(j,i) = zeta'*Varn(:,j) + xi*w(j);
         zeta = zeta - Harn(j,i)*Varn(:,j);
         xi = xi - Harn(j,i)*w(j);
     end
     bignorm = sqrt(zeta'*zeta + xi^2);
     if bignorm/tau <= .25
-        for j = orthogonalVectors
+        for j = 1:i
             rho = zeta'*Varn(:,j) + xi*w(j);
             zeta = zeta - rho*Varn(:,j);
             xi = xi - rho*w(j);
@@ -400,17 +370,83 @@ for i = 1:M
         end
     end
     if i < M
-       bignorm = sqrt(zeta'*zeta + xi^2);
+%        bignorm = sqrt(zeta'*zeta + xi^2);
        Harn(i+1,i) = bignorm;
        Varn(:, i+1) = zeta/Harn(i+1,i);
        w(i+1) = xi/Harn(i+1,i);
+    else
+%        bignorm = sqrt(zeta'*zeta + xi^2);
+       HEnrich = bignorm
+%        Varn(:, i+1) = zeta/Harn(i+1,i);
+%        HEnrich = xi/HEnrich; 
     end
 end
 
-V = [Varn; w'];
-Harn = Harn*(V'*V);
+keyboard
 
 return
+
+% function [Varn, Harn, w, Henrich] = Arnoldi_MF(J, f, dFdT, ...
+%                                                 N, M, K, matrixFree)
+% Henrich = 0;
+% if( mod(M,K) ~= 0 )
+%     error('Total number of vectors must be a multiple of block size');
+% end
+% 
+% Varn = zeros(N, M);
+% Harn = zeros(M, M);
+% w = zeros(M, 1);
+% 
+% w(1) = 1;
+% beta = sqrt(f'*f + w(1)^2);
+% Varn(:, 1) = f/beta;
+% w(1) = w(1)/beta;
+% 
+% 
+% for i = 1:M
+%     if ( matrixFree )
+%         zeta = J(Varn(:, i)) + dFdT*w(i);
+%     else 
+%         zeta = J*Varn(:, i) + dFdT*w(i);
+%     end
+%     
+%     xi = 0;
+%     tau = sqrt(zeta'*zeta);
+%     
+%     if( i <= K )
+%        orthogonalVectors = 1:i; 
+%     else
+%         orthogonalVectors = 1:K;
+% %        orthogonalVectors = [orthogonalVectors (floor(i/K)*K + (1:mod(i,K)))];
+%         orthogonalVectors = unique([1:K, (i-4):(i-1)])
+%     end
+% 
+%     for j = orthogonalVectors
+%         Harn(j,i) = zeta'*Varn(:,j) + xi*w(j);
+%         zeta = zeta - Harn(j,i)*Varn(:,j);
+%         xi = xi - Harn(j,i)*w(j);
+%     end
+%     bignorm = sqrt(zeta'*zeta + xi^2);
+%     if bignorm/tau <= .25
+%         for j = orthogonalVectors
+%             rho = zeta'*Varn(:,j) + xi*w(j);
+%             zeta = zeta - rho*Varn(:,j);
+%             xi = xi - rho*w(j);
+%             Harn(j,i) = Harn(j,i) - rho;
+%         end
+%     end
+%     if i < M
+%        bignorm = sqrt(zeta'*zeta + xi^2);
+%        Harn(i+1,i) = bignorm;
+%        Varn(:, i+1) = zeta/Harn(i+1,i);
+%        w(i+1) = xi/Harn(i+1,i);
+%     end
+% end
+% 
+% V = [Varn; w'];
+% Harn = Harn*(V'*V);
+% 
+% return
 
 
 function [Varn, Harn, W, Henrich] = Arnoldi_MF_Enrich(N, M, ...
