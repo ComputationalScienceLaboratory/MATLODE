@@ -25,6 +25,10 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag )
     
     % TODO: cleanup disgusting hack: ==================================== %
+    global io_arnoldi
+    OPTIONS.IOArnoldi = io_arnoldi;
+    global arnoldi_tol
+    OPTIONS.AdaptiveArnoldiTol = arnoldi_tol;
     global basis_block_size
     OPTIONS.BlockSize  = basis_block_size;
     % =================================================================== %
@@ -97,7 +101,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
     RejectLastH = false;
     RejectMoreH = false;
-   M = OPTIONS.NBasisVectors; 
+    M = OPTIONS.NBasisVectors;
         
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Time loop
@@ -149,58 +153,55 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         
         % Repeat step calculation until current step accepted
         accepted = false;
-        enrich = false;
         while ( ~accepted ) % accepted
             
-            if(~enrich)
-%                [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.BlockSize, OPTIONS.MatrixFree);
-                [Varn, Harn, w, HEnrich] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, OPTIONS.NBasisVectors, OPTIONS.BlockSize, OPTIONS.MatrixFree);
-                ISTATUS.Njac = ISTATUS.Njac + OPTIONS.NBasisVectors;
-            else
-%                 [Varn, Harn, w, HEnrich] = Arnoldi_MF_Enrich(NVAR, M, Varn, Harn, w, HEnrich, Yerr);
-%                 M = M + 1; % The increment needs to be the number of vectors added.  Here it is 1, since Yerr is (N,1);
-            end
+%            [Varn, Harn, w, hmp1, VtV, io_arn_flag] = Arnoldi_MF(fjac, Fcn0, dFdT, NVAR, M, OPTIONS.BlockSize, OPTIONS.MatrixFree, OPTIONS.IOArnoldi);
+%            if ( OPTIONS.MatrixFree )
+%                ISTATUS.Njac = ISTATUS.Njac + M;
+%            end
             
-            lambda = zeros(OPTIONS.NBasisVectors,Coefficient.NStage);
             
-%            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
-            [H, ISING, L, U, p, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+%             [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+%            [H, ISING, L, U, p, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+ 
+%            if ( io_arn_flag )
+%                [Lv, Uv, pv] = lu(VtV);
+%            end
             
-            if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
-                keyboard
-                Ierr = fatOde_ROS_ErrorMessage( -8, T, H );
-                return;
-            end
+            % Stage 1
+%            phi = transpose(Varn)*Fcn0;
+%            if ( io_arn_flag )
+%                phi = Uv\(Lv\phi(pv));
+%            end
+%            phi = phi + w;
+%            locRHS = H * phi;
+%            lambda(:,1) = U\(L\(locRHS(p)));
+            % Compute residual.
+%            residual = abs(H * gam * hmp1) * lambda(M,1)
+
+            % DEBUG: true residual.
+%            debugK = Varn * lambda(:,1) + H*(Fcn0 - Varn*phi);
+%            if ( OPTIONS.MatrixFree )
+%                residual_true = norm((debugK - H*gam*fjac(debugK)) - H*Fcn0)
+%            else
+%                residual_true = norm((speye(NVAR) - H*gam*fjac)*debugK - H*Fcn0)
+%            end
+
+            [H, Varn, Harn, Lh, Uh, ph, w, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
+                 = ROK_ArnoldiAdapt(fjac, Fcn0, dFdT, NVAR, H, Direction, gam, ...
+                                    OPTIONS, ISTATUS);
             
+            lambda = zeros(M,Coefficient.NStage);
+            lambda(:,1) = lambda1;
+
+            % Solution of first stage.
+            K(:,1) = Varn * lambda(:,1) + H*(Fcn0 - Varn*phi);
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Stages
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-%ISTATUS.Nfun = ISTATUS.Nfun + 1;
-%Varn = zeros(size(Varn));
-%w = zeros(size(w));
-
-% Stage 1
-            locF = Fcn0;
-            phi = transpose(Varn)*locF + w;
-            locRHS = H * phi;
-            lambda(:,1) = (eye(M)-H*gam*Harn)\locRHS;
-%            lambda(:,1) = U\(L\(locRHS(p)));
-            % Compute residual.
-%            lambda(:,1)
-            residual = abs(H * gam * HEnrich) * norm(lambda(:,1))
-            
-            K(:,1) = Varn * lambda(:, 1) + H*(locF - Varn*phi);
-            %norm(K(:,1))
-            if ( OPTIONS.MatrixFree )
-                norm(K(:,1) - H*gam*fjac(K(:,1)))
-                residual_true = norm((K(:,1) - H*gam*fjac(K(:,1))) - locF)/norm(locF)
-            else
-                residual_true = norm((speye(NVAR) - H*gam*fjac)*K(:,1) - locF)/norm(locF)
-            end
-            
-
-% Stage 2 - NStage
+            % Stage 2 - NStage
             for istage=2:Coefficient.NStage % stages
                 
                 insum = Y;
@@ -215,11 +216,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 else
                     locF = Fcn0;
                 end
-                phi = transpose(Varn)*locF + w;
-                locLHS = eye(M)-H*gam*Harn; 
+                phi = transpose(Varn)*locF;
+                if ( io_arn_flag )
+                    phi = Uv\(Lv\phi(pv));
+                end
+                phi = phi + w;
+%                locLHS = eye(M)-H*gam*Harn; 
                 locRHS = H*(phi + outsum);
-                lambda(:,istage) = locLHS\locRHS;
-%                lambda(:,istage) = U\(L\(locRHS(p)));
+%                lambda(:,istage) = locLHS\locRHS;
+                lambda(:,istage) = Uh\(Lh\(locRHS(ph)));
                 K(:,istage) = Varn*lambda(:,istage) + H*(locF - Varn*phi);
                 
             end % stages
@@ -333,21 +338,37 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
 return;
 
-function [Varn, Harn, w, HEnrich] = Arnoldi_MF(J, f, dFdT, N, M, BlockSize, matrixFree)
+function [H, Varn, Harn, Lh, Uh, ph, w, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
+                = ROK_ArnoldiAdapt(J, f, dFdT, N, H, Direction, gam, OPTIONS, ISTATUS)
 
+Lv = []; Uv = []; pv = [];
+% TODO: Some logic to choose when to do incomplete orthogonalization?
+io_arn_flag = OPTIONS.IOArnoldi;
+
+% Check whether to perform adaptive selection.
+M = OPTIONS.NBasisVectors;
+adaptive = false;
+if ( M == 0 )
+    M = 4;
+    adaptive = true;
+end
+
+testIndex = [4,6,8,11,15,20,27,36,46,57,70,85,100];
 Varn = zeros(N, M);
 Harn = zeros(M, M);
+VtV = eye(M, M);
 w = zeros(M, 1);
+hmp1 = 0.0;
 
 w(1) = 1;
 beta = sqrt(f'*f + w(1)^2);
 Varn(:, 1) = f/beta;
 w(1) = w(1)/beta;
 
-
-for i = 1:M
-    if ( matrixFree )
+for i = 1:N
+    if ( OPTIONS.MatrixFree )
         zeta = J(Varn(:, i)) + dFdT*w(i);
+        ISTATUS.Njac = ISTATUS.Njac + 1;
     else 
         zeta = J*Varn(:, i) + dFdT*w(i);
     end
@@ -355,150 +376,88 @@ for i = 1:M
     xi = 0;
     tau = sqrt(zeta'*zeta);
 
-    for j = 1:i
+    if ( io_arn_flag )
+%        error('Incomplete orthogonalization is unimplemented.')
+        leftside = max(i-OPTIONS.BlockSize, 0);
+        orthoVectors = (leftside+1):i;
+        remainingVectors = 1:leftside;
+    else
+        orthoVectors = 1:i;
+    end
+
+    for j = orthoVectors
         Harn(j,i) = zeta'*Varn(:,j) + xi*w(j);
         zeta = zeta - Harn(j,i)*Varn(:,j);
         xi = xi - Harn(j,i)*w(j);
     end
     bignorm = sqrt(zeta'*zeta + xi^2);
     if bignorm/tau <= .25
-        for j = 1:i
+        for j = orthoVectors
             rho = zeta'*Varn(:,j) + xi*w(j);
             zeta = zeta - rho*Varn(:,j);
             xi = xi - rho*w(j);
             Harn(j,i) = Harn(j,i) - rho;
         end
     end
-    if i < M
-%        bignorm = sqrt(zeta'*zeta + xi^2);
-       Harn(i+1,i) = bignorm;
-       Varn(:, i+1) = zeta/Harn(i+1,i);
-       w(i+1) = xi/Harn(i+1,i);
-    else
-%        bignorm = sqrt(zeta'*zeta + xi^2);
-       HEnrich = bignorm
-%        Varn(:, i+1) = zeta/Harn(i+1,i);
-%        HEnrich = xi/HEnrich; 
-    end
-end
-
-keyboard
-
-return
-
-% function [Varn, Harn, w, Henrich] = Arnoldi_MF(J, f, dFdT, ...
-%                                                 N, M, K, matrixFree)
-% Henrich = 0;
-% if( mod(M,K) ~= 0 )
-%     error('Total number of vectors must be a multiple of block size');
-% end
-% 
-% Varn = zeros(N, M);
-% Harn = zeros(M, M);
-% w = zeros(M, 1);
-% 
-% w(1) = 1;
-% beta = sqrt(f'*f + w(1)^2);
-% Varn(:, 1) = f/beta;
-% w(1) = w(1)/beta;
-% 
-% 
-% for i = 1:M
-%     if ( matrixFree )
-%         zeta = J(Varn(:, i)) + dFdT*w(i);
-%     else 
-%         zeta = J*Varn(:, i) + dFdT*w(i);
-%     end
-%     
-%     xi = 0;
-%     tau = sqrt(zeta'*zeta);
-%     
-%     if( i <= K )
-%        orthogonalVectors = 1:i; 
-%     else
-%         orthogonalVectors = 1:K;
-% %        orthogonalVectors = [orthogonalVectors (floor(i/K)*K + (1:mod(i,K)))];
-%         orthogonalVectors = unique([1:K, (i-4):(i-1)])
-%     end
-% 
-%     for j = orthogonalVectors
-%         Harn(j,i) = zeta'*Varn(:,j) + xi*w(j);
-%         zeta = zeta - Harn(j,i)*Varn(:,j);
-%         xi = xi - Harn(j,i)*w(j);
-%     end
-%     bignorm = sqrt(zeta'*zeta + xi^2);
-%     if bignorm/tau <= .25
-%         for j = orthogonalVectors
-%             rho = zeta'*Varn(:,j) + xi*w(j);
-%             zeta = zeta - rho*Varn(:,j);
-%             xi = xi - rho*w(j);
-%             Harn(j,i) = Harn(j,i) - rho;
-%         end
-%     end
-%     if i < M
-%        bignorm = sqrt(zeta'*zeta + xi^2);
-%        Harn(i+1,i) = bignorm;
-%        Varn(:, i+1) = zeta/Harn(i+1,i);
-%        w(i+1) = xi/Harn(i+1,i);
-%     end
-% end
-% 
-% V = [Varn; w'];
-% Harn = Harn*(V'*V);
-% 
-% return
-
-
-function [Varn, Harn, W, Henrich] = Arnoldi_MF_Enrich(N, M, ...
-                                V, H, w, HEnrich, newVec)
-
-K = size(newVec,2);
-Varn = zeros(N, M+K);
-Harn = zeros(M, M+K);
-W = zeros(M+K, 1);
-
-Harn(1:M,1:M) = H(:,:);
-Harn(M+1,M) = HEnrich;
-Varn(:,1:M) = V(:,:);
-W(1:M) = w(:);
-
-%keyboard
-for i = M+1:M+K
-    
-    zeta = newVec(:,i-M);
-    zeta = zeta/norm(zeta);
-    xi = 0;
-    tau = sqrt(zeta'*zeta);
-    
-    for j = 1:i
-        Harn(j,i) = zeta'*Varn(:,j) + xi*W(j);
-        zeta = zeta - Harn(j,i)*Varn(:,j);
-        xi = xi - Harn(j,i)*W(j);
-    end
-    %bignorm = sqrt(zeta'*zeta + xi^2);
-%     if bignorm/tau <= .25
-%         for j = 1:i
-%             rho = zeta'*Varn(:,j) + xi*W(j);
-%             zeta = zeta - rho*Varn(:,j);
-%             xi = xi - rho*W(j);
-%             Harn(j,i) = Harn(j,i) - rho;
-%         end 
-%     end
     bignorm = sqrt(zeta'*zeta + xi^2);
-    if(i+1 > M+K);
-        Henrich = bignorm;
-        Varn(:, i) = zeta/Henrich;
-        W(i) = xi/Henrich;
-  
-    else
-        Harn(i+1,i) = bignorm;
-        Varn(:, i) = zeta/Harn(i+1,i);
-        W(i) = xi/Harn(i+1,i);
+    hmp1 = bignorm;
+
+    % Check residual.
+    if ( (~adaptive && i == M) || (adaptive && (i > 100 ||  min(abs(testIndex - i)) == 0)) )
+        [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( i, H, Direction, gam, Harn(1:i, 1:i), ISTATUS );
+
+        if ( io_arn_flag )
+            [Lv, Uv, pv] = lu(VtV(1:i, 1:i), 'vector');
+        end
+
+        % Stage 1
+        phi = transpose(Varn(:,1:i))*f;
+        if ( io_arn_flag )
+            phi = Uv\(Lv\phi(pv));
+        end
+        phi = phi + w;
+        locRHS = H * phi;
+        lambda1 = Uh\(Lh\(locRHS(ph)));
+        % Compute residual.
+        residual = abs(H * gam * hmp1 * lambda1(i));
+
+        fprintf('%d: %e\n', i, residual);
+
+        % DEBUG: true residual.
+%        debugK = Varn * lambda1 + H*(f - Varn*phi);
+%        if ( matrixFree )
+%            residual_true = norm((debugK - H*gam*J(debugK)) - H*f);
+%        else
+%            residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
+%        end
+
+        if ( ~adaptive || residual < OPTIONS.AdaptiveArnoldiTol )
+            M = i;
+            break;
+        end
     end
-    
+
+    Harn(i+1,i) = bignorm;
+    Varn(:, i+1) = zeta/Harn(i+1,i);
+    w(i+1) = xi/Harn(i+1,i);
+    if ( io_arn_flag )
+        for j = orthoVectors
+            VtV(i+1,j) = 0.0;
+            VtV(j,i+1) = 0.0;
+        end
+        for j = remainingVectors
+            vtv = Varn(:,i+1)'*Varn(:,j) + w(i+1)*w(j);
+            VtV(i+1,j) = vtv;
+            VtV(j,i+1) = vtv;
+        end
+        VtV(i+1,i+1) = 1.0;
+    end
 end
+Varn = Varn(1:N, 1:M);
+Harn = Harn(1:M, 1:M);
 
 return
+
 
 %% Major Modification History
 % <html>

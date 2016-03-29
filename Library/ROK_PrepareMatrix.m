@@ -1,4 +1,4 @@
-function [ H, ISING, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS )
+function [ H, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS )
 
     Nconsecutive = 0;
     ISING = true;
@@ -25,6 +25,7 @@ function [ H, ISING, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, ga
                 H = H*0.5;
             else
                 % More than 5 consecutive failed decompositions
+                error('Matrix is repeatedly singular.')
                 return;
             end % Nconsecutive
         end % ising
