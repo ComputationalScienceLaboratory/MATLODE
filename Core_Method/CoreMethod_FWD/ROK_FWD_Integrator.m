@@ -31,6 +31,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     OPTIONS.AdaptiveArnoldiTol = arnoldi_tol;
     global basis_block_size
     OPTIONS.BlockSize  = basis_block_size;
+    global n_recycled_vectors
+    OPTIONS.NRecycledVectors = n_recycled_vectors;
     % =================================================================== %
     
     % Force initial value matrix to be 1 X N.
@@ -81,6 +83,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
     
     K = zeros(NVAR,Coefficient.NStage);
+    benrich = zeros(NVAR, OPTIONS.NRecycledVectors);
+    zenrich = zeros(OPTIONS.NRecycledVectors,1);
 %     lambda = zeros(OPTIONS.NBasisVectors,Coefficient.NStage);
     
     
@@ -187,9 +191,29 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %                residual_true = norm((speye(NVAR) - H*gam*fjac)*debugK - H*Fcn0)
 %            end
 
-            [H, Varn, Harn, Lh, Uh, ph, w, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
+%%%%%%%%%%%%%% Prepare For Vector Recycling. %%%%%%%%%%%
+            if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
+                    R = min(OPTIONS.NRecycledVectors, M-1);
+                    benrich(:,1:R) = Varn(:,end-R:end-1);
+                    zenrich(1:R) = w(end-R:end-1);
+            end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
+                
+            [H, Varn, Harn, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
                  = ROK_ArnoldiAdapt(fjac, Fcn0, dFdT, NVAR, H, Direction, gam, ...
                                     OPTIONS, ISTATUS);
+
+            if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
+                [Varn, Harn, w, Lv, Uv, pv, M, ISTATUS] ...
+                    = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
+                    VtV, benrich, zenrich, R, M, NVAR, io_arn_flag, ...
+                    OPTIONS, ISTATUS);
+                
+                [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
+                    = computeFirstStage(Fcn0, Harn, Varn, w, Lv, Uv, pv, H, M, ... 
+                    Direction, gam, io_arn_flag, ISTATUS);
+                
+            end
             
             lambda = zeros(M,Coefficient.NStage);
             lambda(:,1) = lambda1;
@@ -338,7 +362,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
 return;
 
-function [H, Varn, Harn, Lh, Uh, ph, w, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
+function [H, Varn, Harn, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
                 = ROK_ArnoldiAdapt(J, f, dFdT, N, H, Direction, gam, OPTIONS, ISTATUS)
 
 Lv = []; Uv = []; pv = [];
@@ -404,21 +428,28 @@ for i = 1:N
 
     % Check residual.
     if ( (~adaptive && i == M) || (adaptive && (i > 100 ||  min(abs(testIndex - i)) == 0)) )
-        [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( i, H, Direction, gam, Harn(1:i, 1:i), ISTATUS );
-
-        if ( io_arn_flag )
-            [Lv, Uv, pv] = lu(VtV(1:i, 1:i), 'vector');
-        end
-
-        % Stage 1
-        phi = transpose(Varn(:,1:i))*f;
-        if ( io_arn_flag )
-            phi = Uv\(Lv\phi(pv));
-        end
-        phi = phi + w;
-        locRHS = H * phi;
-        lambda1 = Uh\(Lh\(locRHS(ph)));
+%         [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( i, H, Direction, gam, Harn(1:i, 1:i), ISTATUS );
+% 
+%         if ( io_arn_flag )
+%             [Lv, Uv, pv] = lu(VtV(1:i, 1:i), 'vector');
+%         end
+% 
+%         % Stage 1
+%         phi = transpose(Varn(:,1:i))*f;
+%         if ( io_arn_flag )
+%             phi = Uv\(Lv\phi(pv));
+%         end
+%         phi = phi + w;
+%         locRHS = H * phi;
+%         lambda1 = Uh\(Lh\(locRHS(ph)));
         % Compute residual.
+        if ( io_arn_flag )
+            [Lv, Uv, pv] = lu(VtV, 'vector');
+        end
+
+        [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
+                = computeFirstStage(f, Harn(1:i,1:i), Varn(:,1:i), w, Lv, Uv, pv, H, i, Direction, gam, io_arn_flag, ISTATUS);
+        
         residual = abs(H * gam * hmp1 * lambda1(i));
 
         fprintf('%d: %e\n', i, residual);
@@ -455,6 +486,103 @@ for i = 1:N
 end
 Varn = Varn(1:N, 1:M);
 Harn = Harn(1:M, 1:M);
+
+return
+
+function [Varn, Harn, w, Lv, Uv, pv, M, ISTATUS] ...
+                = ROK_ArnoldiEnrich(J, dFdT, Varn, w, Harn, VtV, b, z, r, M, N, io_arn_flag, OPTIONS, ISTATUS)
+
+Lv = []; Uv = []; pv = [];
+for i = M:M+r-1
+
+    zeta = b(:,i-M+1);
+    xi = z(i-M+1);
+    
+    tau = sqrt(zeta'*zeta);
+
+    if ( io_arn_flag )
+%        error('Incomplete orthogonalization is unimplemented.')
+        leftside = max(i-OPTIONS.BlockSize, 0);
+        orthoVectors = (leftside+1):i;
+        remainingVectors = 1:leftside;
+    else
+        orthoVectors = 1:i;
+    end
+
+    for j = orthoVectors
+        Horth = zeta'*Varn(:,j) + xi*w(j);
+        zeta = zeta - Horth*Varn(:,j);
+        xi = xi - Horth*w(j);
+    end
+    bignorm = sqrt(zeta'*zeta + xi^2);
+    if bignorm/tau <= .25
+        for j = orthoVectors
+            rho = zeta'*Varn(:,j) + xi*w(j);
+            zeta = zeta - rho*Varn(:,j);
+            xi = xi - rho*w(j);
+        end
+    end
+    bignorm = sqrt(zeta'*zeta + xi^2);
+
+    Varn(:, i+1) = zeta/bignorm;
+    w(i+1) = xi/bignorm;
+    
+    if ( io_arn_flag )
+        for j = orthoVectors
+            VtV(i+1,j) = 0.0;
+            VtV(j,i+1) = 0.0;
+        end
+        for j = remainingVectors
+            vtv = Varn(:,i+1)'*Varn(:,j) + w(i+1)*w(j);
+            VtV(i+1,j) = vtv;
+            VtV(j,i+1) = vtv;
+        end
+        VtV(i+1,i+1) = 1.0;
+    end
+    
+end
+
+if ( io_arn_flag )
+    [Lv, Uv, pv] = lu(VtV, 'vector');
+end
+
+if( OPTIONS.MatrixFree )
+    tempVec = zeros(M+r, r);
+    for i = 1:r
+        tempVec(:,i) = transpose(Varn)*(J(Varn(:,M+i)) + w(M+i)*dFdT);
+    end
+else
+    tempVec = transpose(Varn)*(J*Varn(:,M+1:M+r) + dFdT*w(M+1:M+r)');    
+end
+
+Harn = [Harn, zeros(M,r); zeros(r, M + r)];
+
+if ( io_arn_flag )
+    Harn(:,M+1:M+r) = Uv\(Lv\tempVec(pv,:));
+else
+    Harn(:,M+1:M+r) = tempVec;
+end
+    
+
+M = M + r;
+Varn = Varn(1:N, 1:M);
+Harn = Harn(1:M, 1:M);
+
+return
+
+function [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
+                = computeFirstStage(f, Harn, Varn, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS)
+
+[H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+
+% Stage 1
+phi = transpose(Varn)*f;
+if ( io_arn_flag )
+    phi = Uv\(Lv\phi(pv));
+end
+phi = phi + w;
+locRHS = H * phi;
+lambda1 = Uh\(Lh\(locRHS(ph)));
 
 return
 
