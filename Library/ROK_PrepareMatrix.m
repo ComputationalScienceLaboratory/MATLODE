@@ -1,4 +1,4 @@
-function [ H, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS )
+function [ H, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS )
 
     Nconsecutive = 0;
     ISING = true;
@@ -9,9 +9,8 @@ function [ H, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, gam, Harn
 
         % Compute LU decomposition
 %        [ ISING, e ] = lss_decomp( NVAR, ghinv, fjac );
-        [L, U, p] = lu(speye(M) - gh * Harn, 'vector');
+        [L, U, p, singular] = lu_decomposition(speye(M) - gh * Harn);
         ISTATUS.Ndec = ISTATUS.Ndec + 1;
-        singular = (nnz(abs(diag(L)) > 2*eps) ~= M || nnz(abs(diag(U)) > 2*eps) ~= M);
 
         if ( ~singular ) % If successful, done.
             ISING = false;
@@ -23,6 +22,7 @@ function [ H, L, U, p, ISTATUS ] = ROK_PrepareMatrix( M, H, Direction, gam, Harn
             disp(str);
             if ( Nconsecutive <= 5 ) % Less than 5 consecutive failed decompositions
                 H = H*0.5;
+                H = max( OPTIONS.Hmin, min( H, OPTIONS.Hmax ) );
             else
                 % More than 5 consecutive failed decompositions
                 error('Matrix is repeatedly singular.')

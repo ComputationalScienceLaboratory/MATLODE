@@ -77,7 +77,18 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %   Initial Settings
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ISTATUS = ISTATUS_Struct('default');
-    RSTATUS = RSTATUS_Struct('default');    
+    RSTATUS = RSTATUS_Struct('default');
+    
+    if ( OPTIONS.storeCheckpoint )
+        RSTATUS.S1residual = zeros(OPTIONS.ChunkSize, 1);
+        RSTATUS.stepsizes = zeros(OPTIONS.ChunkSize, 1);
+        if ( OPTIONS.NBasisVectors == 0 )
+            RSTATUS.basisSizes = zeros(OPTIONS.ChunkSize, 1);
+        end
+        if ( OPTIONS.IOArnoldi )
+            RSTATUS.blockSizes = zeros(OPTIONS.ChunkSize, 1);
+        end
+    end
     
     stack_ptr = 0;
     
@@ -117,7 +128,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 
             error('Number of steps exceeds maximum buffer bound \n T= %f;     H= %f', T, H );
         end
-        if ( ( ( T+0.1*H ) == T) || ( H <= Roundoff ) )
+        if ( ( ( T+0.1*H ) == T) || ( abs(H) <= Roundoff ) )
             error('Step size too small: T + 10*H = T or H < Roundoff \n T= %f;     H= %f', T, H );
         end
         
@@ -155,6 +166,33 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             end
         end
         
+%%%%%%%%%% Prepare For Vector Recycling. %%%%%%%%%%%
+        if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
+                R = min(OPTIONS.NRecycledVectors, M-1);
+                benrich(:,1:R) = Varn(:,end-R:end-1);
+                zenrich(1:R) = w(end-R:end-1);
+        end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
+            
+        [H, Varn, Harn, hmp1, vmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, io_arn_flag, ISTATUS] ...
+             = ROK_ArnoldiAdapt(fjac, Fcn0, dFdT, NVAR, H, Direction, gam, ...
+                                OPTIONS, ISTATUS);
+
+        if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
+            [Varn, Harn, w, Lv, Uv, pv, M, ISTATUS] ...
+                = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
+                VtV, benrich, zenrich, R, M, NVAR, io_arn_flag, ...
+                OPTIONS, ISTATUS);
+            
+            [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
+                = computeFirstStage(Fcn0, Harn, Varn, w, Lv, Uv, pv, H, M, ... 
+                Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
+            
+        end
+    
+        lambda = zeros(M,Coefficient.NStage);
+        lambda(:,1) = lambda1;
+
         % Repeat step calculation until current step accepted
         accepted = false;
         while ( ~accepted ) % accepted
@@ -191,34 +229,14 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %                residual_true = norm((speye(NVAR) - H*gam*fjac)*debugK - H*Fcn0)
 %            end
 
-%%%%%%%%%%%%%% Prepare For Vector Recycling. %%%%%%%%%%%
-            if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
-                    R = min(OPTIONS.NRecycledVectors, M-1);
-                    benrich(:,1:R) = Varn(:,end-R:end-1);
-                    zenrich(1:R) = w(end-R:end-1);
-            end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
-                
-            [H, Varn, Harn, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
-                 = ROK_ArnoldiAdapt(fjac, Fcn0, dFdT, NVAR, H, Direction, gam, ...
-                                    OPTIONS, ISTATUS);
-
-            if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
-                [Varn, Harn, w, Lv, Uv, pv, M, ISTATUS] ...
-                    = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
-                    VtV, benrich, zenrich, R, M, NVAR, io_arn_flag, ...
-                    OPTIONS, ISTATUS);
-                
+            % Solution of first stage.
+            if ( RejectLastH )
                 [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
                     = computeFirstStage(Fcn0, Harn, Varn, w, Lv, Uv, pv, H, M, ... 
-                    Direction, gam, io_arn_flag, ISTATUS);
-                
+                    Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
+                lambda(:,1) = lambda1;
             end
-            
-            lambda = zeros(M,Coefficient.NStage);
-            lambda(:,1) = lambda1;
 
-            % Solution of first stage.
             K(:,1) = Varn * lambda(:,1) + H*(Fcn0 - Varn*phi);
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,6 +268,23 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %                lambda(:,istage) = locLHS\locRHS;
                 lambda(:,istage) = Uh\(Lh\(locRHS(ph)));
                 K(:,istage) = Varn*lambda(:,istage) + H*(locF - Varn*phi);
+
+                % Stage 2 residual
+%                 if ( istage == 2 )
+%                     externalF = locF - Varn*phi;
+%                     tempLambda = - gamma(2,1) * lambda(:,1) - gam * lambda(:,2);
+%                     if ( OPTIONS.MatrixFree )
+%                          residual2 = abs(H) * norm(-((H * gam) * fjac(externalF)) + ((hmp1 * tempLambda(end)) * vmp1))
+%                     else
+%                          residual2 = abs(H) * norm(-(H * gam * (fjac * externalF)) + (hmp1 * tempLambda(end) * vmp1))
+%                     end
+% 
+%                     if ( OPTIONS.MatrixFree )
+%                         residual2_true = norm((K(:,2) - H * gam * fjac(K(:,2))) - (H * locF) - ((H * gamma(2,1)) * fjac(K(:,1))))
+%                     else
+%                         residual2_true = norm(((speye(NVAR) - H * gam * fjac) * K(:,2)) - (H * locF) - ((H * gamma(2,1)) * (fjac * K(:,1))))
+%                     end
+%                 end
                 
             end % stages
             Ynew = Y;
@@ -287,16 +322,32 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 % Update solution
                 Y = Ynew;
                 
+                % Update Memory Allocation
+                if ( (ISTATUS.Nacc > OPTIONS.ChunkSize*ISTATUS.Nchk) && (OPTIONS.storeCheckpoint == true) )
+                    [ Tout, Yout ] = matlOde_appendMemory(NVAR,Tout,Yout,OPTIONS.ChunkSize);
+                    RSTATUS.S1residual = [RSTATUS.S1residual; zeros(OPTIONS.ChunkSize, 1)];
+                    RSTATUS.stepsizes = [RSTATUS.stepsizes; zeros(OPTIONS.ChunkSize, 1)];
+                    if ( OPTIONS.NBasisVectors == 0 )
+                        RSTATUS.basisSizes = [RSTATUS.basisSizes; zeros(OPTIONS.ChunkSize, 1)];
+                    end
+                    if ( OPTIONS.IOArnoldi )
+                        RSTATUS.blockSizes = [RSTATUS.blockSizes; zeros(OPTIONS.ChunkSize, 1)];
+                    end
+                    ISTATUS.Nchk = ISTATUS.Nchk + 1;
+                end
+                
                 if ( OPTIONS.storeCheckpoint == true )
                     Tout(TYindex,1) = T;                
                     Yout(:,TYindex) = Y;
-                    TYindex = TYindex + 1;                
-                end
-
-                % Update Memory Allocation
-                if ( (ISTATUS.Nacc > OPTIONS.ChunkSize*ISTATUS.Nchk) && (OPTIONS.storeCheckpoint == true) )
-                    [ Tout, Yout ] = matlOde_appendMemory(NVAR,Tout,Yout,OPTIONS.ChunkSize);              
-                    ISTATUS.Nchk = ISTATUS.Nchk + 1;
+                    RSTATUS.S1residual(TYindex) = residual;
+                    RSTATUS.stepsizes(TYindex) = H;
+                    if ( OPTIONS.NBasisVectors == 0 )
+                        RSTATUS.basisSizes(TYindex) = M;
+                    end
+                    if ( OPTIONS.IOArnoldi )
+                        RSTATUS.blockSizes(TYindex) = OPTIONS.BlockSize;
+                    end
+                    TYindex = TYindex + 1;
                 end
                 
                 
@@ -317,7 +368,11 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 enrich = false;
                 % for debugging
                 if ( OPTIONS.displaySteps == true )
-                    str = ['Accepted step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    if ( OPTIONS.NBasisVectors == 0 )
+                        str = ['Accepted step. ', 'Residual = ', num2str(residual), '; Basis Size = ', num2str(M), '; Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    else
+                        str = ['Accepted step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    end
                     disp(str); 
                 end
                 
@@ -325,6 +380,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 if ( RejectMoreH )
                     Hnew = H*OPTIONS.FacRej;
                 end
+                Hnew = max( OPTIONS.Hmin, min( Hnew, OPTIONS.Hmax ) );
                 
                 RejectMoreH = RejectLastH;
                 RejectLastH = true;
@@ -336,7 +392,11 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 
                 % for debugging
                 if ( OPTIONS.displaySteps == true )
-                    str = ['Rejected step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    if ( OPTIONS.NBasisVectors == 0 )
+                        str = ['Rejected step. ', 'Residual = ', num2str(residual), '; Basis Size = ', num2str(M), '; Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    else
+                        str = ['Rejected step. Time = ', num2str(T), '; Stepsize = ', num2str(H)];
+                    end
                     disp(str);
                 end
                 enrich = true;
@@ -353,16 +413,24 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %         Tout(TYindex:OPTIONS.Max_no_steps) = [];
 %         Yout(:,TYindex:OPTIONS.Max_no_steps) = [];      
         Tout(ISTATUS.Nacc+1:end,:) = [];
-        Yout(:,ISTATUS.Nacc+1:end) = []; 
+        Yout(:,ISTATUS.Nacc+1:end) = [];
+        RSTATUS.S1residual = RSTATUS.S1residual(1:ISTATUS.Nacc);
+        RSTATUS.stepsizes = RSTATUS.stepsizes(1:ISTATUS.Nacc);
+        if ( OPTIONS.NBasisVectors == 0 )
+            RSTATUS.basisSizes = RSTATUS.basisSizes(1:ISTATUS.Nacc);
+        end
+        if ( OPTIONS.IOArnoldi )
+            RSTATUS.blockSizes = RSTATUS.blockSizes(1:ISTATUS.Nacc);
+        end
     else
         Tout = T;
         Yout = Y;
     end
     Yout = transpose(Yout);
-    
+
 return;
 
-function [H, Varn, Harn, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, io_arn_flag, ISTATUS] ...
+function [H, Varn, Harn, hmp1, vmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, io_arn_flag, ISTATUS] ...
                 = ROK_ArnoldiAdapt(J, f, dFdT, N, H, Direction, gam, OPTIONS, ISTATUS)
 
 Lv = []; Uv = []; pv = [];
@@ -377,19 +445,22 @@ if ( M == 0 )
     adaptive = true;
 end
 
+basisMax = min(N, 200);
+
 testIndex = [4,6,8,11,15,20,27,36,46,57,70,85,100];
 Varn = zeros(N, M);
 Harn = zeros(M, M);
 VtV = eye(M, M);
 w = zeros(M, 1);
 hmp1 = 0.0;
+vmp1 = zeros(N, 1);
 
 w(1) = 1;
 beta = sqrt(f'*f + w(1)^2);
 Varn(:, 1) = f/beta;
 w(1) = w(1)/beta;
 
-for i = 1:N
+for i = 1:basisMax
     if ( OPTIONS.MatrixFree )
         zeta = J(Varn(:, i)) + dFdT*w(i);
         ISTATUS.Njac = ISTATUS.Njac + 1;
@@ -427,7 +498,7 @@ for i = 1:N
     hmp1 = bignorm;
 
     % Check residual.
-    if ( (~adaptive && i == M) || (adaptive && (i > 100 ||  min(abs(testIndex - i)) == 0)) )
+    if ( (~adaptive && i == M) || (adaptive && (i > 100 ||  min(abs(testIndex - i)) == 0)) || (i == basisMax) )
 %         [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( i, H, Direction, gam, Harn(1:i, 1:i), ISTATUS );
 % 
 %         if ( io_arn_flag )
@@ -444,25 +515,33 @@ for i = 1:N
 %         lambda1 = Uh\(Lh\(locRHS(ph)));
         % Compute residual.
         if ( io_arn_flag )
-            [Lv, Uv, pv] = lu(VtV, 'vector');
+            [Lv, Uv, pv, sing] = lu_decomposition(VtV);
+            %v_cond = cond(VtV)
+            %u_diag = diag(Uv);
+            %u_diag = u_diag(max(1,i-3):end)
+            if ( sing )
+                warning('VtV is singlular or ill-conditioned.')
+            end
         end
 
         [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                = computeFirstStage(f, Harn(1:i,1:i), Varn(:,1:i), w, Lv, Uv, pv, H, i, Direction, gam, io_arn_flag, ISTATUS);
+                = computeFirstStage(f, Harn(1:i,1:i), Varn(:,1:i), w, Lv, Uv, pv, H, i, Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
         
         residual = abs(H * gam * hmp1 * lambda1(i));
 
-        fprintf('%d: %e\n', i, residual);
+%        fprintf('%d: %e\n', i, residual);
 
         % DEBUG: true residual.
 %        debugK = Varn * lambda1 + H*(f - Varn*phi);
-%        if ( matrixFree )
+%        if ( OPTIONS.MatrixFree )
 %            residual_true = norm((debugK - H*gam*J(debugK)) - H*f);
 %        else
 %            residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
 %        end
+%        fprintf('%d: %e, %e\n', i, residual, residual_true);
 
-        if ( ~adaptive || residual < OPTIONS.AdaptiveArnoldiTol )
+
+        if ( ~adaptive || (i == basisMax) || residual < OPTIONS.AdaptiveArnoldiTol )
             M = i;
             break;
         end
@@ -484,6 +563,7 @@ for i = 1:N
         VtV(i+1,i+1) = 1.0;
     end
 end
+vmp1 = zeta/hmp1;
 Varn = Varn(1:N, 1:M);
 Harn = Harn(1:M, 1:M);
 
@@ -543,7 +623,10 @@ for i = M:M+r-1
 end
 
 if ( io_arn_flag )
-    [Lv, Uv, pv] = lu(VtV, 'vector');
+    [Lv, Uv, pv, sing] = lu_decomposition(VtV);
+    if ( sing )
+        warning('VtV is singlular or ill-conditioned.')
+    end
 end
 
 if( OPTIONS.MatrixFree )
@@ -571,9 +654,9 @@ Harn = Harn(1:M, 1:M);
 return
 
 function [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                = computeFirstStage(f, Harn, Varn, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS)
+                = computeFirstStage(f, Harn, Varn, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS, OPTIONS)
 
-[H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS );
+[H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS );
 
 % Stage 1
 phi = transpose(Varn)*f;
