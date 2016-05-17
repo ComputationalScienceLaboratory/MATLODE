@@ -33,6 +33,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     OPTIONS.BlockSize  = basis_block_size;
     global n_recycled_vectors
     OPTIONS.NRecycledVectors = n_recycled_vectors;
+    global basis_extend_by_stage
+    OPTIONS.BasisExtended = basis_extend_by_stage;
     % =================================================================== %
     
     % Force initial value matrix to be 1 X N.
@@ -180,10 +182,10 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                                 OPTIONS, ISTATUS);
 
         if( OPTIONS.NRecycledVectors && T ~= Tspan(1) )
-            [Varn, Harn, w, Lv, Uv, pv, M, ISTATUS] ...
+            [Varn, Harn, w, VtV, Lv, Uv, pv, M, ISTATUS] ...
                 = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
                 VtV, benrich, zenrich, R, M, NVAR, io_arn_flag, ...
-                OPTIONS, ISTATUS);
+                BlockSize, OPTIONS, ISTATUS);
             
             [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
                 = computeFirstStage(Fcn0, Harn, Varn, w, Lv, Uv, pv, H, M, ... 
@@ -256,9 +258,23 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                     end
                     locF = OdeFunction(T + H*c(istage), insum);
                     ISTATUS.Nfun = ISTATUS.Nfun + 1;
+
+                    if ( OPTIONS.BasisExtended )
+%                        fprintf('OldM = %d\n', M);
+                        [Varn, Harn, w, VtV, Lv, Uv, pv, M, ISTATUS] ...
+                            = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
+                            VtV, locF, 0.0, 1, M, NVAR, io_arn_flag, ...
+                            BlockSize, OPTIONS, ISTATUS);
+%                        fprintf('NewM = %d\n', M);
+                        [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS );
+                        lambda = [lambda; zeros(1, size(lambda,2))];
+                        outsum = [outsum; 0.0];
+%                        assert(size(Varn,2) == M && size(Harn,1) == M && size(w,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
+                    end
                 else
                     locF = Fcn0;
                 end
+
                 phi = transpose(Varn)*locF;
                 if ( io_arn_flag )
                     phi = Uv\(Lv\phi(pv));
@@ -288,6 +304,9 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %                 end
                 
             end % stages
+
+%   New solutions
+
             Ynew = Y;
             Yerr = zeros(NVAR,1);
             
@@ -546,12 +565,13 @@ for i = 1:basisMax
             if ( io_arn_flag && (residual >= residual_old || sing) )
                 % Residual is getting bigger, increase orthogonalization window.
                 %fprintf('%d: BlockSize = %d\n', i, Blk);
+                OldBlk = Blk;
                 Blk = Blk * 2;
                 if ( Blk >= i )
                    Blk = i;
                    residual_decrease = true;
                 end
-%                [Varn, Harn, w, VtV, zeta, xi, orthoVectors, remainingVectors] = reorthogonolizeBasis(Varn, Harn, w, VtV, zeta, xi, i, Blk, io_arn_flag);
+%                [Varn, Harn, w, VtV, zeta, xi, orthoVectors, remainingVectors] = reorthogonolizeBasis(Varn, Harn, w, VtV, zeta, xi, i, Blk, OldBlk, io_arn_flag);
                 if ( io_arn_flag)
                     leftside = max(i-Blk, 0);
                     orthoVectors = (leftside+1):i;
@@ -604,10 +624,13 @@ Varn = Varn(1:N, 1:M);
 Harn = Harn(1:M, 1:M);
 BlockSize = min(Blk, 2*M);
 
+%[Vm, Hm, wm, VtVm, zetam, xim, orthoVectors, remainingVectors] = reorthogonolizeBasis(Varn, Harn, w, VtV, zeta, xi, M, Blk+2, Blk, io_arn_flag);
+%[Vm2, Hm2, wm2, VtVm2, zeta, xi, orthoVectors, remainingVectors] = reorthogonolizeBasis(Varn, Harn, w, VtV, zeta, xi, M, Blk+2, 0, io_arn_flag);
+
 return
 
-function [Varn, Harn, w, Lv, Uv, pv, M, ISTATUS] ...
-                = ROK_ArnoldiEnrich(J, dFdT, Varn, w, Harn, VtV, b, z, r, M, N, io_arn_flag, OPTIONS, ISTATUS)
+function [Varn, Harn, w, VtV, Lv, Uv, pv, M, ISTATUS] ...
+                = ROK_ArnoldiEnrich(J, dFdT, Varn, w, Harn, VtV, b, z, r, M, N, io_arn_flag, BlockSize, OPTIONS, ISTATUS)
 
 Lv = []; Uv = []; pv = [];
 for i = M:M+r-1
@@ -619,7 +642,7 @@ for i = M:M+r-1
 
     if ( io_arn_flag )
 %        error('Incomplete orthogonalization is unimplemented.')
-        leftside = max(i-OPTIONS.BlockSize, 0);
+        leftside = max(i-BlockSize, 0);
         orthoVectors = (leftside+1):i;
         remainingVectors = 1:leftside;
     else
@@ -692,7 +715,7 @@ return
 
 % =========================================================================== %
 
-function [Varn, Harn, w, VtV, zeta, xi, orthoVectors, remainingVectors] = reorthogonolizeBasis(Varn, Harn, w, VtV, zeta, xi, M, Blk, io_arn_flag)
+function [Varn, Harn, w, VtV, zeta, xi, orthoVectors, remainingVectors] = reorthogonolizeBasis(Varn, Harn, w, VtV, zeta, xi, M, Blk, OldBlk, io_arn_flag)
 
 remainingVectors = [];
 
@@ -700,7 +723,7 @@ for i = 1:M-1
 
     if ( io_arn_flag )
         leftside = max(i-Blk, 0);
-        orthoVectors = (leftside+1):i;
+        orthoVectors = [(leftside+1):(i-OldBlk)];
         remainingVectors = 1:leftside;
     else
         orthoVectors = 1:i;
