@@ -177,7 +177,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
             
-        [H, Varn, Harn, hmp1, vmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, BlockSize, io_arn_flag, ISTATUS] ...
+        [H, Varn, Harn, hmp1, vmp1, wmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, BlockSize, io_arn_flag, ISTATUS] ...
              = ROK_ArnoldiAdapt(fjac, Fcn0, dFdT, NVAR, H, Direction, gam, BlockSize, ...
                                 OPTIONS, ISTATUS);
 
@@ -261,15 +261,23 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 
                     if ( OPTIONS.BasisExtended )
 %                        fprintf('OldM = %d\n', M);
+                        wnew = double(~OPTIONS.Autonomous); % no time derivative if problem is autonomous.
                         [Varn, Harn, w, VtV, Lv, Uv, pv, M, ISTATUS] ...
                             = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
-                            VtV, locF, 0.0, 1, M, NVAR, io_arn_flag, ...
+                            VtV, locF, wnew, 1, M, NVAR, io_arn_flag, ...
                             BlockSize, OPTIONS, ISTATUS);
 %                        fprintf('NewM = %d\n', M);
-                        [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS );
+%                        [H, Lh2, Uh2, ph2, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS );
+                        hm = Harn(1:(M-1),M);
+                        Uh(:,M) = Lh\(-H*gam*hm(ph));
+                        Uh(M,:) = [zeros(1,M-1), 1.0 - H*gam*Harn(M,M)];
+                        Lh = [Lh, zeros(M-1,1); zeros(1,M-1), 1.0];
+                        ph(M) = M;
                         lambda = [lambda; zeros(1, size(lambda,2))];
                         outsum = [outsum; 0.0];
+%                        assert(norm(Uh - Uh2)/norm(Uh2) < 1e-13 && norm(Lh - Lh2)/norm(Lh2) < 1e-13)
 %                        assert(size(Varn,2) == M && size(Harn,1) == M && size(w,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
+%                        assert(size(Lh,1) == M && size(Uh,1) == M && size(ph,2) == M)
                     end
                 else
                     locF = Fcn0;
@@ -288,12 +296,23 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 
                 % Stage 2 residual
 %                 if ( istage == 2 )
-%                     externalF = locF - Varn*phi;
 %                     tempLambda = - gamma(2,1) * lambda(:,1) - gam * lambda(:,2);
-%                     if ( OPTIONS.MatrixFree )
-%                          residual2 = abs(H) * norm(-((H * gam) * fjac(externalF)) + ((hmp1 * tempLambda(end)) * vmp1))
+%                     if ( OPTIONS.BasisExtended )
+%                         if ( OPTIONS.MatrixFree )
+%                             jvhat = fjac(Varn(:,M)) + w(M) * dFdT;
+%                         else
+%                             jvhat = fjac * Varn(:,M) + w(M) * dFdT;
+%                         end
+%                         res2smvec = Varn' * jvhat; 
+%                         res2vec = ((-1.0 * gam * lambda(M,2)) * (jvhat - Varn*res2smvec) + ((hmp1 * tempLambda(M-1)) * vmp1));
+%                         residual2 = abs(H) * sqrt(res2vec'*res2vec + ((-1.0 * gam * lambda(M,2) *(-1.0 * w' * res2smvec)) + (hmp1 * tempLambda(M-1) * wmp1))^2)
 %                     else
-%                          residual2 = abs(H) * norm(-(H * gam * (fjac * externalF)) + (hmp1 * tempLambda(end) * vmp1))
+%                         externalF = locF - Varn*phi;
+%                         if ( OPTIONS.MatrixFree )
+%                              residual2 = abs(H) * norm(-((H * gam) * fjac(externalF)) + ((hmp1 * tempLambda(end)) * vmp1))
+%                         else
+%                              residual2 = abs(H) * norm(-(H * gam * (fjac * externalF)) + (hmp1 * tempLambda(end) * vmp1))
+%                         end
 %                     end
 % 
 %                     if ( OPTIONS.MatrixFree )
@@ -456,7 +475,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 
 return;
 
-function [H, Varn, Harn, hmp1, vmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, BlockSize, io_arn_flag, ISTATUS] ...
+function [H, Varn, Harn, hmp1, vmp1, wmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, BlockSize, io_arn_flag, ISTATUS] ...
                 = ROK_ArnoldiAdapt(J, f, dFdT, N, H, Direction, gam, BlockSize, OPTIONS, ISTATUS)
 
 Lv = []; Uv = []; pv = [];
@@ -487,7 +506,11 @@ hmp1 = 0.0;
 vmp1 = zeros(N, 1);
 residual = Inf;
 
-w(1) = 1;
+if ( OPTIONS.Autonomous )
+    w(1) = 0;
+else
+    w(1) = 1;
+end
 beta = sqrt(f'*f + w(1)^2);
 Varn(:, 1) = f/beta;
 w(1) = w(1)/beta;
@@ -619,6 +642,7 @@ for i = 1:basisMax
         VtV(i+1,i+1) = 1.0;
     end
 end
+wmp1 = xi/hmp1;
 vmp1 = zeta/hmp1;
 Varn = Varn(1:N, 1:M);
 Harn = Harn(1:M, 1:M);
