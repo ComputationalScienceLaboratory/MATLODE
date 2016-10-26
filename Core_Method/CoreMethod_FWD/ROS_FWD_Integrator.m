@@ -204,8 +204,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                     K(ioffset+1:ioffset+NVAR) = K(ioffset+1:ioffset+NVAR) + HG*dFdT;
                 end
                 
-                % Solve the system
-                K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+                if ( OPTIONS.LU )
+                    %%%%% LU Decomp NEW %%%%%
+                    [L,U,P] = lu(e);
+                    K(ioffset+1:ioffset+NVAR) = U\(L\(P*K(ioffset+1:ioffset+NVAR)));
+                    %%%%%%%%%%%%%%%%%%%%%%%%%
+                else 
+                    % Solve the system
+                    K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+                end                             
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
             end % stages

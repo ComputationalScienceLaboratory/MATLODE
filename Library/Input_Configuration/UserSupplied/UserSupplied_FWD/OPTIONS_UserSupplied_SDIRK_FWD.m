@@ -152,8 +152,7 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_FWD( OPTIONS_U )
     if ( ~isempty(OPTIONS_U.Y_TLM) == true )
         warning('MatlODE:configuration','Y_TLM is not used in integrator.');
         OPTIONS_U.Y_TLM = [];
-    end       
-
+    end
 end
 
 %%

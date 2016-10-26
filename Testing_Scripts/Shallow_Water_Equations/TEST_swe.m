@@ -5,7 +5,7 @@ clear global;
 % analysis: -1: solution
 %           -2: error
 %           -3: cpu time
-analysis = -3;
+analysis = -1;
 
 % error: -1: relative root mean squared (rRMS)
 %        -2: relative error

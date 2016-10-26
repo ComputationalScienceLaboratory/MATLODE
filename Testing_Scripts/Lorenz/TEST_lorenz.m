@@ -5,7 +5,7 @@ clear global;
 % analysis: -1: solution
 %           -2: error
 %           -3: cpu time
-analysis = -3;
+analysis = -1;
 
 % error: -1: relative root mean squared (rRMS)
 %        -2: relative error
@@ -73,7 +73,7 @@ RelTol = [ 1e-8; 1e-8; 1e-8 ];
 
 yDimension = length(y0);
 
-Options = MatlOde_OPTIONS( 'AbsTol',          AbsTol, ...
+Options = MATLODE_OPTIONS( 'AbsTol',          AbsTol, ...
                            'RelTol',          RelTol, ...
                            'Jacobian',        Ode_Jacobian, ...
                            'AbsTol_TLM',      ones(yDimension,yDimension).*AbsTol(1).*10, ...

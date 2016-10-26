@@ -26,7 +26,7 @@ error_mode = -2;
 %             -10: ROS_ADJ_Integrator
 %             -11: RK_ADJ_Integrator
 %             -12: SDIRK_ADJ_Integrator              
-integrator = -1;
+integrator = -12;
 
 % Adjoint: -1: xxxxADJ1 w/ Quadrature
 %          -2: xxxxADJ1 no Quadrature
@@ -67,8 +67,8 @@ u2_p = -2.00158510637908252240537862224;
 
 y0 = [u1; u2; u1_p; u2_p]; 
 
-RelTol = [ 1e-1 ];
-AbsTol = [ 1e-1; 1e-1; 1e-1; 1e-1 ];
+RelTol = ones(4,1)*1e-8;
+AbsTol = ones(4,1)*1e-8;
 
 % RelTol = RelTol(1);
 % AbsTol = AbsTol(1);
@@ -84,7 +84,7 @@ Options = MATLODE_OPTIONS( 'AbsTol',          AbsTol, ...
                            'NTLM',            yDimension, ...
                            'AbsTol_ADJ',      AbsTol.*10, ...
                            'RelTol_ADJ',      RelTol.*10, ...
-                           'NADJ',            yDimension, ...
+                           'NADJ',            1, ...
                            'Desired_Mode',    -1*adj_mode, ...
                            'storeCheckpoint', true, ...
                            'displayStats',    true, ...
@@ -211,7 +211,7 @@ if ( (integrator == -9) || (integrator == -11) || (integrator == -12) )
             disp( 'ERK/RK/SDIRK ADJ2 no Quadrature' );
             Options = MATLODE_OPTIONS( Options, ...
                                         'NP', 1, ...
-                                        'Lambda', eye(yDimension) );
+                                        'Lambda', [1; 0; 0; 0] );
         otherwise
     end
 end
@@ -292,7 +292,7 @@ switch ( analysis )
 
             case -10
                 disp( 'Solving problem with ROS_ADJ_Integrator: ');
-                [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
+                [ T, Y, Sens, Coefficient ] = ...
                     MATLODE_ROS_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'ADJ';
@@ -308,7 +308,7 @@ switch ( analysis )
 
             case -12
                 disp( 'Solving problem with SDIRK_ADJ_Integrator: ');
-                [ T, Y, Lambda, ISTATUS, RSTATUS, Ierr, Coefficient ] = ...
+                [ T, Y, Sens, Stats ] = ...
                     MATLODE_SDIRK_ADJ_Integrator( Ode_Function, Tspan, y0, Options );
                 
                 implementation = 'ADJ';

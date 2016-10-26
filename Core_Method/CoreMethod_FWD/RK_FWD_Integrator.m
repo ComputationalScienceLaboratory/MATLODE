@@ -199,7 +199,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = RK_FWD_
              
             % Solve for linear systems
             [ DZ1, DZ2, DZ3, ISTATUS ] = RK_Solve( NVAR, H, DZ1, DZ2, DZ3, ...
-                e1, e2, ISING, ISTATUS );
+                e1, e2, ISING, OPTIONS.LU, ISTATUS );
 
             NewtonIncrement = sqrt( ( errorNorm( NVAR, DZ1, SCAL )^2 ...
                 + errorNorm( NVAR, DZ2, SCAL )^2 ...
@@ -290,9 +290,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = RK_FWD_
                 DZ4 = DZ4 - (rkGamma*Z4)/H;
                 DZ4 = DZ4 + (rkGamma*G)/H;
 
-                % Solve the linear system              
-                DZ4 = e1\DZ4;
-                
+                % Solve the linear system
+                if ( OPTIONS.LU ) 
+                    %%%%% LU Decomp NEW %%%%%
+                    [L,U,P] = lu(e1);
+                    DZ4 = U\(L\(P*DZ4));
+                    %%%%%%%%%%%%%%%%%%%%%%%%%                    
+                else
+                    DZ4 = e1\DZ4;
+                end                               
                 ISTATUS.Nsol = ISTATUS.Nsol + 1;
 
                 % Check convergence of Newton iterations
@@ -658,7 +664,7 @@ return; % (END) SUBROUTINE: Runge Kutta Decomposition
 
 
 % (START) SUBROUTINE: Runge Kutta Solve
-function [ R1, R2, R3, ISTATUS ] = RK_Solve( NVAR, H, R1, R2, R3, e1, e2, ISING, ISTATUS )
+function [ R1, R2, R3, ISTATUS ] = RK_Solve( NVAR, H, R1, R2, R3, e1, e2, ISING, isLU, ISTATUS )
 
     global rkT rkTinvAinv
     
@@ -668,11 +674,28 @@ function [ R1, R2, R3, ISTATUS ] = RK_Solve( NVAR, H, R1, R2, R3, e1, e2, ISING,
     
     R = rkTinvAinv*x;
     
-    R(1,:) = e1\transpose(R(1,:));
+    % Solve the linear system
+    if ( isLU )
+        %%%%% LU Decomp NEW %%%%%
+        [L,U,P] = lu(e1);
+        R(1,:) = U\(L\(P*transpose(R(1,:))));
+        %%%%%%%%%%%%%%%%%%%%%%%%%
+    else
+        R(1,:) = e1\transpose(R(1,:));
+    end
 
     rhs = transpose(R(2,:)) + transpose(R(3,:)).*1i;  
+            
+    % Solve the linear system
+    if ( isLU )
+        %%%%% LU Decomp NEW %%%%%
+        [L,U,P] = lu(e2);
+        solution = U\(L\(P*rhs));
+        %%%%%%%%%%%%%%%%%%%%%%%%%
+    else
+        solution = e2\rhs;
+    end
     
-    solution = e2\rhs;
     R(2,:) = real(solution);
     R(3,:) = imag(solution);
 

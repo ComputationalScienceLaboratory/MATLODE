@@ -4,7 +4,7 @@ function [ jac ] = swe_Jacobian_mex( t,y )
     % Sparse parameters will change with model parameters. This needs to be
     % generalized in the future.
 
-     [row, col, val ] = sweCartesian_jac_mex(t,y);
+     [row, col, val ] = swe_jac_mex(t,y);
      jac = sparse(row,col,val,3468,3468);
 
 return;

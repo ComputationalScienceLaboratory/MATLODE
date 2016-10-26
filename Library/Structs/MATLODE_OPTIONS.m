@@ -293,6 +293,7 @@ Names = [
     'TLMTruncErr      '
     'WarningConfig    '
     'Y_TLM            '
+    'LU               '
     ];
 m = size(Names,1);
 names = lower(Names);

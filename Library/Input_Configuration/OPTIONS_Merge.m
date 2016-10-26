@@ -151,7 +151,10 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     end
     if ( ~isempty(OPTIONS_U.NBasisVectors) == true )
         OPTIONS.NBasisVectors = OPTIONS_U.NBasisVectors;
-    end    
+    end
+    if ( ~isempty(OPTIONS_U.NADJ) == true )
+        OPTIONS.NADJ = OPTIONS_U.NADJ;
+    end
     if ( ~isempty(OPTIONS_U.NewtonMaxIt) == true )
         OPTIONS.NewtonMaxIt = OPTIONS_U.NewtonMaxIt;
     end
@@ -202,6 +205,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     end
     if ( ~isempty(OPTIONS_U.Y_TLM) == true )
         OPTIONS.Y_TLM = OPTIONS_U.Y_TLM;
+    end
+    if ( ~isempty(OPTIONS_U.LU) == true )
+        OPTIONS.LU = OPTIONS_U.LU;
     end
 
 end

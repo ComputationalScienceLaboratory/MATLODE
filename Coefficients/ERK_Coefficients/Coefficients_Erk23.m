@@ -1,4 +1,4 @@
-function [ erkMethod rkELO rkS erkName ] = Coefficients_Erk23( RK2 )
+function [ erkMethod, rkELO, rkS, erkName ] = Coefficients_Erk23( RK2 )
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Filename: Coefficients_Erk23.m
 %

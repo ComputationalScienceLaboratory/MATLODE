@@ -260,7 +260,14 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 HGammaInv = 1.0/(H*rkGamma);
                 DZ = DZ*HGammaInv;
                 if( ~OPTIONS.MatrixFree )
-                    DZ = e\DZ;
+                    if ( OPTIONS.LU )
+                        %%%%% LU Decomp NEW %%%%%
+                        [L,U,P] = lu(e);
+                        DZ = U\(L\(P*DZ));
+                        %%%%%%%%%%%%%%%%%%%%%%%%%
+                    else
+                        DZ = e\DZ;
+                    end                                       
                 else
                     [ DZ, gmresFlag, ~, iter ] = gmres(e, DZ, [], ...
                         OPTIONS.GMRES_TOL);
@@ -354,7 +361,14 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
         HGammaInv = 1.0/( H*rkGamma );
         Yerr = Yerr*HGammaInv;
         if(~OPTIONS.MatrixFree)
-            Yerr = e\Yerr;
+            if ( OPTIONS.LU )
+                %%%%% LU Decomp NEW %%%%%
+                [L,U,P] = lu(e);
+                Yerr = U\(L\(P*Yerr));
+                %%%%%%%%%%%%%%%%%%%%%%%%%                
+            else
+                Yerr = e\Yerr;
+            end                        
         else
             [ Yerr, gmresFlag, ~, iter ] = gmres(e, Yerr, ...
                 [], OPTIONS.GMRES_TOL);

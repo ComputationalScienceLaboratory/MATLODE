@@ -130,15 +130,8 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
         
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'SDIRK', 'ADJ', Y0, Tspan );
              
-    OPTIONS.NADJ = size(Y0,1);
     OPTIONS.NVAR = size(Y0,1);
-       
-    % Parameters for SDIRK ADJ
-    Lambda = zeros(NVAR,OPTIONS.NADJ);
-    for k=1:OPTIONS.NADJ
-        Lambda(k,k) = 1;
-    end
-    
+           
     if ( ~isempty(OPTIONS.Jacp) )
         % SDIRKADJ1 w/ Quadrature
         if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDP) && ...
