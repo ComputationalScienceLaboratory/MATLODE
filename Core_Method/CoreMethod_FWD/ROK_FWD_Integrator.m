@@ -174,10 +174,12 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         if ( OPTIONS.BiOrthogonalLanczos )
             io_arn_flag = false;
             Lv = []; Uv = []; pv = [];
-            [Varn, Wlzs, Harn, w, wt] = ROK_LanczosBiorthogonalize(fjac, dFdT, Fcn0, M, NVAR, OPTIONS, ISTATUS);
-            [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                 = computeFirstStage(Fcn0, Harn, Varn, Wlzs, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
-            residual = 0;
+            %[Varn, Wlzs, Harn, w, wt] = ROK_LanczosBiorthogonalize(fjac, dFdT, Fcn0, M, NVAR, OPTIONS, ISTATUS);
+            %[H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
+            %     = computeFirstStage(Fcn0, Harn, Varn, Wlzs, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
+            %residual = 0;
+            [Varn, Wlzs, Harn, vt, wt, M, residual, H, Lh, Uh, ph, lambda1, phi, ISTATUS] = ...
+              ROK_LanczosBiorthogonalize(fjac, dFdT, Fcn0, M, NVAR, H, Direction, gam, OPTIONS, ISTATUS);
         else
 
 %%%%%%%%%% Prepare For Vector Recycling. %%%%%%%%%%%
@@ -188,7 +190,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
             
-            [H, Varn, Harn, hmp1, vmp1, wmp1, Lh, Uh, ph, w, VtV, Lv, Uv, pv, lambda1, phi, M, residual, BlockSize, io_arn_flag, ISTATUS] ...
+            [H, Varn, Harn, hmp1, vmp1, wmp1, Lh, Uh, ph, vt, VtV, Lv, Uv, pv, lambda1, phi, M, residual, BlockSize, io_arn_flag, ISTATUS] ...
                  = ROK_ArnoldiAdapt(fjac, Fcn0, dFdT, NVAR, H, Direction, gam, BlockSize, ...
                                     OPTIONS, ISTATUS);
     
@@ -199,12 +201,12 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                     BlockSize, OPTIONS, ISTATUS);
                 
                 [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                    = computeFirstStage(Fcn0, Harn, Varn, [], w, Lv, Uv, pv, H, M, ... 
+                    = computeFirstStage(Fcn0, Harn, Varn, [], vt, [], Lv, Uv, pv, H, M, ... 
                     Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
                 
             end
 
-            Wlzs = [];
+            Wlzs = []; wt = [];
         
         end
 
@@ -226,7 +228,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             % Solution of first stage.
             if ( RejectLastH )
                 [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                    = computeFirstStage(Fcn0, Harn, Varn, Wlzs, w, Lv, Uv, pv, H, M, ... 
+                    = computeFirstStage(Fcn0, Harn, Varn, Wlzs, vt, wt, Lv, Uv, pv, H, M, ... 
                     Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
                 lambda(:,1) = lambda1;
             end
@@ -253,8 +255,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                     if ( OPTIONS.BasisExtended )
 %                        fprintf('OldM = %d\n', M);
                         wnew = double(~OPTIONS.Autonomous); % no time derivative if problem is autonomous.
-                        [Varn, Harn, w, VtV, Lv, Uv, pv, M, ISTATUS] ...
-                            = ROK_ArnoldiEnrich(fjac, dFdT, Varn, w, Harn, ...
+                        [Varn, Harn, vt, VtV, Lv, Uv, pv, M, ISTATUS] ...
+                            = ROK_ArnoldiEnrich(fjac, dFdT, Varn, vt, Harn, ...
                             VtV, locF, wnew, 1, M, NVAR, io_arn_flag, ...
                             BlockSize, OPTIONS, ISTATUS);
 %                        fprintf('NewM = %d\n', M);
@@ -267,7 +269,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                         lambda = [lambda; zeros(1, size(lambda,2))];
                         outsum = [outsum; 0.0];
 %                        assert(norm(Uh - Uh2)/norm(Uh2) < 1e-13 && norm(Lh - Lh2)/norm(Lh2) < 1e-13)
-%                        assert(size(Varn,2) == M && size(Harn,1) == M && size(w,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
+%                        assert(size(Varn,2) == M && size(Harn,1) == M && size(vt,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
 %                        assert(size(Lh,1) == M && size(Uh,1) == M && size(ph,2) == M)
                     end
                 else
@@ -275,14 +277,14 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 end
 
                 if ( OPTIONS.BiOrthogonalLanczos )
-                    phi = transpose(Wlzs)*locF;
+                    phi = transpose(Wlzs)*locF + wt;
                 else
                     phi = transpose(Varn)*locF;
+                    if ( io_arn_flag )
+                        phi = Uv\(Lv\phi(pv));
+                    end
+                    phi = phi + vt;
                 end
-                if ( io_arn_flag )
-                    phi = Uv\(Lv\phi(pv));
-                end
-                phi = phi + w;
 %                locLHS = eye(M)-H*gam*Harn; 
                 locRHS = H*(phi + outsum);
 %                lambda(:,istage) = locLHS\locRHS;
@@ -294,13 +296,13 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %                     tempLambda = - gamma(2,1) * lambda(:,1) - gam * lambda(:,2);
 %                     if ( OPTIONS.BasisExtended )
 %                         if ( OPTIONS.MatrixFree )
-%                             jvhat = fjac(Varn(:,M)) + w(M) * dFdT;
+%                             jvhat = fjac(Varn(:,M)) + vt(M) * dFdT;
 %                         else
-%                             jvhat = fjac * Varn(:,M) + w(M) * dFdT;
+%                             jvhat = fjac * Varn(:,M) + vt(M) * dFdT;
 %                         end
 %                         res2smvec = Varn' * jvhat; 
 %                         res2vec = ((-1.0 * gam * lambda(M,2)) * (jvhat - Varn*res2smvec) + ((hmp1 * tempLambda(M-1)) * vmp1));
-%                         residual2 = abs(H) * sqrt(res2vec'*res2vec + ((-1.0 * gam * lambda(M,2) *(-1.0 * w' * res2smvec)) + (hmp1 * tempLambda(M-1) * wmp1))^2)
+%                         residual2 = abs(H) * sqrt(res2vec'*res2vec + ((-1.0 * gam * lambda(M,2) *(-1.0 * vt' * res2smvec)) + (hmp1 * tempLambda(M-1) * wmp1))^2)
 %                     else
 %                         externalF = locF - Varn*phi;
 %                         if ( OPTIONS.MatrixFree )
@@ -565,7 +567,7 @@ for i = 1:basisMax
         residual_decrease = false;
         while ( ~residual_decrease )
             [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                    = computeFirstStage(f, Harn(1:i,1:i), Varn(:,1:i), [], w, Lv, Uv, pv, H, i, Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
+                    = computeFirstStage(f, Harn(1:i,1:i), Varn(:,1:i), [], w, [], Lv, Uv, pv, H, i, Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
             
             residual = abs(H * gam * hmp1 * lambda1(i));
     
@@ -732,20 +734,30 @@ return
 
 % =========================================================================== %
 
-function [V, W, T, vt, wt] = ROK_LanczosBiorthogonalize(J, dFdT, f, M, N, OPTIONS, ISTATUS)
+function [V, W, T, vt, wt, M, residual, H, Lt, Ut, pt, lambda1, phi, ISTATUS] = ...
+    ROK_LanczosBiorthogonalize(J, dFdT, f, M, N, H, Direction, gam, OPTIONS, ISTATUS)
 
 if ( OPTIONS.MatrixFree )
   error('Lanczos biorthogonalization does not support matrix-free Jacobian operators.');
 end
+
+% Check whether to perform adaptive selection.
+M = OPTIONS.NBasisVectors;
+adaptive = false;
 if ( M == 0 )
-  error('Lanczos biorthogonalization does not support adaptive basis sizes.');
+    M = 4;
+    adaptive = true;
 end
 
+basisMax = min(N, 200);
+
+testIndex = [4,6,8,11,15,20,27,36,46,57,70,85,100];
 V = zeros(N, M);
 W = zeros(N, M);
 T = zeros(M, M);
 vt = zeros(M, 1);
 wt = zeros(M, 1);
+residual = Inf;
 
 if ( OPTIONS.Autonomous )
   vt(1) = 0.0;
@@ -777,7 +789,8 @@ what = what - alpha * W(:,1);
 y = y - alpha * wt(1);
 
 beta = vhat'*what + x*y;
-delta = sqrt(abs(beta));
+delta = sqrt(vhat'*vhat + x*x);
+%delta = sqrt(abs(beta));
 beta = beta / delta;
 
 W(:,2) = (1.0/beta) * what;
@@ -788,7 +801,7 @@ T(1,1) = alpha;
 T(1,2) = beta;
 T(2,1) = delta;
 
-for j = 2:M
+for j = 2:basisMax
   vhat = J*V(:,j) + dFdT * vt(j);
   x = 0.0;
   what = J'*W(:,j);
@@ -806,40 +819,60 @@ for j = 2:M
   y = y - alpha * wt(j) - beta * wt(j-1);
 
   beta = vhat'*what + x*y;
-  delta  = sqrt(abs(beta));
+  delta  = sqrt(vhat'*vhat + x*x);
+%  delta = sqrt(abs(beta));
   beta = beta / delta;
 
-  T(j,j) = alpha;
-  if ( j < M )
-    T(j,j+1) = beta;
-    T(j+1,j) = delta;
-    W(:,j+1) = (1.0/beta) * what;
-    wt(j+1) = (1.0/beta) * y;
-    V(:,j+1) = (1.0/delta) * vhat;
-    vt(j+1) = (1.0/delta) * x;
+  % Check residual
+  if ( (~adaptive && j == M) || (adaptive && (j > 100 || min(abs(testIndex - j)) == 0)) || (j == basisMax) )
+   [H, Lt, Ut, pt, lambda1, phi, ISTATUS] ...
+                  = computeFirstStage(f, T(1:j,1:j), V(:,1:j), W(:,1:j), vt, wt, [], [], [], H, j, Direction, gam, false, ISTATUS, OPTIONS);
+   residual = abs(H * gam * delta * lambda1(j));
+   % DEBUG: true residual.
+%   debugK = V * lambda1 + H*(f - V*phi);
+%   residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
+%   fprintf('%d: %e, %e\n', j, residual, residual_true);
+   if ( ~adaptive || (j == basisMax) || residual < OPTIONS.AdaptiveArnoldiTol )
+     M = j;
+     break;
+   end
   end
-
+  
+  T(j,j) = alpha;
+  T(j,j+1) = beta;
+  T(j+1,j) = delta;
+  W(:,j+1) = (1.0/beta) * what;
+  wt(j+1) = (1.0/beta) * y;
+  V(:,j+1) = (1.0/delta) * vhat;
+  vt(j+1) = (1.0/delta) * x;
+    
 end
+
+V = V(1:N, 1:M);
+vt = vt(1:M);
+W = W(1:N, 1:M);
+wt = wt(1:M);
+T = T(1:M, 1:M);
 
 return
 
 % =========================================================================== %
 
 function [H, Lh, Uh, ph, lambda1, phi, ISTATUS] ...
-                = computeFirstStage(f, Harn, Varn, Warn, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS, OPTIONS)
+                = computeFirstStage(f, Harn, Varn, Warn, vt, wt, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS, OPTIONS)
 
 [H, Lh, Uh, ph, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS );
 
 % Stage 1
 if ( OPTIONS.BiOrthogonalLanczos )
-    phi = transpose(Warn)*f;
+    phi = transpose(Warn)*f + wt;
 else
     phi = transpose(Varn)*f;
+    if ( io_arn_flag )
+        phi = Uv\(Lv\phi(pv));
+    end
+    phi = phi + vt;
 end
-if ( io_arn_flag )
-    phi = Uv\(Lv\phi(pv));
-end
-phi = phi + w;
 locRHS = H * phi;
 lambda1 = Uh\(Lh\(locRHS(ph)));
 
