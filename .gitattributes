@@ -1,0 +1,28 @@
+* text=auto
+
+*.m text
+*.c text
+*.html text
+*.xml text
+*.txt text
+*.md text
+*.prj text
+*.kpp text
+
+*.png binary
+*.jpg binary
+*.mat binary
+*.pdf binary
+*.eps binary
+*.fig binary
+*.mexa64 binary
+*.mexmaci64 binary
+
+*.bak binary
+*.db binary
+*.idx binary
+*.map binary
+*.pack binary
+*.sample binary
+*.swp binary
+
