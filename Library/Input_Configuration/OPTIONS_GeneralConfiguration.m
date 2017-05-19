@@ -303,6 +303,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     RS4 = 3;
     RD3 = 4;
     RD4 = 5;
+    ROW1= 6;
+    ROW2= 7;
     
     % SDIRK method number
     S2A = 1;
@@ -378,6 +380,10 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                     [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas3( RD3 );
                 case 5
                     [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas4( RD4 );
+                case 6
+                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW2( ROW1 );
+                case 7
+                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW3( ROW2 );
                 otherwise % default methods
                     switch ( implementation )
                         case 'FWD'
