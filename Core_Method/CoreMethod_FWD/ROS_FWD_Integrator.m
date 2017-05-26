@@ -146,20 +146,49 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
         ISTATUS.Nfun = ISTATUS.Nfun + 1;
         
         % Compute the function derivative with respect to T
+        dFdT=0;
         if ( ~OPTIONS.Autonomous )
             [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, OdeFunction, ISTATUS );
         end
         
         % Compute the Jacobian at current time
-        fjac = OPTIONS.Jacobian(T,Y);
-        ISTATUS.Njac = ISTATUS.Njac + 1;
+        if ( ~OPTIONS.MatrixFree )
+            fjac = OPTIONS.Jacobian(T,Y);
+            ISTATUS.Njac = ISTATUS.Njac + 1;
+        else
+            if( ~isempty(OPTIONS.Jacobian) )
+                if( nargin(OPTIONS.Jacobian) == 3 )
+                    fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
+                elseif( nargin( OPTIONS.Jacobian )== 2 )
+                    Jac = OPTIONS.Jacobian(T,Y);
+                    %ISTATUS.Njac = ISTATUS.Njac + 1;
+                    fjac = @(vee)(Jac*vee);
+                else
+                    error('Jacobian function takes a fucked up number of variables.')
+                end
+            else
+               % Fcn0 = OdeFunction(T,Y);
+	       % ISTATUS.Nfun= ISTATUS.Nfun+1;
+                normy = norm(Y);
+                fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
+            end
+        end
         
         % Repeat step calculation until current step accepted
         accepted = false;
+        gmresFlag = 0;
+        singCount = 0;
         while ( ~accepted ) % accepted
-            [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( NVAR, H, Direction, ros_Gamma(1), fjac, ISTATUS );
             
-            if ( ISING ~= 0 ) % More than 5 consecutive failed decompositions
+            if ( ~OPTIONS.MatrixFree )
+                [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( NVAR, H, Direction, ros_Gamma(1), fjac, ISTATUS );
+            else
+                hgaminv = 1.0/(Direction*H*ros_Gamma(1));
+                e = @(v)(hgaminv*v - fjac(v));
+                ISING = 0;
+            end
+            
+            if ( ISING ~= 0 || singCount >= 15 ) % More than 5 consecutive failed decompositions
                 error('Matrix is repeatedly singular');
             end
             
@@ -203,19 +232,60 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                     HG = Direction*H*ros_Gamma(istage);
                     K(ioffset+1:ioffset+NVAR) = K(ioffset+1:ioffset+NVAR) + HG*dFdT;
                 end
-                
-                if ( OPTIONS.LU )
-                    %%%%% LU Decomp NEW %%%%%
-                    [L,U,P] = lu(e);
-                    K(ioffset+1:ioffset+NVAR) = U\(L\(P*K(ioffset+1:ioffset+NVAR)));
-                    %%%%%%%%%%%%%%%%%%%%%%%%%
-                else 
-                    % Solve the system
-                    K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
-                end                             
-                ISTATUS.Nsol = ISTATUS.Nsol + 1;
+                if ( ~OPTIONS.MatrixFree )                
+			if ( OPTIONS.LU )
+			    %%%%% LU Decomp NEW %%%%%
+			    [L,U,P] = lu(e);
+			    K(ioffset+1:ioffset+NVAR) = U\(L\(P*K(ioffset+1:ioffset+NVAR)));
+			    %%%%%%%%%%%%%%%%%%%%%%%%%
+			else 
+			    % Solve the system
+			    K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
+			end                             
+                else
+                    [ tempK, gmresFlag, ~, iter] = ...
+                        gmres(e, K(ioffset+1:ioffset+NVAR), ...
+                        OPTIONS.GMRES_Restart,...
+                        OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
+                    
+                    if ( ~isempty(OPTIONS.GMRES_Restart) )
+                         vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
+                    else
+                         vecCount = iter(2);
+                    end
+                    ISTATUS.Njac =  ISTATUS.Njac + vecCount;
+                    
+                    if( gmresFlag ~= 0 )
+                        resvec = abs(e(tempK) - K(ioffset+1:ioffset+NVAR));
+                        scalar = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(K(ioffset+1:ioffset+NVAR));
+                        if (norm(resvec./scalar) > sqrt(NVAR))
+                            singCount = singCount + 1;
+                            switch(gmresFlag)
+                                case 1
+                                    warning('GMRES: iterated MAXIT times but did not converge');
+                                    break;
+                                case 2
+                                    warning('GMRES: preconditioner M was ill-conditioned');
+                                    break;
+                                case 3
+                                    warning('GMRES: stagnated (two consecutive iterates were the same)');
+                                    break;
+                            end
+                        else
+                            gmresFlag = 0;
+                        end
+                    end
+                    K(ioffset+1:ioffset+NVAR) = tempK;
+                end
+
+	        ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 
             end % stages
+            
+            if( gmresFlag ~= 0 )
+                H = 0.5*H;
+                continue;
+            end
             
             Ynew = Y;
             for j=1:Coefficient.NStage

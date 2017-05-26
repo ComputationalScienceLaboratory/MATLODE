@@ -109,10 +109,10 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_ROS_FWD( OPTIONS_U )
         warning('MatlODE:configuration','TLMTruncErr is not used in integrator.');
         OPTIONS_U.TLMTruncErr = [];
     end
-    if ( ~isempty(OPTIONS_U.MatrixFree) == true )
-        warning('MatlODE:configuration','MatrixFree is not used in integrator.');
-        OPTIONS_U.MatrixFree = [];
-    end                    
+%     if ( ~isempty(OPTIONS_U.MatrixFree) == true )
+%         warning('MatlODE:configuration','MatrixFree is not used in integrator.');
+%         OPTIONS_U.MatrixFree = [];
+%     end                    
     if ( ~isempty(OPTIONS_U.Mu) == true )
         warning('MatlODE:configuration','Mu is not used in integrator.');
         OPTIONS_U.Mu = [];
