@@ -139,9 +139,11 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
         
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'RK', 'ADJ', Y0, Tspan );
              
-    OPTIONS.NADJ = size(Y0,1);
-    OPTIONS.NVAR = size(Y0,1);
-     
+    %    OPTIONS.NADJ = size(Y0,1); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
+    OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
+    %    OPTIONS.NVAR = size(Y0,1); % Make it more explicit that we want a column vector
+    OPTIONS.NVAR = size(Y0, 1);
+    
     % Call RK ADJ integration
     % [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = RK_ADJ2_Integrator( NVAR, ...
     % NADJ, OPTIONS, FWD_Tout(end), Lambda, GetQuad, ICNTRL, Coefficient, stack_ptr );

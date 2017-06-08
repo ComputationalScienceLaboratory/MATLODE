@@ -140,8 +140,10 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
         return;
     end
     
-    OPTIONS.NADJ = size(Y0,1);
-    OPTIONS.NVAR = size(Y0,1);    
+    %    OPTIONS.NADJ = size(Y0,1); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
+    OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
+    %    OPTIONS.NVAR = size(Y0,1); % Make it more explicit that we want a column vector
+    OPTIONS.NVAR = size(Y0, 1);
     
     % Parameters for ROS ADJ
     Lambda = zeros(NVAR,OPTIONS.NADJ);

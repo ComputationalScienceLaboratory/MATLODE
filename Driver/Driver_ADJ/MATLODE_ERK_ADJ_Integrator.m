@@ -133,8 +133,10 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
         
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'ADJ', Y0, tspan );
              
-    OPTIONS.NADJ = max(size(Y0));
-    OPTIONS.NVAR = max(size(Y0));
+    %    OPTIONS.NADJ = max(size(Y0)); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
+    OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
+    %    OPTIONS.NVAR = max(size(Y0)); % Make it more explicit that we want a column vector
+    OPTIONS.NVAR = size(Y0, 1);
 
     % Call ERK ADJ integration
     if ( ~isempty(OPTIONS.Jacp) && ~isempty(OPTIONS.Mu) )
