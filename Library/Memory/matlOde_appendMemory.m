@@ -23,12 +23,10 @@
 %  Computational Science Laboratory, Virginia Tech.
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
-function [ Tout, Yout ] = matlOde_appendMemory( nvar, t, y, chunk )
+function [ Tout, Yout ] = matlOde_appendMemory( ~ , Tout, Yout, chunk )
 
-    [ Tout, Yout ] = matlOde_allocateMemory( nvar, chunk );
-    
-    Tout = [ t; Tout ];
-    Yout = [ y Yout ];
+    Tout(end+chunk) = 0;
+    Yout(:,end+chunk) = 0;
 
 return;
 
