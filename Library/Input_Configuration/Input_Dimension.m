@@ -2,7 +2,7 @@ function [ OPTIONS ] = Input_Dimension(Y0,OdeFunction,OPTIONS)
 %% For any integrator
 
 if  isempty(Y0)
-    error('The Initial vector for the ODE system should be provided')
+    error('The Initial vector for the ODE system should not be empty')
 end
 
 if size(Y0,2)~=1
@@ -11,25 +11,22 @@ else
     OPTIONS.NVAR = size(Y0, 1);
 end
 
-
-t0=0;
-
-
 if  isempty(OdeFunction)
-error('The ODE system should be provided')
+    error('The ODE system should be provided')
 end
 
 % Check the number of arguments the function accepts
 if nargin(OdeFunction) ~= 2
     warning('ODE function should have exactly two arguments.')
 end
-    
+
+t0=0;    
 Yp0=OdeFunction(t0,Y0);
 if size(Yp0,2)~=1
   error('The ODE system should return a column vector')
 end
 if size(Yp0,1)~=OPTIONS.NVAR
-  error('Dimension of the Jacobian needs to be NVAR')   
+  error('Dimension of the OdeFunction needs to be NVAR')   
 end
 
 %% Integrator that requires the Jacobian of the ODE system
