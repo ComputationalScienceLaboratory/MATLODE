@@ -36,13 +36,14 @@ OPTIONS.NVAR = size(Y0, 1);
 
 %% For any integrator, we check that the ODE function returns a NVAR*1 vector
 if  isempty(OdeFunction)
-error('The ODE system should be provided')
+    error('The ODE system should be provided')
 end
 
 % Check the number of arguments the function accepts
 if nargin(OdeFunction) ~= 2
     warning('ODE function should have exactly two arguments.')
 end
+
 t0=0;    
 Yp0=OdeFunction(t0,Y0);
 if size(Yp0,2)~=1 && size(Yp0,1)~=OPTIONS.NVAR
