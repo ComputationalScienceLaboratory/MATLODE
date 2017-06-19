@@ -119,23 +119,14 @@ function [ Tout_FWD, Yout_FWD, FWD_Stats ] = MATLODE_ERK_FWD_Integrator( OdeFunc
     else
         error('Too many input arguments.');
     end
-%  TO BE REMOVED   
-%     % Force initial value matrix to be N X 1.
-%     if ( size(Y0,2) == 1 )
-%         % DO NOTHING
-%     else
-%         Y0 = transpose(Y0);
-%     end    
-%     
+    
     % Initialize Adjoint Flags
     adjStackFlag = false;
     adjQuadFlag = false;
         
     % Configure Forward Options
-    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,'ERK','FWD',Y0, Tspan );
-
-    %OPTIONS.NVAR = max(size(Y0)); TO BE REMOVED 
-    OPTIONS=Input_Dimension(Y0,OdeFunction,OPTIONS);
+    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'FWD', Y0, Tspan );
+    OPTIONS                  = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -103,9 +103,12 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
     [ OPTIONS ]               = OPTIONS_Merge(OPTIONS_U,OPTIONS);
     [ OPTIONS, Coefficient ]  = OPTIONS_GeneralConfiguration(OPTIONS,family,implementation,y0,tspan);    
     %% Flags 
+   
+    OPTIONS.Family         = family;
+    OPTIONS.Implementation = implementation;
     
-    OPTIONS.Family=family;
-    OPTIONS.Implementation=implementation;
+    
+    % TODO: LATER OPTION.Method should be a string not a number
 end
 
 %%
