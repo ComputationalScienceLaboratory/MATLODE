@@ -102,7 +102,10 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
     % default configurations across all integrators.
     [ OPTIONS ]               = OPTIONS_Merge(OPTIONS_U,OPTIONS);
     [ OPTIONS, Coefficient ]  = OPTIONS_GeneralConfiguration(OPTIONS,family,implementation,y0,tspan);    
-
+    %% Flags 
+    
+    OPTIONS.Family=family;
+    OPTIONS.Implementation=implementation;
 end
 
 %%
