@@ -38,13 +38,13 @@ end
 OPTIONS.NVAR = size(Y0, 1);
 
 %% For any integrator, we check that the ODE function returns a NVAR*1 vector
-if isempty(OdeFunction)
-    error('The ODE system should be provided')
+if ~isa(OdeFunction, 'function_handle')
+    error('OdeFunction function should be a function handle like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
 end
 
 % Check the number of arguments the function accepts
 if nargin(OdeFunction) ~= 2
-    warning('ODE function should have exactly two arguments.')
+    error('ODE function should have exactly two arguments like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
 end
 
 
@@ -65,14 +65,18 @@ if OPTIONS.MatrixFree
     end
 else
     if  ~isempty(OPTIONS.Jacobian)
-        if nargin(OPTIONS.Jacobian) ~= 2
-            warning('The Jacobian function should have exactly two arguments.')
+        if ~isa(OPTIONS.Jacobian, 'function_handle')
+            error('Jacobian function should be a function handle like: OPTIONS.Jacobian=(t,Y)function_name(t,Y,p1,p2,..).')
         end
         
+        if nargin(OPTIONS.Jacobian) ~= 2
+            error('Jacobian function should have exactly two arguments like: OPTIONS.Jacobian=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
+
         Jac = OPTIONS.Jacobian(t0, Y0);
         
         if size(Jac, 2) ~= OPTIONS.NVAR || size(Jac,1) ~= OPTIONS.NVAR
-            error('Dimension of the Jacobian should be be NVAR*NVAR')
+            error('Jacobian function should be a NVAR*NVAR matrix')
         end
     end
 end
@@ -108,68 +112,83 @@ end
 
 if strcmp(OPTIONS.Implementation, 'ADJ')
     if ~isempty(OPTIONS.Lambda)
+        if ~isa(OPTIONS.Lambda,'function_handle')
+            error('Lambda function should be a function handle like: OPTIONS.Lambda=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
         if nargin(OPTIONS.Lambda) ~= 2
-            warning('Lambda function should have exactly two arguments.')
+            error('Lambda function should have exactly two arguments like: OPTIONS.Lambda=(t,Y)function_name(t,Y,p1,p2,..).')
         end
         
         Lambda = OPTIONS.Lambda(t0,Y0);
         
         if size(Lambda, 2) ~= OPTIONS.NVAR
-            error('Dimension of the Lambda function should return NADJ*NVAR')
+            error('Lambda function should return a NADJ*NVAR matrix')
         else
             OPTIONS.NADJ = size(Lambda, 1);
         end
     else
-        error('Lambda function should be provided')
+        error('Lambda function should be provided like: OPTIONS.Lambda=(t,Y)function_name(t,Y,p1,p2,..).')
     end
     
     if ~isempty(OPTIONS.Mu)
+        if ~isa(OPTIONS.Mu,'function_handle')
+            error('Mu function should be a function handle like: OPTIONS.Mu=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
         if nargin(OPTIONS.Mu) ~= 2
-            warning('Mu function should have exactly two arguments.')
+            warning('Mu function should have exactly two arguments like: OPTIONS.Mu=(t,Y)function_name(t,Y,p1,p2,..).')
         end
         
         Mu = OPTIONS.Mu(t0, Y0);
         
         if size(Mu, 1) ~= OPTIONS.NADJ
-            error('Dimension of the Mu function should return NADJ*NP')
+            error('Mu function should return a NADJ*NP matrix')
         else
             OPTIONS.NP = size(Mu, 2);
         end
     end
     
     if ~isempty(OPTIONS.Jacp)
+        if ~isa(OPTIONS.Jacp,'function_handle')
+            error('Jacp function should be a function handle like: OPTIONS.Jacp=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
         if nargin(OPTIONS.Jacp) ~= 2
-            warning('Jacp should have exactly two arguments.')
+            error('Jacp function should have exactly two arguments like: OPTIONS.Jacp=(t,Y)function_name(t,Y,p1,p2,..).')
         end
         
         Jacp = OPTIONS.Jacp(t0, Y0);
         
         if size(Jacp, 1) ~= OPTIONS.NVAR && size(Jacp, 2) ~= OPTIONS.NP
-            error('Dimension of the Jacobian needs to be NVAR*NP')
+            error('Jacp function  should return a NVAR*NP matrix')
         end
     end
     
     if ~isempty(OPTIONS.DRDP)
+        if ~isa(OPTIONS.DRDP,'function_handle')
+            error('DRDP function should be a function handle like: OPTIONS.DRDP=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
         if nargin(OPTIONS.DRDP) ~= 2
-            warning('DRDP should have exactly two arguments.')
+            warning('DRDP function should have exactly two arguments like: OPTIONS.DRDP=(t,Y)function_name(t,Y,p1,p2,..).')
         end
         
         DRDP = OPTIONS.DRDP(t0, Y0);
         
         if size(DRDP, 1) ~= OPTIONS.NADJ && size(DRDP, 2) ~= OPTIONS.NP
-            error('Dimension of DRDP needs to be NADJ*NP')
+            error('DRDP function needs to return a  NADJ*NP matrix')
         end
     end
     
     if ~isempty(OPTIONS.DRDY)
+         if ~isa(OPTIONS.DRDY ,'function_handle')
+            error('DRDY function should be a function handle like: OPTIONS.DRDY=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
         if nargin(OPTIONS.DRDY) ~= 2
-            warning('DRDY should have exactly two arguments.')
+            warning('DRDY should have exactly two arguments like: OPTIONS.DRDY=(t,Y)function_name(t,Y,p1,p2,..).')
         end
         
         DRDY=OPTIONS.DRDY(t0, Y0);
         
         if size(DRDY, 1) ~= OPTIONS.NADJ && size(DRDY, 2) ~= OPTIONS.NVAR
-            error('Dimension of DRDY needs to be NADJ*NVAR')
+            error('DRDY function shoud return a NADJ*NVAR matrix')
         end
     end
 end

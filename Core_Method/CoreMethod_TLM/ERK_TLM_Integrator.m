@@ -62,8 +62,8 @@ function [ Tout, Yout, Y_TLM, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( Ode
     end  
 
     % Get Problem Size
-    NVAR = max(size(Y));
-    NTLM = max(size(OPTIONS.Y_TLM));
+    NVAR = size(Y,1);% TO CHANGE int he MASTER code
+    NTLM = size(OPTIONS.Y_TLM,2);
     
     Tinitial = Tspan(1);
     Tfinal   = Tspan(2);
@@ -159,7 +159,7 @@ function [ Tout, Yout, Y_TLM, ISTATUS, RSTATUS, Ierr ] = ERK_TLM_Integrator( Ode
             end
             
             if ( ~OPTIONS.FDAprox )
-                K_TLM(:,istage,:) = FJAC*S_TLM;
+                K_TLM(:,istage,:) = reshape( FJAC*S_TLM, [NVAR,1,NTLM] );
             else
 %                [ K_TLM(:,istage,itlm), ISTATUS ] = ...
 %                    Forward_FD_JacV( T+rkC(istage)*H, TMP, S_TLM, ...

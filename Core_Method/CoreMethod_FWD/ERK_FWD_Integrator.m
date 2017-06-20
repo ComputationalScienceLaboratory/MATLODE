@@ -71,7 +71,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ERK_FWD
 % Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     % Get Problem Size
-    NVAR = max(size(Y));
+    NVAR = OPTIONS.NVAR;
 
     Tinitial = Tspan(1);
     Tfinal = Tspan(2);
@@ -85,25 +85,21 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ERK_FWD
     
     Yout(:,TYindex) = Y;
     Tout(TYindex,1) = Tinitial; 
-    
-    
+    if ( adjQuadFlag == true ) % initial value of the quadrature
+    quadrature = OPTIONS.Quadrature(Tinitial,Y);
+    end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Initial settings
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    % Force initial value matrix to be N X 1.
-    if ( size(Y,2) == 1 )
-        % DO NOTHING
-    else
-        Y = transpose(Y);
-    end
 
     ISTATUS = ISTATUS_Struct('default');
     RSTATUS = RSTATUS_Struct('default');
     
     ISTATUS.Nchk = 1;
     
-    quadrature = OPTIONS.Quadrature();
+    
+    
 
     T = Tinitial;                               
     Tdirection = sign( Tfinal-Tinitial );       
@@ -191,7 +187,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ERK_FWD
             % Update the results for the quadrature term
             if ( adjQuadFlag == true )
                 for i=1:Coefficient.NStage
-                    TMP = Y + Z(:,i);
+                    TMP =  Z(:,i);
                     R = OPTIONS.QFun(T+rkC(i)*H,TMP);
                     quadrature = H*rkB(i)*R + quadrature;                   
                 end

@@ -135,18 +135,18 @@ function [ Tout_FWD, Yout_FWD, FWD_Stats ] = MATLODE_ERK_FWD_Integrator( OdeFunc
     %   Accounts for Tspan n-dimensional array to force output at
     %   specific times. Accumlates statistics.
     tspanMaxSize = max(size(Tspan));
-    Yout_FWD_interval = transpose(Y0);
     Yout_FWD = transpose(Y0);
     Tout_FWD = Tspan(1);
     ISTATUS_FWD = ISTATUS_Struct('default');
     for interval=1:tspanMaxSize-1
         tic;
         [ Tout_FWD_interval, Yout_FWD_interval, ISTATUS_FWD_interval, RSTATUS_FWD, Ierr ] = ...
-            ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Yout_FWD_interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag );
+            ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Y0, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag );
         elapsedTime(interval) = toc;
         ISTATUS_FWD = ISTATUS_Add(ISTATUS_FWD,ISTATUS_FWD_interval);
-        Tout_FWD = [Tout_FWD Tout_FWD_interval];
-        Yout_FWD = [Yout_FWD; Yout_FWD_interval];
+        Tout_FWD = [Tout_FWD; transpose(Tout_FWD_interval)];
+        Yout_FWD = [Yout_FWD;Yout_FWD_interval];
+        Y0=transpose(Yout_FWD(end,:));
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     

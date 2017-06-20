@@ -99,7 +99,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
- MATLODE_ERK_ADJ_Integrator( OdeFunction, tspan, Y0, OPTIONS_U )    
+ MATLODE_ERK_ADJ_Integrator( OdeFunction, Tspan, Y0, OPTIONS_U )    
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )
         fprintf('Syntax: \n');
@@ -110,15 +110,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
         return;
     end    
     
-    % Force initial value matrix to be N X 1.
-    if ( size(Y0,2) == 1 )
-        % DO NOTHING
-    else
-        Y0 = transpose(Y0);
-    end    
 
-    % Get Problem Size
-    NVAR = max(size(Y0));
 
     % Initialize Y
     Y(:,1) = Y0;
@@ -131,16 +123,12 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
     % Initialize ISTATUS and RSTATUS
     ISTATUS_TOTAL = ISTATUS_Struct('default');
         
-    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'ADJ', Y0, tspan );
-             
-    %    OPTIONS.NADJ = max(size(Y0)); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
-    OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
-    %    OPTIONS.NVAR = max(size(Y0)); % Make it more explicit that we want a column vector
-    OPTIONS.NVAR = size(Y0, 1);
+    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'ADJ', Y0, Tspan );
+    OPTIONS                  = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
 
     % Call ERK ADJ integration
     if ( ~isempty(OPTIONS.Jacp) && ~isempty(OPTIONS.Mu) )
-        OPTIONS.NP   = size(OPTIONS.Jacp(0,Y0),2);        
+    %    OPTIONS.NP   = size(OPTIONS.Jacp(0,Y0),2);     removed this is done in the InputDimension function   
         % ERKADJ1 w/ Quadrature
         if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDP) && ...
                 ~isempty(OPTIONS.DRDY) && ~isempty(OPTIONS.Quadrature) )
@@ -155,28 +143,32 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %   Accounts for tspan n-dimensional array to force output at
             %   specific times. Accumlates statistics.
-            tspanMaxSize = max(size(tspan));
-            FWD_Yout_Interval = transpose(Y0);
+            tspanMaxSize = max(size(Tspan));
             Yout_FWD = transpose(Y0);
-            Tout_FWD = tspan(1);
+            Tout_FWD = Tspan(1);
             FWD_ISTATUS = ISTATUS_Struct('default');
             for interval=1:tspanMaxSize-1
                 tic;
                 [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
-                    ERK_FWD_Integrator( OdeFunction,[tspan(interval), tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                    ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Y0, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
                 elapsedTime_FWD(interval) = toc;
                 FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
-                OPTIONS.Quadrature = Quadrature;
-                Tout_FWD = [Tout_FWD FWD_Tout_Interval];
+%                 OPTIONS.Quadrature = Quadrature;
+                Tout_FWD = [Tout_FWD; transpose(FWD_Tout_Interval)];
                 Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
+                Y0=transpose(Yout_FWD(end,:));
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
             
             % Call ERK ADJ1 Core Method w/ Quadrature
             % disp('ERKADJ1 w/ Quadrature');
+             Tf=Tout_FWD(end);
+            Yf=Yout_FWD(end,:);
+            Lambda_Tf=OPTIONS.Lambda(Tf,Yf);
+            Mu_Tf=OPTIONS.Mu(Tf,Yf);
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );     
+                ERK_ADJ1_DiscreteIntegrator(Lambda_Tf,Mu_Tf,OPTIONS, Coefficient, stack_ptr, adjQuadFlag );     
             elapsedTime_ADJ = toc;
             
         % ERKADJ1 no Quadrature
@@ -192,15 +184,15 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %   Accounts for tspan n-dimensional array to force output at
             %   specific times. Accumlates statistics.
-            tspanMaxSize = max(size(tspan));
+            tspanMaxSize = max(size(Tspan));
             FWD_Yout_Interval = transpose(Y0);
             Yout_FWD = transpose(Y0);
-            Tout_FWD = tspan(1);
+            Tout_FWD = Tspan(1);
             FWD_ISTATUS = ISTATUS_Struct('default');
             for interval=1:tspanMaxSize-1
                 tic;
                 [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr ] = ...
-                    ERK_FWD_Integrator( OdeFunction,[tspan(interval), tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                    ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
                 elapsedTime_FWD(interval) = toc;
                 FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
                 Tout_FWD = [Tout_FWD FWD_Tout_Interval];
@@ -229,15 +221,15 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %   Accounts for tspan n-dimensional array to force output at
             %   specific times. Accumlates statistics.
-            tspanMaxSize = max(size(tspan));
+            tspanMaxSize = max(size(Tspan));
             FWD_Yout_Interval = transpose(Y0);
             Yout_FWD = transpose(Y0);
-            Tout_FWD = tspan(1);
+            Tout_FWD = Tspan(1);
             FWD_ISTATUS = ISTATUS_Struct('default');
             for interval=1:tspanMaxSize-1
                 tic;
                 [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
-                    ERK_FWD_Integrator( OdeFunction,[tspan(interval), tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                    ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
                 elapsedTime_FWD(interval) = toc;
                 FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
                 OPTIONS.Quadrature = Quadrature;
@@ -250,7 +242,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             % disp('ERKADJ2 w/ Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );  
+                ERK_ADJ2_DiscreteIntegrator( lambda_Tf,Mu_Tf, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );  
             elapsedTime_ADJ = toc;
             
         % ERKADJ2 no Quadrature
@@ -266,15 +258,15 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %   Accounts for tspan n-dimensional array to force output at
             %   specific times. Accumlates statistics.
-            tspanMaxSize = max(size(tspan));
+            tspanMaxSize = max(size(Tspan));
             FWD_Yout_Interval = transpose(Y0);
             Yout_FWD = transpose(Y0);
-            Tout_FWD = tspan(1);
+            Tout_FWD = Tspan(1);
             FWD_ISTATUS = ISTATUS_Struct('default');
             for interval=1:tspanMaxSize-1
                 tic;
                 [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr ] = ...
-                    ERK_FWD_Integrator( OdeFunction,[tspan(interval), tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
+                    ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], FWD_Yout_Interval(end,:), OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
                 elapsedTime_FWD(interval) = toc;
                 FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
                 Tout_FWD = [Tout_FWD FWD_Tout_Interval];
