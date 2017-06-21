@@ -110,7 +110,7 @@ if ( nargout == 0 && nargin == 0 )
     return;
 end
 
-% Initialize 
+% Initialize
 stack_ptr    = 0;
 % Adjoint Flags
 adjStackFlag = true;
@@ -127,22 +127,22 @@ OPTIONS                  = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
 if ( ~isempty(OPTIONS.Jacp) && ~isempty(OPTIONS.Mu) )
     if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDP) && ...
             ~isempty(OPTIONS.DRDY) && ~isempty(OPTIONS.Quadrature) )
-    
+        
         adjQuadFlag  = true;
         adjMuFlag    = true;
     else
-
+        
         adjQuadFlag  = false;
         adjMuFlag    = true;
     end
 else
-
+    
     if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDY) && ~isempty(OPTIONS.Quadrature) )
-
+        
         adjQuadFlag  = true;
         adjMuFlag    = false;
     else
-
+        
         adjQuadFlag  = false;
         adjMuFlag    = false;
     end
@@ -171,10 +171,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Call ERK ADJ Core Method ;
-Tf=Tout_FWD(end);
-Yf=Yout_FWD(end,:);
-Lambda_Tf=OPTIONS.Lambda(Tf,Yf);
-Mu_Tf=OPTIONS.Mu(Tf,Yf);
+Tf = Tout_FWD(end);
+Yf = Yout_FWD(end,:);
+Lambda_Tf = OPTIONS.Lambda(Tf,Yf);
+if adjMuFlag
+    Mu_Tf = OPTIONS.Mu(Tf,Yf);
+else
+    Mu_Tf = NaN;
+end
+
 tic;
 [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
     ERK_ADJ_DiscreteIntegrator(Lambda_Tf,Mu_Tf,OPTIONS, Coefficient, stack_ptr, adjQuadFlag,adjMuFlag );
