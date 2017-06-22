@@ -76,20 +76,20 @@ global rkA rkB rkC
 %   Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Tout = 0;
+% TODO: FIXME: XXX: TK: Initialise Yout and Tout and change the way the stack works.
 
 TYindex = 1;
-Lambda=transpose(Lambda_tf);
-Mu=transpose(Mu_tf);
-%     Yout = Lambda;
+
+Lambda = transpose(Lambda_tf);
+Mu     = transpose(Mu_tf);
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initializations
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-U = zeros(OPTIONS.NVAR,OPTIONS.NADJ,Coefficient.NStage);
+U = zeros(OPTIONS.NVAR, OPTIONS.NADJ, Coefficient.NStage);
 if adjMuFlag
-    V = zeros(OPTIONS.NP,OPTIONS.NADJ,Coefficient.NStage);
+    V = zeros(OPTIONS.NP, OPTIONS.NADJ, Coefficient.NStage);
 end
 
 
@@ -101,7 +101,7 @@ RSTATUS = RSTATUS_Struct('default');
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 while ( stack_ptr > 0 )
     % Recover checkpoints for stage vales and vectors
-    [ T, H, Y, Z, stack_ptr ] = erkPop( OPTIONS.NVAR, Coefficient.NStage, stack_ptr );
+    [ T, H, Y, Z, stack_ptr ] = erkPop(OPTIONS.NVAR, Coefficient.NStage, stack_ptr );
     Yout(:,TYindex) = Y;
     Tout(TYindex,1) = T;
     
@@ -109,53 +109,56 @@ while ( stack_ptr > 0 )
     
     ISTATUS.Nstp = ISTATUS.Nstp + 1;
     
-    for istage=Coefficient.NStage:-1:1
+    for istage = Coefficient.NStage:-1:1
         % Jacobian of the current stage solution
-        fjac = OPTIONS.Jacobian( T+rkC(istage)*H, Z(:,istage) );
+        fjac = OPTIONS.Jacobian(T + rkC(istage)*H, Z(:, istage));
         ISTATUS.Njac = ISTATUS.Njac + 1;
         
         if  adjQuadFlag
-            WY = OPTIONS.DRDY(T+rkC(istage)*H, Z(:,istage) );
-            WY=transpose(WY);
+            WY = OPTIONS.DRDY(T + rkC(istage)*H, Z(:, istage));
+            WY = transpose(WY);
         end
         
-        if  adjMuFlag %  Jacp and DRDP are used in the Mu calculation
-            fpjac = OPTIONS.Jacp( T+rkC(istage)*H, Z(:,istage) );
+        if adjMuFlag %  Jacp and DRDP are used in the Mu calculation
+            fpjac = OPTIONS.Jacp(T + rkC(istage)*H, Z(:, istage));
             if  adjQuadFlag
-            WP = OPTIONS.DRDP( T+rkC(istage)*H, Z(:,istage) );
-            WP=transpose(WP);
+                WP = OPTIONS.DRDP(T + rkC(istage)*H, Z(:, istage));
+                WP = transpose(WP);
             end
         end
         
-        for iadj=1:OPTIONS.NADJ
+        for iadj = 1:OPTIONS.NADJ
             
-            TMP = zeros(OPTIONS.NVAR,1);            
-            if ( istage < Coefficient.NStage )
-                for j=istage+1:Coefficient.NStage
-                    TMP = TMP + H*rkA(j,istage)*U(:,iadj,j);
+            TMP = zeros(OPTIONS.NVAR, 1);
+            if istage < Coefficient.NStage
+                for j = istage + 1:Coefficient.NStage
+                    TMP = TMP + H*rkA(j, istage)*U(:, iadj, j);
                 end
             end
-            TMP = TMP + H*rkB(istage)*Lambda(:,iadj);
-            U(:,iadj,istage) = transpose(fjac)*TMP;
             
-            if  adjQuadFlag
-                U(:,iadj,istage) = U(:,iadj,istage) + H*rkB(istage)*WY(:,iadj);
+            TMP = TMP + H*rkB(istage)*Lambda(:, iadj);
+            U(:, iadj, istage) = transpose(fjac)*TMP;
+            
+            if adjQuadFlag
+                U(:, iadj, istage) = U(:, iadj, istage) + ...
+                    H*rkB(istage)*WY(:, iadj);
             end
+            
             if adjMuFlag
-                V(:,iadj,istage) = transpose(fpjac)*TMP;
+                V(:, iadj, istage) = transpose(fpjac)*TMP;
                 if adjQuadFlag
-                V(:,iadj,istage) = V(:,iadj,istage) + H*rkB(istage)*WP(:,iadj);
+                    V(:, iadj, istage) = V(:, iadj, istage) + ...
+                        H*rkB(istage)*WP(:, iadj);
                 end
             end
         end % iadj
-        
     end % istage
     
     % Update adjoint solution
-    for istage=1:Coefficient.NStage
-        Lambda = Lambda + U(:,:,istage);
+    for istage = 1:Coefficient.NStage
+        Lambda = Lambda + U(:, :, istage);
         if adjMuFlag
-        Mu = Mu + V(:,:,istage);
+            Mu = Mu + V(:, :, istage);
         end
     end
     
@@ -163,8 +166,9 @@ end % time loop
 
 % Successful return
 Ierr = 1;
-Mu=transpose(Mu);
-Lambda=transpose(Lambda);
 
-return;
+Mu     = transpose(Mu);
+Lambda = transpose(Lambda);
+
+end
 

@@ -114,8 +114,6 @@ end
 stack_ptr    = 0;
 % Adjoint Flags
 adjStackFlag = true;
-adjQuadFlag  = false;
-adjMuFlag    = false;
 
 % Initialize ISTATUS and RSTATUS
 ISTATUS_TOTAL = ISTATUS_Struct('default');
@@ -137,7 +135,8 @@ if ( ~isempty(OPTIONS.Jacp) && ~isempty(OPTIONS.Mu) )
     end
 else
     
-    if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDY) && ~isempty(OPTIONS.Quadrature) )
+    if ( ~isempty(OPTIONS.QFun) && ~isempty(OPTIONS.DRDY) && ...
+            ~isempty(OPTIONS.Quadrature) )
         
         adjQuadFlag  = true;
         adjMuFlag    = false;
@@ -158,31 +157,32 @@ tspanMaxSize = max(size(Tspan));
 Yout_FWD = transpose(Y0);
 Tout_FWD = Tspan(1);
 FWD_ISTATUS = ISTATUS_Struct('default');
-for interval=1:tspanMaxSize-1
+for interval = 1:tspanMaxSize-1
     tic;
     [ FWD_Tout_Interval, FWD_Yout_Interval, FWD_ISTATUS_interval, FWD_RSTATUS, FWD_Ierr, stack_ptr, Quadrature ] = ...
         ERK_FWD_Integrator( OdeFunction,[Tspan(interval), Tspan(interval+1)], Y0, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag, stack_ptr );
     elapsedTime_FWD(interval) = toc;
-    FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS,FWD_ISTATUS_interval);
+    FWD_ISTATUS = ISTATUS_Add(FWD_ISTATUS, FWD_ISTATUS_interval);
     Tout_FWD = [Tout_FWD; transpose(FWD_Tout_Interval)];
     Yout_FWD = [Yout_FWD; FWD_Yout_Interval];
-    Y0=transpose(Yout_FWD(end,:));
+    Y0 = transpose(Yout_FWD(end, :));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Call ERK ADJ Core Method ;
 Tf = Tout_FWD(end);
-Yf = Yout_FWD(end,:);
-Lambda_Tf = OPTIONS.Lambda(Tf,Yf);
+Yf = Yout_FWD(end, :);
+Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+
 if adjMuFlag
-    Mu_Tf = OPTIONS.Mu(Tf,Yf);
+    Mu_Tf = OPTIONS.Mu(Tf, Yf);
 else
-    Mu_Tf = NaN;
+    Mu_Tf = [];
 end
 
 tic;
 [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-    ERK_ADJ_DiscreteIntegrator(Lambda_Tf,Mu_Tf,OPTIONS, Coefficient, stack_ptr, adjQuadFlag,adjMuFlag );
+    ERK_ADJ_DiscreteIntegrator(Lambda_Tf, Mu_Tf, OPTIONS, Coefficient, stack_ptr, adjQuadFlag,adjMuFlag );
 elapsedTime_ADJ = toc;
 
 % Fold statistics
@@ -224,15 +224,15 @@ if ( OPTIONS.displayStats == true )
 end
 
 % Outputs
-if ( ~exist('Quadrature','var') )
+if ( ~exist('Quadrature', 'var') )
     Quadrature = [];
 end
-if ( ~exist('Mu','var')  )
+
+if ( ~exist('Mu', 'var')  )
     Mu = [];
 end
 
-
-return;
+end
 
 %% Major Modification History
 % <html>
