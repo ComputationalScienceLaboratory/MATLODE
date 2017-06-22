@@ -120,7 +120,7 @@ function options = MATLODE_OPTIONS(varargin)
     TLMtruncErr_str     = '    TLMtruncErr: [ Determiens whether to incorpate sensitivity truncation error ]\n';
     WarningConfig_str   = '  WarningConfig: [ Determines whether warning messages are displayed during option configuration. ]\n';
     Y_TLM_str           = '          Y_TLM: [ Contains the sensitivities of Y with respect to the specified coefficients ]\n';
-
+    Events              = '           Events: [ User defined function: Event function. ]\n';
 % Print out all possible values of properties.
 if (nargin == 0) && (nargout == 0)
     fprintf( AbsTol_str );
@@ -178,7 +178,8 @@ if (nargin == 0) && (nargout == 0)
     fprintf( TLMNewtonEst_str );
     fprintf( TLMtruncErr_str );
     fprintf( WarningConfig_str );
-    fprintf( Y_TLM_str );    
+    fprintf( Y_TLM_str );
+    fprintf( Events_str );
     fprintf( '\n' );
   return;
 end
@@ -220,6 +221,7 @@ if (nargin == 1) && (nargout == 0)
             fprintf( TLMtruncErr_str );
             fprintf( WarningConfig_str );
             fprintf( Y_TLM_str );
+            fprintf( Events );
             fprintf( '\n' );
         case 'RK'
         case 'ROS'
@@ -297,6 +299,7 @@ Names = [
     'WarningConfig    '
     'Y_TLM            '
     'LU               '
+    'Events           '
     ];
 m = size(Names,1);
 names = lower(Names);

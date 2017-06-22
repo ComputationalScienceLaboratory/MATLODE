@@ -119,13 +119,19 @@ H = H*sign_Tdirection;
 Reject = false;
 FirstStep = true;
 
+
+%EVENT DETECTION: INITIALIZE VARIABLES.
+    eventOldVal = OPTIONS.Events(T, Y);
+    eventDetected = false;
+%END EVENT DETECTION
+
 % Determine scaling factor for integration
 SCAL = 1.0 ./ ( OPTIONS.AbsTol + OPTIONS.RelTol .* abs(Y) );
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Time loop begins
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-while ( (Tfinal-T) * Tdirection - Roundoff >= 0.0 )
+while ( (Tfinal-T) * Tdirection - Roundoff >= 0.0 && ~eventDetected )
     if ( ISTATUS.Nstp > OPTIONS.Max_no_steps )
         error('Number of steps exceeds maximum bound.');
     end
@@ -180,6 +186,32 @@ while ( (Tfinal-T) * Tdirection - Roundoff >= 0.0 )
     % Accept/Reject step
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if ( Err < 1.0 )
+        %EVENT DETECTION: DETECT EVENTS
+        Ynew = Y;
+        for i=1:Coefficient.NStage
+            %if ( rkB(i) ~= 0.0 )
+                % Ynew = Ynew + rkD(i)*Z(:,i); This is from SDRIK Paul version of the code
+                Ynew = Ynew +H*rkB(i)*K(:,i);% based on the code for Y update solution
+            %end
+        end
+      [eventNewVal,isterminal,direction] = OPTIONS.Events(T + H, Ynew);
+        [withinTOL, signChange, theta] = ...
+            EventTest(direction, eventOldVal, ...
+            eventNewVal, 1e-8, OPTIONS.Events,...
+            T, Y, Z, H);
+        if ( withinTOL )
+            eventDetected = true;
+        elseif ( signChange )
+            H = theta*H;
+            Reject = true;
+            SkipJac = true;
+            SkipLU = false;
+            continue;
+        end
+        eventOldVal = eventNewVal;
+        
+        %END EVENT DETECTION
+        
         FirstStep = false;
         ISTATUS.Nacc = ISTATUS.Nacc + 1;
         

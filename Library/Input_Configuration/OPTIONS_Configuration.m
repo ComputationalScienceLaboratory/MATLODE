@@ -106,6 +106,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
    
     OPTIONS.Family         = family;
     OPTIONS.Implementation = implementation;
+    OPTIONS.Events         = OPTIONS_U.Events;
     
     
     % TODO: LATER OPTION.Method should be a string not a number
