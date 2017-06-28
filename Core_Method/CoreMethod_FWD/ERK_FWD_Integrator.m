@@ -121,8 +121,13 @@ FirstStep = true;
 
 
 %EVENT DETECTION: INITIALIZE VARIABLES.
+eventFlag = false;
+
+if ~isempty(OPTIONS.Events)
     eventOldVal = OPTIONS.Events(T, Y);
-    eventDetected = false;
+    eventFlag   = true;
+end
+eventDetected = false;
 %END EVENT DETECTION
 
 % Determine scaling factor for integration
@@ -187,28 +192,30 @@ while ( (Tfinal-T) * Tdirection - Roundoff >= 0.0 && ~eventDetected )
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if ( Err < 1.0 )
         %EVENT DETECTION: DETECT EVENTS
-        Ynew = Y;
-        for i=1:Coefficient.NStage
-            %if ( rkB(i) ~= 0.0 )
+        if eventFlag
+            Ynew = Y;
+            for i=1:Coefficient.NStage
+                %if ( rkB(i) ~= 0.0 )
                 % Ynew = Ynew + rkD(i)*Z(:,i); This is from SDRIK Paul version of the code
                 Ynew = Ynew +H*rkB(i)*K(:,i);% based on the code for Y update solution
-            %end
+                %end
+            end
+            [eventNewVal,isterminal,direction] = OPTIONS.Events(T + H, Ynew);
+            [withinTOL, signChange, theta] = ...
+                EventTest(direction, eventOldVal, ...
+                eventNewVal, 1e-8, OPTIONS.Events,...
+                T, Y, Z, H);
+            if ( withinTOL )
+                eventDetected = true;
+            elseif ( signChange )
+                H = theta*H;
+                Reject = true;
+                SkipJac = true;
+                SkipLU = false;
+                continue;
+            end
+            eventOldVal = eventNewVal;
         end
-      [eventNewVal,isterminal,direction] = OPTIONS.Events(T + H, Ynew);
-        [withinTOL, signChange, theta] = ...
-            EventTest(direction, eventOldVal, ...
-            eventNewVal, 1e-8, OPTIONS.Events,...
-            T, Y, Z, H);
-        if ( withinTOL )
-            eventDetected = true;
-        elseif ( signChange )
-            H = theta*H;
-            Reject = true;
-            SkipJac = true;
-            SkipLU = false;
-            continue;
-        end
-        eventOldVal = eventNewVal;
         
         %END EVENT DETECTION
         
