@@ -10,8 +10,6 @@ function [theta, component] = eventFunctionZero(T, Y, Z, H, EventFunction, compo
 
 return
 
-
-
 function y = interpolatedY(theta, Y, Z, H)
 
 %     b = zeros(size(rkDOb,1), 1);
