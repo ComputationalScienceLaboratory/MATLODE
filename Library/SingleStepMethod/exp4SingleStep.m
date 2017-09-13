@@ -23,10 +23,10 @@
 %  Computational Science Laboratory, Virginia Tech.
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
-function [y yerr] = exp4SingleStep(y, dt, rhsFun, J, ...
-                            f, MatrixFree, NBasisVectors)
+function [y, yerr, ISTATUS] = exp4SingleStep(y, dt, rhsFun, J, ...
+                            f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol)
 
-% Implements exp4 given in equation (5.8) Hochbruck:  "Exponential 
+% Implements exp4 given in equation (5.8) Hochbruck:  "Exponential
 % Integrators For Large Systems of Differential Equations".
 
 
@@ -40,7 +40,7 @@ u = zeros(N,2);
 normf = norm(f,2);                          % norm of f(y0)
 % Compute the Krylov basis matrices
 [V, H, M] = ArnoldiAdapt(J, f, N, dt, MatrixFree, NBasisVectors);
-% Constructed using an augmented H as in Hochbruck "Exponential 
+% Constructed using an augmented H as in Hochbruck "Exponential
 % Integrators For Large Systems of Differential Equations" page 17.
 e1 = [1; zeros(M-1, 1)];                    % first canonical basis vector
 Hbar = [1/3*dt*H e1; zeros(1, M+1)];
@@ -126,7 +126,7 @@ return;
 %   </tr>
 % </table>
 % </html>
-% 
+%
 %%
 % <html>
 %   <div>

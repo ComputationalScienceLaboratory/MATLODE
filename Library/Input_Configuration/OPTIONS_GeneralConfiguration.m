@@ -324,7 +324,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                 case 3
                     [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk43( RK4 );
                 case 4
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );                  
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
                 case 5
                     [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Verme( RK6 );
                 case 6
@@ -361,7 +361,11 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             Coefficient.Name = rkName;
         case 'ROK'
             switch( OPTIONS.Method )
-                otherwise
+              case 1
+                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
+              case 2
+                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4a( 0 );
+              otherwise
                     [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
             end
             Coefficient.Method = rokMethod;
@@ -428,7 +432,62 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                     OPTIONS.OneStepIntegrator = @erow4SingleStep;
                     expName = 'EROW4';
                     expMethod = 2;
+                    expELO = 4;
+                case 3
+                    OPTIONS.OneStepIntegrator = @epirk4kSingleStep;
+                    expName = 'EPIRKK4';
+                    expMethod = 3;
+                    expELO = 4;
+                case 4
+                    OPTIONS.OneStepIntegrator = @epirk4kSingleStepNaiveExp;
+                    expName = 'EPIRKK4NaiveExp';
+                    expMethod = 4;
+                    expELO = 4;
+                case 5
+                    OPTIONS.OneStepIntegrator = @epirk4SingleStep;
+                    expName = 'EPIRK4';
+                    expMethod = 5;
+                    expELO = 4;
+                case 6
+                    OPTIONS.OneStepIntegrator = @epirk4SingleStepNaiveExp;
+                    expName = 'EPIRK4NaiveExp';
+                    expMethod = 6;
+                    expELO = 4;
+                case 7
+                    OPTIONS.OneStepIntegrator = @epirk5P1bVarSingleStep;
+                    expName = 'EPIRK5P1BVar';
+                    expMethod = 7;
+                    expELO = 5;
+                case 8
+                    OPTIONS.OneStepIntegrator = @epirk3WSingleStepNaiveExp;
+                    expName = 'EPIRKW3NaiveExp';
+                    expMethod = 8;
                     expELO = 3;
+                case 9
+                    OPTIONS.OneStepIntegrator = @epirk3WISingleStepNaiveExp;
+                    expName = 'EPIRKW3I';
+                    expMethod = 9;
+                    expELO = 3;
+                case 10
+                    OPTIONS.OneStepIntegrator = @epirk3WZSingleStepNaiveExp;
+                    expName = 'EPIRKW3Z';
+                    expMethod = 10;
+                    expELO = 3;
+                case 11
+                    OPTIONS.OneStepIntegrator = @epirk3WDSingleStepNaiveExp;
+                    expName = 'EPIRKW3D';
+                    expMethod = 11;
+                    expELO = 3;
+                case 12
+                    OPTIONS.OneStepIntegrator = @epirk3WSingleStep;
+                    expName = 'EPIRKW3';
+                    expMethod = 12;
+                    expELO = 3;
+                case 13
+                    OPTIONS.OneStepIntegrator = @epirk3WLTSingleStep;
+                    expName = 'EPIRKW3LT';
+                    expMethod = 13;
+                    expELO = 3;                    
                 otherwise
                     OPTIONS.OneStepIntegrator = @exp4SingleStep;
                     expName = 'EXP4';
@@ -437,7 +496,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             end
             Coefficient.Method = expMethod;
             Coefficient.ELO = expELO;
-            Coefficient.Name = expName;            
+            Coefficient.Name = expName;
         case 'EXPK'
             switch( OPTIONS.Method )
                 otherwise

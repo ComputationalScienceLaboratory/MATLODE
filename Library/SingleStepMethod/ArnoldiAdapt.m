@@ -23,13 +23,49 @@
 %  Computational Science Laboratory, Virginia Tech.
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
-function [V H i] = ArnoldiAdapt(J, f, N, c, MatrixFree, NBasisVectors)
+function [V, H, i] = ArnoldiAdapt(J, f, N, c, MatrixFree, NBasisVectors, Tol, MinBasisVectors)
+%
+% NBasisVectors = Max number of basis vectors to be used 
+% MinBasisVectors = Min number of basis vectors to be used 
+% If MinBaisVectors is not specified and NBasisVectors is 0, then
+% its only dependent on the residual.
+%
+
+if(~exist('Tol','var'))
+    tol = 1e-12;
+else
+    tol = Tol;
+end
+
+if(~exist('MinBasisVectors','var'))
+    MBasisVectors = 1;
+else
+    MBasisVectors = MinBasisVectors;
+end
+
+testIndex = [1,2,3,4,6,8,11,15,20,27,36,46,57,70,85,100];
+
+% K-methods with max basis size
+if(NBasisVectors ~= 0)
+    % Preallocate H of that size plus one as is used in lines 64,65
+    H = zeros(NBasisVectors+1);
+    % Preallocate V of that size plus one as is used in lines 64,65
+    V = zeros(N, NBasisVectors+1);
+    % Store H_Size
+    H_size = NBasisVectors;
+else
+    % Preallocate H of a reasonably big size and increase size to next
+    % testIndex size if Tol check fails. Use a size from testIndex plus
+    % one as is used in lines 64,65
+    H_size = 15;
+    H = zeros(H_size + 1);
+    V = zeros(N, H_size + 1);
+end
 
 
 beta = norm(f);
 V(:, 1) = f/beta;
-tol = 1e-12;
-testIndex = [1,2,3,4,6,8,11,15,20,27,36,46,57,70,85,100];
+
 %     Arnoldi iteration
 for i = 1:N
     if( ~MatrixFree )
@@ -45,16 +81,54 @@ for i = 1:N
     H(i+1,i) = norm(w);
     V(:,i+1) = w/H(i+1,i);
     
-    if min(abs(testIndex - j)) == 0 || (j > 100) 
+    % Perform tolerance check only when the number of basis is not
+    % set and only for the chosen testIndex values
+    % With line 89, 90 the i>100 condition is redundant
+    if  (NBasisVectors == 0) && (~isempty(find(testIndex == i, 1)))
+        % First compute the residual
         e1 = [1; zeros(i-1, 1)]; 
         Hbar = [c*H(1:i,1:i) e1; zeros(1, i+1)];
         tempExp = expm(Hbar);
         residual = c*beta*H(i+1,i)*tempExp(i, end)/N;
-        if residual < tol || j == NBasisVectors
+        % Check if the residual is below prescribed value of tolerance
+        if (residual < tol) 
             break
+        else
+            % Check that we are not increasing the basis size beyond NBasisVectors
+            if(i == NBasisVectors)
+                break;
+            end
+            
+            % Now check if we have already come up previously allocated size
+            % If so increase the size
+            if(i == H_size)
+                % First verify whether it is in the list of testIndex
+                iFindTestIndex = find(testIndex == i);
+                if(length(iFindTestIndex) == 1 && iFindTestIndex < 16)
+                    % If it is in testIndex, then increase it to next
+                    % bigger size if one is available
+                    H_size = testIndex(iFindTestIndex + 1); 
+                else
+                    % Increase it by a fixed percentage: Say 10%
+                    H_size = int32((H_size * 110)/100);
+                    % Also add it dynamically to testIndex to ensure that
+                    % residual check only happens at that index
+                    testIndex(end + 1) = H_size;
+                end
+                % H_size plus one as is used in lines 64,65
+                H_new = zeros(H_size + 1);
+                H_new(1:i+1, 1:i) = H(1:i+1,1:i);
+                H = H_new;
+                V_new = zeros(N, H_size + 1);
+                V_new(:, 1:i+1) = V(:,1:i+1);
+                V = V_new;
+            end
         end
     end
-           
+
+    if i == NBasisVectors
+        break;
+    end
 end
 H = H(1:i,1:i);
 V = V(1:N,1:i);

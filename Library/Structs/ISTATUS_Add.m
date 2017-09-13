@@ -34,7 +34,7 @@ function [ ISTATUS ] = ISTATUS_Add( ISTATUS1, ISTATUS2 )
     ISTATUS.Nsol = ISTATUS1.Nsol + ISTATUS2.Nsol;
     ISTATUS.Nsng = ISTATUS1.Nsng + ISTATUS2.Nsng;
     ISTATUS.Nchk = ISTATUS1.Nchk + ISTATUS2.Nchk;
-
+    ISTATUS.Nkdim = ISTATUS1.Nkdim + ISTATUS2.Nkdim;
 return;
 
 %% Major Modification History

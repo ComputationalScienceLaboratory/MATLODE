@@ -36,6 +36,7 @@ if (nargin == 0) && (nargout == 0)
   fprintf( ' Nsol: [ No. of forward/backward substitutions ]\n' );
   fprintf( ' Nsng: [ No. of singular matrix decompositions]\n' );
   fprintf( ' Nchk: [ No. of allocated memory chunks ]\n' );
+  fprintf( ' Nkdim: [ No. of Krylov vectors]\n' );
   fprintf('\n');
   return;
 end
@@ -50,6 +51,7 @@ if ( nargin == 1 && strcmp('default',varargin) )
     options.Nsol = 0;
     options.Nsng = 0;
     options.Nchk = 1;
+    options.Nkdim = 0;
     return;
 end
 
