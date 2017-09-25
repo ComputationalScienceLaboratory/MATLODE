@@ -119,7 +119,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         str = [ 'Error: User selected Hmin: ', num2str(OPTIONS.Hmin), '. Hmin must be >= 0.' ];
         error(str);
     end
-        
+    
     % Hmax
     if ( OPTIONS.Hmax == 0 )
         OPTIONS.Hmax = abs( tspan(2)-tspan(1) );
@@ -143,20 +143,20 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     % FacMax
     if ( OPTIONS.FacMax == 0 )
         switch ( family )
-            case 'ERK'
-                OPTIONS.FacMax = 10.0;
-            case 'EXP'
-                OPTIONS.FacMax = 6.0;
-            case 'EXPK'
-                OPTIONS.FacMax = 6.0;
-            case 'RK'
-                OPTIONS.FacMax = 8.0;
-            case 'ROK'
-                OPTIONS.FacMax = 6.0;
-            case 'ROS'
-                OPTIONS.FacMax = 6.0;
-            case 'SDIRK'
-                OPTIONS.FacMax = 10.0;
+          case 'ERK'
+            OPTIONS.FacMax = 10.0;
+          case 'EXP'
+            OPTIONS.FacMax = 6.0;
+          case 'EXPK'
+            OPTIONS.FacMax = 6.0;
+          case 'RK'
+            OPTIONS.FacMax = 8.0;
+          case 'ROK'
+            OPTIONS.FacMax = 6.0;
+          case 'ROS'
+            OPTIONS.FacMax = 6.0;
+          case 'SDIRK'
+            OPTIONS.FacMax = 10.0;
         end
     elseif ( OPTIONS.FacMax > 0.0 )
         % DO NOTHING: User supplied or fine tuned value.
@@ -174,7 +174,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         str = [ 'Error: User selected FacRej: ', num2str(OPTIONS.FacRej), '. FacMax must be >= 0.' ];
         error(str);
     end
-           
+    
     % FacSafe
     if ( OPTIONS.FacSafe == 0 )
         OPTIONS.FacSafe = 0.9;
@@ -246,14 +246,14 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     % Hstart
     if ( OPTIONS.Hstart == 0.0 )
         switch ( family )
-            case 'ERK'
-                OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );                
-            case 'RK'
-                OPTIONS.Hstart = 0.0;
-            case 'ROS'
-                OPTIONS.Hstart = max( OPTIONS.Hmin, 1d-5 );
-            case 'SDIRK'
-                OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );
+          case 'ERK'
+            OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );                
+          case 'RK'
+            OPTIONS.Hstart = 0.0;
+          case 'ROS'
+            OPTIONS.Hstart = max( OPTIONS.Hmin, 1d-5 );
+          case 'SDIRK'
+            OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );
         end
     elseif ( OPTIONS.Hstart > 0.0 )
         OPTIONS.Hstart = min( abs(OPTIONS.Hstart), abs( tspan(2)-tspan(1) ) );
@@ -265,17 +265,17 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     % ITOL
     if ( OPTIONS.ITOL == 0 )
         switch ( family )
-            case 'ROS'
-                OPTIONS.ITOL = true; % VectorTol=true
-            otherwise
-                OPTIONS.ITOL = 1;
+          case 'ROS'
+            OPTIONS.ITOL = true; % VectorTol=true
+          otherwise
+            OPTIONS.ITOL = 1;
         end
     elseif ( OPTIONS.ITOL == 1 )
         switch ( family )
-            case 'ROS'
-                OPTIONS.ITOL = false; % VectorTol=false
-            otherwise
-                OPTIONS.ITOL = 0;
+          case 'ROS'
+            OPTIONS.ITOL = false; % VectorTol=false
+          otherwise
+            OPTIONS.ITOL = 0;
         end
     else
         str = [ 'Error: User selected ITOL: ', num2str(ITOL), '. ITOL must be 0 or 1.' ];
@@ -315,197 +315,207 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     
     % Method
     switch ( family )
-        case 'ERK'
-            switch ( OPTIONS.Method )
-                case 1
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk23( RK2 );
-                case 2
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk3_Heun( RK3 );
-                case 3
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk43( RK4 );
-                case 4
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
-                case 5
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Verme( RK6 );
-                case 6
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri853( RK8 );
-                case 7
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Fehlberg78( 1 ); % temp
-                otherwise
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
+      case 'ERK'
+        switch ( OPTIONS.Method )
+          case 1
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk23( RK2 );
+          case 2
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk3_Heun( RK3 );
+          case 3
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk43( RK4 );
+          case 4
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
+          case 5
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Verme( RK6 );
+          case 6
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri853( RK8 );
+          case 7
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Fehlberg78( 1 ); % temp
+          otherwise
+            [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Dopri5( RK5 );
+        end
+        Coefficient.Method = erkMethod;
+        Coefficient.ELO = erkELO;
+        Coefficient.NStage = erkS;
+        Coefficient.Name = erkName;
+      case 'RK'
+        switch ( OPTIONS.Method )
+          case 1
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Radau2A( R2A, OPTIONS );
+          case 2
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Lobatto3C( L3C, OPTIONS );
+          case 3
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Gauss( GAU );
+          case 4
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Radau1A( R1A );
+          case 5
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Lobatto3A( L3A );
+          case 6
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_BackwardEuler( 1 ); % temp
+          otherwise
+            [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Lobatto3C( L3C, OPTIONS );
+        end
+        Coefficient.Method = rkMethod;
+        Coefficient.ELO = rkELO;
+        Coefficient.NStage = rkS;
+        Coefficient.Name = rkName;
+      case 'ROK'
+        switch( OPTIONS.Method )
+          case 1
+            [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
+          case 2
+            [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4a( 0 );
+          otherwise
+            [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
+        end
+        Coefficient.Method = rokMethod;
+        Coefficient.ELO = rokELO;
+        Coefficient.NStage = rokS;
+        Coefficient.Name = rokName;
+      case 'ROS'
+        switch( OPTIONS.Method )
+          case 1
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros2( RS2 );
+          case 2
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros3( RS3 );
+          case 3
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros4( RS4 );
+          case 4
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas3( RD3 );
+          case 5
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas4( RD4 );
+          case 6
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW2( ROW1 );
+          case 7
+            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW3( ROW2 );
+          otherwise % default methods
+            switch ( implementation )
+              case 'FWD'
+                [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros4( RS4 );
+              case 'TLM'
+                [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas4( RD4 );
+              case 'ADJ'
+                [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas3( RD3 );
             end
-            Coefficient.Method = erkMethod;
-            Coefficient.ELO = erkELO;
-            Coefficient.NStage = erkS;
-            Coefficient.Name = erkName;
-        case 'RK'
-            switch ( OPTIONS.Method )
-                case 1
-                    [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Radau2A( R2A, OPTIONS );
-                case 2
-                    [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Lobatto3C( L3C, OPTIONS );
-                case 3
-                    [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Gauss( GAU );
-                case 4
-                    [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Radau1A( R1A );
-                case 5
-                    [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Lobatto3A( L3A );
-                case 6
-                    [ rkMethod, rkELO, rkS, rkName ] = Coefficients_BackwardEuler( 1 ); % temp
-                otherwise
-                   [ rkMethod, rkELO, rkS, rkName ] = Coefficients_Lobatto3C( L3C, OPTIONS );
-            end
-            Coefficient.Method = rkMethod;
-            Coefficient.ELO = rkELO;
-            Coefficient.NStage = rkS;
-            Coefficient.Name = rkName;
-        case 'ROK'
-            switch( OPTIONS.Method )
-              case 1
-                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
-              case 2
-                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4a( 0 );
-              otherwise
-                    [ rokMethod, rokELO, rokS, rokName ] = Coefficients_ROK4b( 0 );
-            end
-            Coefficient.Method = rokMethod;
-            Coefficient.ELO = rokELO;
-            Coefficient.NStage = rokS;
-            Coefficient.Name = rokName;
-        case 'ROS'
-            switch( OPTIONS.Method )
-                case 1
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros2( RS2 );
-                case 2
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros3( RS3 );
-                case 3
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros4( RS4 );
-                case 4
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas3( RD3 );
-                case 5
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas4( RD4 );
-                case 6
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW2( ROW1 );
-                case 7
-                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW3( ROW2 );
-                otherwise % default methods
-                    switch ( implementation )
-                        case 'FWD'
-                            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros4( RS4 );
-                        case 'TLM'
-                            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas4( RD4 );
-                        case 'ADJ'
-                            [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Rodas3( RD3 );
-                    end
-            end
-            Coefficient.Method = rosMethod;
-            Coefficient.ELO = rosELO;
-            Coefficient.NStage = rosS;
-            Coefficient.Name = rosName;
-        case 'SDIRK'
-            switch ( OPTIONS.Method )
-                case 1
-                    [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk2A( S2A );
-                case 2
-                    [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk2B( S2B );
-                case 3
-                    [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk3A( S3A );
-                case 4
-                    [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk4A( S4A );
-                case 5
-                    [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk4B( S4B );
-                otherwise
-                    [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk4A( S4A );
-            end    
-            Coefficient.Method = sdirkMethod;
-            Coefficient.ELO = sdirkELO;
-            Coefficient.NStage = sdirkS;
-            Coefficient.Name = sdirkName;
-        case 'EXP'
-            switch( OPTIONS.Method )
-                case 1
-                    OPTIONS.OneStepIntegrator = @exp4SingleStep;
-                    expName = 'EXP4';
-                    expMethod = 1;
-                    expELO = 3;
-                case 2
-                    OPTIONS.OneStepIntegrator = @erow4SingleStep;
-                    expName = 'EROW4';
-                    expMethod = 2;
-                    expELO = 4;
-                case 3
-                    OPTIONS.OneStepIntegrator = @epirk4kSingleStep;
-                    expName = 'EPIRKK4';
-                    expMethod = 3;
-                    expELO = 4;
-                case 4
-                    OPTIONS.OneStepIntegrator = @epirk4kSingleStepNaiveExp;
-                    expName = 'EPIRKK4NaiveExp';
-                    expMethod = 4;
-                    expELO = 4;
-                case 5
-                    OPTIONS.OneStepIntegrator = @epirk4SingleStep;
-                    expName = 'EPIRK4';
-                    expMethod = 5;
-                    expELO = 4;
-                case 6
-                    OPTIONS.OneStepIntegrator = @epirk4SingleStepNaiveExp;
-                    expName = 'EPIRK4NaiveExp';
-                    expMethod = 6;
-                    expELO = 4;
-                case 7
-                    OPTIONS.OneStepIntegrator = @epirk5P1bVarSingleStep;
-                    expName = 'EPIRK5P1BVar';
-                    expMethod = 7;
-                    expELO = 5;
-                case 8
-                    OPTIONS.OneStepIntegrator = @epirk3WSingleStepNaiveExp;
-                    expName = 'EPIRKW3NaiveExp';
-                    expMethod = 8;
-                    expELO = 3;
-                case 9
-                    OPTIONS.OneStepIntegrator = @epirk3WISingleStepNaiveExp;
-                    expName = 'EPIRKW3I';
-                    expMethod = 9;
-                    expELO = 3;
-                case 10
-                    OPTIONS.OneStepIntegrator = @epirk3WZSingleStepNaiveExp;
-                    expName = 'EPIRKW3Z';
-                    expMethod = 10;
-                    expELO = 3;
-                case 11
-                    OPTIONS.OneStepIntegrator = @epirk3WDSingleStepNaiveExp;
-                    expName = 'EPIRKW3D';
-                    expMethod = 11;
-                    expELO = 3;
-                case 12
-                    OPTIONS.OneStepIntegrator = @epirk3WSingleStep;
-                    expName = 'EPIRKW3';
-                    expMethod = 12;
-                    expELO = 3;
-                case 13
-                    OPTIONS.OneStepIntegrator = @epirk3WLTSingleStep;
-                    expName = 'EPIRKW3LT';
-                    expMethod = 13;
-                    expELO = 3;                    
-                otherwise
-                    OPTIONS.OneStepIntegrator = @exp4SingleStep;
-                    expName = 'EXP4';
-                    expMethod = 1;
-                    expELO = 3;
-            end
-            Coefficient.Method = expMethod;
-            Coefficient.ELO = expELO;
-            Coefficient.Name = expName;
-        case 'EXPK'
-            switch( OPTIONS.Method )
-                otherwise
-                    [ expkMethod, expkELO, expkS, expkName ] = Coefficients_EXPK4( 0 );
-            end
-            Coefficient.Method = expkMethod;
-            Coefficient.ELO = expkELO;
-            Coefficient.NStage = expkS;
-            Coefficient.Name = expkName;
+        end
+        Coefficient.Method = rosMethod;
+        Coefficient.ELO = rosELO;
+        Coefficient.NStage = rosS;
+        Coefficient.Name = rosName;
+      case 'SDIRK'
+        switch ( OPTIONS.Method )
+          case 1
+            [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk2A( S2A );
+          case 2
+            [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk2B( S2B );
+          case 3
+            [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk3A( S3A );
+          case 4
+            [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk4A( S4A );
+          case 5
+            [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk4B( S4B );
+          otherwise
+            [ sdirkMethod, sdirkELO, sdirkS, sdirkName ] = Coefficients_Sdirk4A( S4A );
+        end    
+        Coefficient.Method = sdirkMethod;
+        Coefficient.ELO = sdirkELO;
+        Coefficient.NStage = sdirkS;
+        Coefficient.Name = sdirkName;
+      case 'EXP'
+        switch( OPTIONS.Method )
+          case 1
+            OPTIONS.OneStepIntegrator = @exp4SingleStep;
+            expName = 'EXP4';
+            expMethod = 1;
+            expELO = 3;
+          case 2
+            OPTIONS.OneStepIntegrator = @erow4SingleStep;
+            expName = 'EROW4';
+            expMethod = 2;
+            expELO = 4;
+          case 3
+            OPTIONS.OneStepIntegrator = @epirk4kSingleStep;
+            expName = 'EPIRKK4';
+            expMethod = 3;
+            expELO = 4;
+          case 4
+            OPTIONS.OneStepIntegrator = @epirk4kSingleStepNaiveExp;
+            expName = 'EPIRKK4NaiveExp';
+            expMethod = 4;
+            expELO = 4;
+          case 5
+            OPTIONS.OneStepIntegrator = @epirk4SingleStep;
+            expName = 'EPIRK4';
+            expMethod = 5;
+            expELO = 4;
+          case 6
+            OPTIONS.OneStepIntegrator = @epirk4SingleStepNaiveExp;
+            expName = 'EPIRK4NaiveExp';
+            expMethod = 6;
+            expELO = 4;
+          case 7
+            OPTIONS.OneStepIntegrator = @epirk5P1bVarSingleStep;
+            expName = 'EPIRK5P1BVar';
+            expMethod = 7;
+            expELO = 5;
+          case 8
+            OPTIONS.OneStepIntegrator = @epirk3WSingleStepNaiveExp;
+            expName = 'EPIRKW3NaiveExp';
+            expMethod = 8;
+            expELO = 3;
+          case 9
+            OPTIONS.OneStepIntegrator = @epirk3WISingleStepNaiveExp;
+            expName = 'EPIRKW3I';
+            expMethod = 9;
+            expELO = 3;
+          case 10
+            OPTIONS.OneStepIntegrator = @epirk3WZSingleStepNaiveExp;
+            expName = 'EPIRKW3Z';
+            expMethod = 10;
+            expELO = 3;
+          case 11
+            OPTIONS.OneStepIntegrator = @epirk3WDSingleStepNaiveExp;
+            expName = 'EPIRKW3D';
+            expMethod = 11;
+            expELO = 3;
+          case 12
+            OPTIONS.OneStepIntegrator = @epirk3WSingleStep;
+            expName = 'EPIRKW3';
+            expMethod = 12;
+            expELO = 3;
+          case 13
+            OPTIONS.OneStepIntegrator = @epirk3WLTSingleStep;
+            expName = 'EPIRKW3LT';
+            expMethod = 13;
+            expELO = 3;                    
+          case 14
+            OPTIONS.OneStepIntegrator = @epirk4kbSingleStep;
+            expName = 'EPIRKK4b';
+            expMethod = 14;
+            expELO = 4;
+          case 15
+            OPTIONS.OneStepIntegrator = @epirk3WcSingleStep;
+            expName = 'EPIRKW3c';
+            expMethod = 15;
+            expELO = 3;
+          otherwise
+            OPTIONS.OneStepIntegrator = @exp4SingleStep;
+            expName = 'EXP4';
+            expMethod = 1;
+            expELO = 3;
+        end
+        Coefficient.Method = expMethod;
+        Coefficient.ELO = expELO;
+        Coefficient.Name = expName;
+      case 'EXPK'
+        switch( OPTIONS.Method )
+          otherwise
+            [ expkMethod, expkELO, expkS, expkName ] = Coefficients_EXPK4( 0 );
+        end
+        Coefficient.Method = expkMethod;
+        Coefficient.ELO = expkELO;
+        Coefficient.NStage = expkS;
+        Coefficient.Name = expkName;
     end
     
     % Max_no_steps
@@ -517,46 +527,46 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if ( OPTIONS.Max_no_steps == 0 ) % Default Settings
         switch ( family )
-            case 'ERK'
-                OPTIONS.Max_no_steps = 10000;
-            case 'RK'
-                switch ( implementation )
-                    case 'FWD'
-                        OPTIONS.Max_no_steps = 200000;
-                    case 'TLM'
-                        OPTIONS.Max_no_steps = 200000;
-                    case 'ADJ'
-                        OPTIONS.Max_no_steps = 20000;
-                end
-            case 'ROK'
-                switch ( implementation )
-                    case 'FWD'
-                        OPTIONS.Max_no_steps = 200000;
-                    case 'TLM'
-                       % DO NOTHING
-                    case 'ADJ'
-                       % DO NOTHING
-                end
-            case 'ROS'
-                switch ( implementation )
-                    case 'FWD'
-                        OPTIONS.Max_no_steps = 200000; 
-                    case 'TLM'
-                        OPTIONS.Max_no_steps = 200000;
-                    case 'ADJ'
-                        OPTIONS.Max_no_steps = 200000;
-                end
-            case 'SDIRK'
-                switch ( implementation )
-                    case 'FWD'
-                        OPTIONS.Max_no_steps = 200000;
-                    case 'TLM'
-                        OPTIONS.Max_no_steps = 200000;
-                    case 'ADJ'
-                        OPTIONS.Max_no_steps = 10000;
-                end
-            otherwise
+          case 'ERK'
+            OPTIONS.Max_no_steps = 10000;
+          case 'RK'
+            switch ( implementation )
+              case 'FWD'
                 OPTIONS.Max_no_steps = 200000;
+              case 'TLM'
+                OPTIONS.Max_no_steps = 200000;
+              case 'ADJ'
+                OPTIONS.Max_no_steps = 20000;
+            end
+          case 'ROK'
+            switch ( implementation )
+              case 'FWD'
+                OPTIONS.Max_no_steps = 200000;
+              case 'TLM'
+                % DO NOTHING
+              case 'ADJ'
+                % DO NOTHING
+            end
+          case 'ROS'
+            switch ( implementation )
+              case 'FWD'
+                OPTIONS.Max_no_steps = 200000; 
+              case 'TLM'
+                OPTIONS.Max_no_steps = 200000;
+              case 'ADJ'
+                OPTIONS.Max_no_steps = 200000;
+            end
+          case 'SDIRK'
+            switch ( implementation )
+              case 'FWD'
+                OPTIONS.Max_no_steps = 200000;
+              case 'TLM'
+                OPTIONS.Max_no_steps = 200000;
+              case 'ADJ'
+                OPTIONS.Max_no_steps = 10000;
+            end
+          otherwise
+            OPTIONS.Max_no_steps = 200000;
         end
     elseif ( OPTIONS.Max_no_steps > 0 )
         % DO NOTHING: User supplied or fine tuned value.
@@ -639,23 +649,23 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     % AdjointSolve
     if( strcmp(implementation,'ADJ') )
         switch( family )
-            case 'ERK'
-            case 'RK'              
-            case 'ROS'
-            case 'SDIRK'
-            otherwise
-                error('Error: Internal error...');
+          case 'ERK'
+          case 'RK'              
+          case 'ROS'
+          case 'SDIRK'
+          otherwise
+            error('Error: Internal error...');
         end
     end
-        
+    
     % DirectADJ
     if ( OPTIONS.DirectADJ == false )
         OPTIONS.DirectADJ = false;
     elseif ( OPTIONS.DirectADJ == true )
         OPTIONS.DirectADJ = true;
     elseif ( ~isempty( OPTIONS.DirectADJ ) )
-       str = [ 'Error: User selected DirectADJ: ', num2str(OPTIONS.DirectADJ), '. DirectADJ must be 0 or 1.' ];
-       error(str);
+        str = [ 'Error: User selected DirectADJ: ', num2str(OPTIONS.DirectADJ), '. DirectADJ must be 0 or 1.' ];
+        error(str);
     end
     
     % ChunkSize

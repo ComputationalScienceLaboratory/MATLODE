@@ -193,7 +193,7 @@ while t_now < t_out
             s = norm(vv);
 
             % Happy breakdown
-            if s < tol
+            if s < tol || j == 1000
                 happy = 1;
                 tau = t_out - t_now;
                 break;
@@ -229,7 +229,7 @@ while t_now < t_out
             s = norm(vv);
 
             % Happy breakdown
-            if s < tol
+            if s < tol || j == 1000
                 happy = 1;
                 tau = t_out - t_now;
                 break;

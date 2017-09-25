@@ -126,7 +126,7 @@ for i = 1:N
         end
     end
 
-    if i == NBasisVectors
+    if i == NBasisVectors || i == 1000
         break;
     end
 end
