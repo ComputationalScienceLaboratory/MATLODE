@@ -1,11 +1,7 @@
-function jac = vanDerPol_Jacobian(~,y,mu)
+function jac = vanDerPol_Jacobian(~, y)
 %VDPOLJAC van der Pol equation Jacobian.
 
-% mu = ?; passed as an input argument
-
-if nargin < 3 % supply default of not given
-    mu = 10.0;
-end
+mu = 10.0;
 
 % jac = [         0                    1
 %        (-2*mu*y(1)*y(2)-1) (mu*(1-y(1)^2))];
