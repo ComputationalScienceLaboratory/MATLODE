@@ -114,6 +114,9 @@ function [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_RK_FWD_Integrator( OdeFunct
     % Configure Options   
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, 'RK', 'FWD', Y0, Tspan );
     
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);  
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Call Forwrad Method
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

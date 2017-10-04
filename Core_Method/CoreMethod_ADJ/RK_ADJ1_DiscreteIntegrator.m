@@ -57,7 +57,7 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
+function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, lambda_Tf, mu_Tf )
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Global variables
@@ -76,16 +76,22 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIn
 
     TYindex = 1;
     
-    Mu = OPTIONS.Mu();    
-    Lambda = OPTIONS.Lambda;
+    % We are forcing the user to have a dim(Mu) to be NADJ x NP, but the
+    % implementation expects NP x NADJ.
+    Mu = transpose(mu_Tf);
+    
+    Lambda = lambda_Tf;
     
     WY1 = zeros(NVAR,OPTIONS.NADJ);
     WY2 = zeros(NVAR,OPTIONS.NADJ);
     WY3 = zeros(NVAR,OPTIONS.NADJ);
-    
-    WP1 = zeros(OPTIONS.NP,OPTIONS.NADJ);
-    WP2 = zeros(OPTIONS.NP,OPTIONS.NADJ);
-    WP3 = zeros(OPTIONS.NP,OPTIONS.NADJ);
+
+%     WP1 = zeros(OPTIONS.NP,OPTIONS.NADJ);
+%     WP2 = zeros(OPTIONS.NP,OPTIONS.NADJ);
+%     WP3 = zeros(OPTIONS.NP,OPTIONS.NADJ);
+    WP1 = zeros(OPTIONS.NADJ, OPTIONS.NP);
+    WP2 = zeros(OPTIONS.NADJ, OPTIONS.NP);
+    WP3 = zeros(OPTIONS.NADJ, OPTIONS.NP);
     
     FPJAC1 = zeros(NVAR,OPTIONS.NP);
     FPJAC2 = zeros(NVAR,OPTIONS.NP);
@@ -132,6 +138,10 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIn
             if ( adjQuadFlag )
                 WY1 = OPTIONS.DRDY(T+rkC(1)*H,TMP);
                 WP1 = OPTIONS.DRDP(T+rkC(1)*H,TMP);
+                
+                % This is inefficient and should be accounted for in a
+                % future release
+                WP1 = transpose(WP1);
             end
             TMP = Y + Zstage(NVAR+1:2*NVAR,1);
             fjac2 = OPTIONS.Jacobian( T+rkC(2)*H, TMP );
@@ -139,6 +149,10 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIn
             if ( adjQuadFlag )
                 WY2 = OPTIONS.DRDY(T+rkC(2)*H,TMP);
                 WP2 = OPTIONS.DRDP(T+rkC(2)*H,TMP);
+                
+                % This is inefficient and should be accounted for in a
+                % future release
+                WP2 = transpose(WP2);
             end
             TMP = Y + Zstage(2*NVAR+1:3*NVAR,1);
             fjac3 = OPTIONS.Jacobian( T+rkC(3)*H, TMP );
@@ -146,6 +160,10 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = RK_ADJ1_DiscreteIn
             if ( adjQuadFlag )
                 WY3 = OPTIONS.DRDY(T+rkC(3)*H,TMP);
                 WP3 = OPTIONS.DRDP(T+rkC(3)*H,TMP);
+                
+                % This is inefficient and should be accounted for in a
+                % future release
+                WP3 = transpose(WP3);
             end
             ISTATUS.Njac = ISTATUS.Njac + 3;
             

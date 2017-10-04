@@ -131,9 +131,13 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
     % Initialize ISTATUS and RSTATUS
     ISTATUS_TOTAL = ISTATUS_Struct('default');
         
+    % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'ADJ', Y0, tspan );
-             
-    OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
+    
+    % Check input dimensions
+    OPTIONS = Input_Dimension(tspan(1), Y0, OdeFunction, OPTIONS);         
+    
+    OPTIONS.NADJ = size(OPTIONS.Lambda(tspan(1), Y0), 2);
     OPTIONS.NVAR = size(Y0, 1);
 
     % Call ERK ADJ integration
@@ -170,11 +174,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call ERK ADJ1 Core Method w/ Quadrature
             % disp('ERKADJ1 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ1_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );     
+                ERK_ADJ1_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf );     
             elapsedTime_ADJ = toc;
             
         % ERKADJ1 no Quadrature
@@ -206,11 +216,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call ERK ADJ1 Core Method no Quadrature
             % disp('ERKADJ1 no Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ1_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );             
+                ERK_ADJ1_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf);
             elapsedTime_ADJ = toc;
         end
     else
@@ -244,11 +260,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call ERK ADJ2 Core Method no Quadrature
             % disp('ERKADJ2 w/ Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ2_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );  
+                ERK_ADJ2_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf );  
             elapsedTime_ADJ = toc;
             
         % ERKADJ2 no Quadrature
@@ -280,11 +301,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call ERK ADJ2 Core Method no Quadrature
             % disp('ERKADJ2 no Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ2_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag ); 
+                ERK_ADJ2_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf ); 
             elapsedTime_ADJ = toc;
         end
     end    

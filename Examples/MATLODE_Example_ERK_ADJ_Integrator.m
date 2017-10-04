@@ -16,7 +16,7 @@
 % load our input parameters into our workspace. 
 Ode_Function        = @vanDerPol_Function;
 Ode_Jacobian        = @vanDerPol_Jacobian;
-Ode_Lambda          = eye(2);
+Ode_Lambda          = @vanDerPol_Lambda; 
 Ode_Quadrature      = @vanDerPol_Quadrature;
 Ode_QFun            = @vanDerPol_QFun;
 Ode_DRDP            = @vanDerPol_DRDP;

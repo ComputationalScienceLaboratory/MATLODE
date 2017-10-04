@@ -117,6 +117,9 @@ function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_SDIRK_TLM_Integrator
     % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,'SDIRK','TLM',Y0, Tspan );
     
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);  
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Call Tangent Linear Method
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

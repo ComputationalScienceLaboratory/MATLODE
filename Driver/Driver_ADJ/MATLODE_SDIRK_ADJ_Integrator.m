@@ -128,8 +128,12 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
     % Initialize ISTATUS and RSTATUS
     ISTATUS_TOTAL = ISTATUS_Struct('default');
         
+    % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'SDIRK', 'ADJ', Y0, Tspan );
              
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan, Y0, OdeFunction, OPTIONS);
+    
      %    OPTIONS.NADJ = size(Y0,1); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
     OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
     %    OPTIONS.NVAR = size(Y0,1); % Make it more explicit that we want a column vector
@@ -166,11 +170,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call ERK ADJ1 Core Method w/ Quadrature
             %disp('SDIRKADJ1 w/ Quadrature');
             tic;
             [ Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                SDIRK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag ); 
+                SDIRK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf ); 
             elapsedTime_ADJ(interval) = toc;
         % SDIRKADJ1 no Quadrature
         else
@@ -201,11 +211,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call ERK ADJ1 Core Method w/ Quadrature
             %disp('SDIRKADJ1 no Quadrature');
             tic;
             [ Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                SDIRK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag ); 
+                SDIRK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf ); 
             elapsedTime_ADJ(interval) = toc;
         end
     else
@@ -238,11 +254,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call ERK ADJ2 Core Method no Quadrature
             %disp('ERKADJ2 w/ Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf );
             elapsedTime_ADJ(interval) = toc;
         % SDIRKADJ2 no Quadrature
         else
@@ -273,11 +294,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_SDIRK_A
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call ERK ADJ2 Core Method no Quadrature
             %disp('ERKADJ2 no Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag ); 
+                SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf ); 
             elapsedTime_ADJ(interval) = toc;
         end
     end    

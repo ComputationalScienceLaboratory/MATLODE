@@ -101,14 +101,10 @@ end
 % Initial settings
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 ISTATUS = ISTATUS_Struct('default');
 RSTATUS = RSTATUS_Struct('default');
 
 ISTATUS.Nchk = 1;
-
-
-
 
 T = Tinitial;
 Tdirection = sign( Tfinal-Tinitial );

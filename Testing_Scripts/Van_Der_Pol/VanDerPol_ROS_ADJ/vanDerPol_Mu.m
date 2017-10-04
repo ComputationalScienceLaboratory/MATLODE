@@ -1,6 +1,6 @@
-function Mu = vanDerPol_Mu()
+function Mu = vanDerPol_Mu(~, ~)
 
-    Mu = zeros(1,2);
+    Mu = zeros(2,1);
 
 end
 

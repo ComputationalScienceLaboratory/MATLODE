@@ -55,7 +55,7 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
+function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, lambda_Tf )
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Global Variables
@@ -86,12 +86,11 @@ function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ2_DiscreteInteg
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initializations
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Lambda = OPTIONS.Lambda;   
+    Lambda = lambda_Tf;
 
     Direction = 1;
     
     TYindex = 1;
-%    H = 0; %????
     
     ros_W = zeros(Coefficient.NStage,1);
     

@@ -57,7 +57,7 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
+function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, lambda_tf, mu_tf )
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Global Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,7 +66,13 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Lambda = OPTIONS.Lambda;
+    
+    Lambda = lambda_tf;
+    
+    % We are forcing the user to have a dim(Mu) to be NADJ x NP, but the
+    % implementation expects NP x NADJ.
+    Mu = transpose(mu_tf);
+    
     Yout = Lambda;
     Tout = 0;
     TYindex = 1;
@@ -78,8 +84,6 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
     U = zeros(NVAR,OPTIONS.NADJ,Coefficient.NStage);
     V = zeros(OPTIONS.NP,OPTIONS.NADJ,Coefficient.NStage);
     
-    Mu = OPTIONS.Mu();
-
     ISTATUS = ISTATUS_Struct('default');
     RSTATUS = RSTATUS_Struct('default');
 
@@ -107,6 +111,10 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
             fpjac = OPTIONS.Jacp( T+rkC(istage)*H, Z(:,istage) );
             if ( adjQuadFlag )
                 WP = OPTIONS.DRDP( T+rkC(istage)*H, Z(:,istage) );
+                
+                % This is inefficient and should be accounted for in a
+                % future release
+                WP = transpose(WP);
             end
             
             for iadj=1:OPTIONS.NADJ
@@ -123,8 +131,8 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
                 V(:,iadj,istage) = transpose(fpjac)*TMP;
                 
                 if ( adjQuadFlag )
-                    U(:,iadj,istage) = U(:,iadj,istage) + H*rkB(istage)*WY(:,iadj);
-                    V(:,iadj,istage) = V(:,iadj,istage) + H*rkB(istage)*WP(:,iadj);
+                    U(:,iadj,istage) = U(:,iadj,istage) + H*rkB(istage)*WY(:, iadj);
+                    V(:,iadj,istage) = V(:,iadj,istage) + H*rkB(istage)*WP(:, iadj);
                 end
                 
             end % iadj

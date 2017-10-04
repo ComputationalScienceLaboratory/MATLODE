@@ -1,6 +1,6 @@
 function RP = vanDerPol_DRDP( ~, ~ )
 
-    RP = zeros(1,2);
+    RP = zeros(2,1);
 
 return;
 

@@ -137,16 +137,14 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
     % Initialize ISTATUS and RSTATUS
     ISTATUS_TOTAL = ISTATUS_Struct('default');
         
+    % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'RK', 'ADJ', Y0, Tspan );
-             
-    %    OPTIONS.NADJ = size(Y0,1); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
-    OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
-    %    OPTIONS.NVAR = size(Y0,1); % Make it more explicit that we want a column vector
-    OPTIONS.NVAR = size(Y0, 1);
     
-    % Call RK ADJ integration
-    % [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = RK_ADJ2_Integrator( NVAR, ...
-    % NADJ, OPTIONS, FWD_Tout(end), Lambda, GetQuad, ICNTRL, Coefficient, stack_ptr );
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
+    
+    OPTIONS.NADJ = size(OPTIONS.Lambda(Tspan(1), Y0), 2);
+    OPTIONS.NVAR = size(Y0, 1);
     
     if ( ~isempty(OPTIONS.Jacp) )
         % RungeKuttaADJ1 w/ Quadrature
@@ -179,11 +177,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call RK ADJ1 Core Method no Quadrature
             % disp('RungeKuttaADJ1 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf );
             elapsedTime_ADJ = toc;            
         % RungeKuttaADJ1 no Quadrature
         else
@@ -214,11 +218,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%             
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call RK ADJ1 Core Method no Quadrature
             % disp('RungeKuttaADJ2 no Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                RK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf );
             elapsedTime_ADJ = toc;            
         end
     else
@@ -251,11 +261,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%             
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call RK ADJ2 Core Method no Quadrature
             % disp('RungeKuttaADJ2 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf);
             elapsedTime_ADJ = toc;            
         % RungeKuttaADJ2 no Quadrature
         else
@@ -286,11 +301,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call RK ADJ2 Core Method no Quadrature
             % disp('RungeKuttaADJ2 no Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf );
             elapsedTime_ADJ = toc;
         end
     end

@@ -114,9 +114,12 @@ function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_ERK_TLM_Integrator( 
         Y0 = transpose(Y0);
     end      
     
-    % Configure Options (check this)
+    % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,'ERK','TLM',Y0, Tspan );
           
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);  
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Call Tangent Linear Method
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

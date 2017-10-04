@@ -126,7 +126,9 @@ function [ Tout_FWD, Yout_FWD, FWD_Stats ] = MATLODE_ERK_FWD_Integrator( OdeFunc
         
     % Configure Forward Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'FWD', Y0, Tspan );
-    OPTIONS                  = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
+    
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);  
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

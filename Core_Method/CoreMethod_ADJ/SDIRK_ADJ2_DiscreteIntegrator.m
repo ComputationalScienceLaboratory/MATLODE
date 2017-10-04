@@ -51,7 +51,7 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Lambda, ISTATUS, RSTATUS, Ierr ] = SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
+function [ Lambda, ISTATUS, RSTATUS, Ierr ] = SDIRK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, lambda_Tf )
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Global variables
@@ -64,7 +64,7 @@ function [ Lambda, ISTATUS, RSTATUS, Ierr ] = SDIRK_ADJ2_DiscreteIntegrator( NVA
 % Local variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     TYindex = 1;
-    Lambda = OPTIONS.Lambda;
+    Lambda = lambda_Tf;
     
     SkipJac = false;
     SkupLU = false;

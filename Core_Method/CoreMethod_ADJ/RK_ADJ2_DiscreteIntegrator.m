@@ -55,7 +55,7 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )    
+function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = RK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, lambda_Tf )    
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Global variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,12 +83,11 @@ function [ Tout, Yout, Lambda, ISTATUS, RSTATUS, Ierr ] = RK_ADJ2_DiscreteIntegr
         WY3 = zeros(NVAR,OPTIONS.NADJ);
     end
     
-    Lambda = OPTIONS.Lambda;
+    Lambda = lambda_Tf;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initializations
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
     T1 = chk_T(end)+chk_H(end); %<---------------temp fix
     NewtonConverge = true;

@@ -112,9 +112,12 @@ function [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_SDIRK_FWD_Integrator( OdeFu
     adjStackFlag = false;
     adjQuadFlag  = false;
     
-    % Configure Options (check this)
+    % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,'SDIRK','FWD',Y0,Tspan);
 
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);  
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Call Forwrad Method
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -135,6 +135,9 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
     % Configure Options
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ROS', 'ADJ', Y0, Tspan );
     
+    % Check input dimensions
+    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
+    
     % Check for user input errors
     if ( Ierr < 0.0 )
         return;
@@ -184,11 +187,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call ROS ADJ1 Core Method w/ Quadrature
             % disp('ROSADJ1 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ROS_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                ROS_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf );
             elapsedTime_ADJ = toc;
         % RosenbrockADJ2 no Quadrature
         else
@@ -219,11 +228,17 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            Mu_Tf = OPTIONS.Mu(Tf, Yf);
+            
             % Call ROS ADJ1 Core Method w/ Quadrature
             % disp('ROSADJ1 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ROS_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                ROS_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf, Mu_Tf );
             elapsedTime_ADJ = toc;
         end
     else
@@ -257,11 +272,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call ROS ADJ2 Core Method w/ Quadrature
             % disp('ROSADJ2 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ROS_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                ROS_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf );
             elapsedTime_ADJ = toc;
         % RosenbrockADJ2 no Quadrature
         else
@@ -292,11 +312,16 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
             
+            % Initialize lambda and mu using function handlers
+            Tf = Tout_FWD(end);
+            Yf = Yout_FWD(end, :);
+            Lambda_Tf = OPTIONS.Lambda(Tf, Yf);
+            
             % Call ROS ADJ2 Core Method w/ Quadrature
             % disp('ROSADJ2 no Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ROS_ADJ2_DiscreteIntegrator(  NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );
+                ROS_ADJ2_DiscreteIntegrator(  NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag, Lambda_Tf );
             elapsedTime_ADJ = toc;
         end
     end
