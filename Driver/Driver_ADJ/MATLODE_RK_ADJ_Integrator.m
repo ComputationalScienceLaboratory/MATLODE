@@ -141,7 +141,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_RK_ADJ_
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'RK', 'ADJ', Y0, Tspan );
     
     % Check input dimensions
-    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
+    OPTIONS = Input_Dimension(Tspan, Y0, OdeFunction, OPTIONS);
     
     OPTIONS.NADJ = size(OPTIONS.Lambda(Tspan(1), Y0), 2);
     OPTIONS.NVAR = size(Y0, 1);

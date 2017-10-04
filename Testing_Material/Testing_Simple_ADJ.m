@@ -152,7 +152,7 @@ title('Van Der Pol (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number
 %%
 %  Authored by Tony D'Augustine, Adrian Sandu, and Hong Zhang.
 %  Computational Science Laboratory, Virginia Tech.
-%  ©2015 Virginia Tech Intellectual Properties, Inc.
+%  ï¿½2015 Virginia Tech Intellectual Properties, Inc.
 %
 
 %%

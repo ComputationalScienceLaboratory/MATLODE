@@ -118,7 +118,7 @@ function [ Tout_TLM, Yout_TLM, Y_TLM, Stats_TLM ] = MATLODE_RK_TLM_Integrator( O
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U,'RK','TLM',Y0, Tspan );
         
 	% Check input dimensions
-    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);  
+    OPTIONS = Input_Dimension(Tspan, Y0, OdeFunction, OPTIONS);  
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Call Tangent Linear Method

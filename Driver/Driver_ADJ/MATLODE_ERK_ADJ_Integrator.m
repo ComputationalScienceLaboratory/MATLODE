@@ -135,7 +135,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'ADJ', Y0, tspan );
     
     % Check input dimensions
-    OPTIONS = Input_Dimension(tspan(1), Y0, OdeFunction, OPTIONS);         
+    OPTIONS = Input_Dimension(tspan, Y0, OdeFunction, OPTIONS);         
     
     OPTIONS.NADJ = size(OPTIONS.Lambda(tspan(1), Y0), 2);
     OPTIONS.NVAR = size(Y0, 1);

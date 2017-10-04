@@ -136,7 +136,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = MATLODE_ROS_ADJ
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ROS', 'ADJ', Y0, Tspan );
     
     % Check input dimensions
-    OPTIONS = Input_Dimension(Tspan(1), Y0, OdeFunction, OPTIONS);
+    OPTIONS = Input_Dimension(Tspan, Y0, OdeFunction, OPTIONS);
     
     % Check for user input errors
     if ( Ierr < 0.0 )
