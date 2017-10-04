@@ -427,7 +427,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
             ISTATUS.Njac =  ISTATUS.Njac + vecCount;
             if(gmresFlag ~= 0)
                 resvec = abs(e(tempYerr) - Yerr);
-                scalar = OPTIONS.AbsTol + OPTIONS.RelTol*abs(Yerr);
+                scalar = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(Yerr);
                 if ( norm(resvec./scalar) > sqrt(NVAR) )
                     switch(gmresFlag)
                         case 1
