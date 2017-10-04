@@ -1,4 +1,4 @@
-function Quad = vanDerPol_Quadrature()
+function Quad = vanDerPol_Quadrature(~, ~)
 
     Quad = zeros(2,1);
 

@@ -57,7 +57,7 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific 
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteIntegrator(Lambda_tf,Mu_tf, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
+function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag )
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Global Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,22 +66,19 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-     Tout = 0;
-
+    Lambda = OPTIONS.Lambda;
+    Yout = Lambda;
+    Tout = 0;
     TYindex = 1;
-    Lambda=transpose(Lambda_tf);
-    Mu=transpose(Mu_tf);
-%     Yout = Lambda;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initializations
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    U = zeros(OPTIONS.NVAR,OPTIONS.NADJ,Coefficient.NStage);
+    U = zeros(NVAR,OPTIONS.NADJ,Coefficient.NStage);
     V = zeros(OPTIONS.NP,OPTIONS.NADJ,Coefficient.NStage);
     
-%     Mu = OPTIONS.Mu();
+    Mu = OPTIONS.Mu();
 
     ISTATUS = ISTATUS_Struct('default');
     RSTATUS = RSTATUS_Struct('default');
@@ -91,7 +88,7 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     while ( stack_ptr > 0 )
         % Recover checkpoints for stage vales and vectors
-        [ T, H, Y, Z, stack_ptr ] = erkPop( OPTIONS.NVAR, Coefficient.NStage, stack_ptr );
+        [ T, H, Y, Z, stack_ptr ] = erkPop( NVAR, Coefficient.NStage, stack_ptr );
         Yout(:,TYindex) = Y;
         Tout(TYindex,1) = T;
         
@@ -106,16 +103,14 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
             
             if ( adjQuadFlag )
                 WY = OPTIONS.DRDY(T+rkC(istage)*H, Z(:,istage) );
-                WY=transpose(WY);
             end
             fpjac = OPTIONS.Jacp( T+rkC(istage)*H, Z(:,istage) );
             if ( adjQuadFlag )
                 WP = OPTIONS.DRDP( T+rkC(istage)*H, Z(:,istage) );
-                WP=transpose(WP);
             end
             
             for iadj=1:OPTIONS.NADJ
-                TMP = zeros(OPTIONS.NVAR,1);
+                TMP = zeros(NVAR,1);
                 
                 if ( istage < Coefficient.NStage )
                     for j=istage+1:Coefficient.NStage
@@ -146,8 +141,7 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ERK_ADJ1_DiscreteI
     
     % Successful return
     Ierr = 1;
-    Mu=transpose(Mu);
-    Lambda=transpose(Lambda);
+    
 
 return;
 

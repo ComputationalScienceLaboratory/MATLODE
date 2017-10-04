@@ -118,7 +118,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
     end    
 
     % Get Problem Size
-    NVAR = max(size(Y0));
+    OPTIONS.NVAR = size(Y0, 1);
 
     % Initialize Y
     Y(:,1) = Y0;
@@ -133,9 +133,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
         
     [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'ERK', 'ADJ', Y0, tspan );
              
-    %    OPTIONS.NADJ = max(size(Y0)); % This is incorrect. We want Lambda column vectors and this says the following makes it clear that the number of column vectors equals the number of adjoint propagations.
     OPTIONS.NADJ = size(OPTIONS.Lambda, 2);
-    %    OPTIONS.NVAR = max(size(Y0)); % Make it more explicit that we want a column vector
     OPTIONS.NVAR = size(Y0, 1);
 
     % Call ERK ADJ integration
@@ -176,7 +174,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             % disp('ERKADJ1 w/ Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );     
+                ERK_ADJ1_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );     
             elapsedTime_ADJ = toc;
             
         % ERKADJ1 no Quadrature
@@ -212,7 +210,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             % disp('ERKADJ1 no Quadrature');
             tic;
             [ ADJ_Tout, ADJ_Yout, Lambda, Mu, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ1_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );             
+                ERK_ADJ1_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );             
             elapsedTime_ADJ = toc;
         end
     else
@@ -250,7 +248,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             % disp('ERKADJ2 w/ Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );  
+                ERK_ADJ2_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag );  
             elapsedTime_ADJ = toc;
             
         % ERKADJ2 no Quadrature
@@ -286,7 +284,7 @@ function [ Tout_FWD, Yout_FWD, Lambda, Quadrature, Mu, Stats ] = ...
             % disp('ERKADJ2 no Quadrature');
             tic;
             [ Lambda, ADJ_ISTATUS, ADJ_RSTATUS, ADJ_Ierr ] = ...
-                ERK_ADJ2_DiscreteIntegrator( NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag ); 
+                ERK_ADJ2_DiscreteIntegrator( OPTIONS.NVAR, OPTIONS, Coefficient, stack_ptr, adjQuadFlag ); 
             elapsedTime_ADJ = toc;
         end
     end    

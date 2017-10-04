@@ -83,7 +83,12 @@ Roundoff = eps/2;
 
 TYindex = 1;
 
-
+% Force initial value matrix to be N X 1.
+if ( size(Y,2) == 1 )
+    % DO NOTHING
+else
+    Y = transpose(Y);
+end  
 
 Yout(:,TYindex) = Y;
 Tout(TYindex,1) = Tinitial;
