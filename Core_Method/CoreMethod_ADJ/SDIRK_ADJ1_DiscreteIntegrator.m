@@ -250,7 +250,7 @@ function [ Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = SDIRK_ADJ1_DiscreteIntegrator(
         for istage=1:Coefficient.NStage
             for iadj=1:OPTIONS.NADJ
                 Lambda(:,iadj) = Lambda(:,iadj) + U(:,iadj,istage);
-                Mu(:,iadj) = Mu(:,iadj) + V(:,iadj,istage);
+                Mu(iadj,:) = Mu(iadj,:) + V(:,iadj,istage);
             end
         end
         

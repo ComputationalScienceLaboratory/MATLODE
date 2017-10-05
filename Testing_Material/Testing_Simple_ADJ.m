@@ -137,6 +137,42 @@ figure(2);
 loglog(steps,errorSensitivity);
 title('Van Der Pol (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
 
+%% Test Case 3B:
+% *Description*: Running |MATLODE_ROS_ADJ_Integrator| with different absolute
+% and relative tolerance values given default option struct and
+% quadrature term.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda, ...
+    'Quadrature',Ode_Quadrature,'QFun',Ode_QFun,'DRDY',Ode_DRDY,...
+    'Hesstr_vec',Ode_Hesstr_vec,'Hesstr_vec_r',Ode_Hesstr_vec_r);
+[steps, errorSolution, errorSensitivity, errorQuad ] = TEST_General_Sensitivity(@MATLODE_ROS_ADJ_Integrator,Ode_Function,Tspan,y0,Option,-8,-4,T_Ref,Y_Ref,Sens_Ref_wQuad,Quad_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(3);
+loglog(steps,errorQuad);
+title('Van Der Pol (Quadrature)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
+%% Test Case 3C:
+% *Description*: Running |MATLODE_ROS_ADJ_Integrator| with different absolute
+% and relative tolerance values givendefault option struct and
+% mu term.
+Option = MATLODE_OPTIONS('Jacobian',Ode_Jacobian,'Lambda',Ode_Lambda, ...
+    'Jacp',Ode_Jacp,'Mu',Ode_Mu,'NP',1,'Hesstr_vec',Ode_Hesstr_vec,...
+    'Hesstr_vec_f_py',Ode_Hesstr_vec_f_py);
+[steps, errorSolution, errorSensitivity, ~, errorMu ] = TEST_General_Sensitivity(@MATLODE_ROS_ADJ_Integrator,Ode_Function,Tspan,y0,Option,-11,-4,T_Ref,Y_Ref,Sens_Ref,Quad_Ref,Mu_C_Ref);
+figure(1);
+loglog(steps,errorSolution);
+title('Van Der Pol (Solution)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(2);
+loglog(steps,errorSensitivity);
+title('Van Der Pol (Sensitivity)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+figure(3);
+loglog(steps,errorMu);
+title('Van Der Pol (Mu)'); ylabel('RMS Relative Error'); xlabel('Number of Steps');
+
 %% Test Case 4A: MATLODE_SDIRK_ADJ_Integrator (Default)
 % *Description*: Running |MATLODE_SDIRK_ADJ_Integrator| with different absolute
 % and relative tolerance values given default option struct.

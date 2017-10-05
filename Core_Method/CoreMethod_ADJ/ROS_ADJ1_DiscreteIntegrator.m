@@ -81,9 +81,11 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ1_DiscreteI
     U = zeros(NVAR*Coefficient.NStage,OPTIONS.NADJ);
     V = zeros(NVAR*Coefficient.NStage,OPTIONS.NADJ);    
 
-    RP0 = zeros(OPTIONS.NP,OPTIONS.NADJ);
-    RP1 = zeros(OPTIONS.NP,OPTIONS.NADJ);
-    
+%     RP0 = zeros(OPTIONS.NP,OPTIONS.NADJ);
+%     RP1 = zeros(OPTIONS.NP,OPTIONS.NADJ);
+    RP0 = zeros(OPTIONS.NADJ, OPTIONS.NP);
+    RP1 = zeros(OPTIONS.NADJ, OPTIONS.NP);
+
     RY0 = zeros(NVAR,OPTIONS.NADJ);
     RY1 = zeros(NVAR,OPTIONS.NADJ);
     
@@ -216,20 +218,24 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ1_DiscreteI
             FPJAC1 = OPTIONS.Jacp(Tau,Ystage(istart:istart+(NVAR-1)));
             if ( adjQuadFlag )
                 RP1 = OPTIONS.DRDP(Tau,Ystage(istart:istart+(NVAR-1)));
+                
+                % This transpsoe is inefficient and should be accounted for in a
+                % future release
+                RP1 = transpose(RP1);
             end
             for m=1:OPTIONS.NADJ
                 Tmp3 = zeros(OPTIONS.NP,1);
                 Tmp3 = Tmp3 + transpose(FPJAC1)*U(istart:istart+(NVAR-1),m);
-                Mu(:,m) = Mu(:,m) + Tmp3;
+                Mu(m,:) = Mu(m,:) + Tmp3;
                 if ( adjQuadFlag )
                     Tmp3 = Tmp3 + H*ros_W(istage)*RP1(:,m);
-                    Mu(:,m) = Mu(:,m) + Tmp3;
+                    Mu(m,:) = Mu(m,:) + Tmp3;
                 end
                 Tmp3 = OPTIONS.Hesstr_vec_f_py(T,Ystage,U(istart:istart+(NVAR-1),m),K(istart:istart+NVAR-1));
-                Mu(:,m) = Mu(:,m) + Tmp3;
+                Mu(m,:) = Mu(m,:) + Tmp3;
                 if ( adjQuadFlag )
                     Tmp3 = OPTIONS.Hesstr_vec_r_py(T,Ystage,H*ros_W(istage),K(istart:istart+NVAR-1));
-                    Mu(:,m) = Mu(:,m) + Tmp3;
+                    Mu(m,:) = Mu(m,:) + Tmp3;
                 end
             end
         end
@@ -258,7 +264,7 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ1_DiscreteI
                     Tmp = Tmp + ros_Gamma(istage)*U(istart:istart+(NVAR-1),m);
                 end
                 Alpha = H;
-                Mu(:,m) = Mu(:,m) + H*transpose(FPJAC1)*Tmp;
+                Mu(m,:) = Mu(m,:) + H*transpose(FPJAC1)*Tmp;
                 Tmp2 = transpose(djdt)*Tmp;
                 Lambda(:,m) = Lambda(:,m) + H*Tmp2;                                
             end
@@ -275,6 +281,12 @@ function [ Tout, Yout, Lambda, Mu, ISTATUS, RSTATUS, Ierr ] = ROS_ADJ1_DiscreteI
             % Approximate d(r_p)/dr and add it to Mu
             RP0 = OPTIONS.DRDP(T,Ystage(1));
             RP1 = OPTIONS.DRDP(T+Delta,Ystage(1));
+            
+            % This transpsoe is inefficient and should be accounted for in a
+            % future release
+            RP0 = transpose(RP0);
+            RP1 = transpose(RP1);
+            
             RP1 = RP1 - RP0;
             RP1 = RP1/Delta;
             Mu = Mu + H*GammaW*RP1;
