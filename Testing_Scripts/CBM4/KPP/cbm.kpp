@@ -1,6 +1,0 @@
-#MODEL      cbm4 
-#INTEGRATOR rosenbrock
-#LANGUAGE   Matlab 
-#DRIVER     general
-#HESSIAN    on
-#STOICMAT   on
