@@ -23,11 +23,11 @@
 %  Computational Science Laboratory, Virginia Tech.
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
-function [V, H, i] = ArnoldiAdapt(J, f, N, c, MatrixFree, NBasisVectors, Tol, MinBasisVectors)
+function [V, H, i] = ArnoldiAdapt(J, f, N, c, MatrixFree, MaxBasisVectors, Tol, MinBasisVectors, AdaptiveKrylov)
 %
-% NBasisVectors = Max number of basis vectors to be used 
+% MaxBasisVectors = Max number of basis vectors to be used 
 % MinBasisVectors = Min number of basis vectors to be used 
-% If MinBaisVectors is not specified and NBasisVectors is 0, then
+% If MinBaisVectors is not specified and MaxBasisVectors is 0, then
 % its only dependent on the residual.
 %
 
@@ -43,16 +43,27 @@ else
     MBasisVectors = MinBasisVectors;
 end
 
+if(~exist('AdaptiveKrylov', 'var'))
+    adaptive = true;
+else
+    adaptive = AdaptiveKrylov;
+end
+
+
 testIndex = [1,2,3,4,6,8,11,15,20,27,36,46,57,70,85,100];
 
 % K-methods with max basis size
-if(NBasisVectors ~= 0)
-    % Preallocate H of that size plus one as is used in lines 64,65
-    H = zeros(NBasisVectors+1);
-    % Preallocate V of that size plus one as is used in lines 64,65
-    V = zeros(N, NBasisVectors+1);
-    % Store H_Size
-    H_size = NBasisVectors;
+if(~adaptive)
+    if (MaxBasisVectors ~= 0)
+        % Preallocate H of that size plus one as is used in lines 64,65
+        H = zeros(MaxBasisVectors+1);
+        % Preallocate V of that size plus one as is used in lines 64,65
+        V = zeros(N, MaxBasisVectors+1);
+        % Store H_Size
+        H_size = MaxBasisVectors;
+    else
+        error('MaxBasisVectors has to be greater than zero when Adaptive Krylov flag is false.');
+    end   
 else
     % Preallocate H of a reasonably big size and increase size to next
     % testIndex size if Tol check fails. Use a size from testIndex plus
@@ -84,7 +95,7 @@ for i = 1:N
     % Perform tolerance check only when the number of basis is not
     % set and only for the chosen testIndex values
     % With line 89, 90 the i>100 condition is redundant
-    if  (NBasisVectors == 0) && (~isempty(find(testIndex == i, 1)))
+    if  adaptive && (i > MBasisVectors) && (~isempty(find(testIndex == i, 1)))
         % First compute the residual
         e1 = [1; zeros(i-1, 1)]; 
         Hbar = [c*H(1:i,1:i) e1; zeros(1, i+1)];
@@ -94,8 +105,8 @@ for i = 1:N
         if (residual < tol) 
             break
         else
-            % Check that we are not increasing the basis size beyond NBasisVectors
-            if(i == NBasisVectors)
+            % Check that we are not increasing the basis size beyond MaxBasisVectors
+            if(i == MaxBasisVectors)
                 break;
             end
             
@@ -126,7 +137,7 @@ for i = 1:N
         end
     end
 
-    if i == NBasisVectors || i == 1000
+    if i == MaxBasisVectors
         break;
     end
 end

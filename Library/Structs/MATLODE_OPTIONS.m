@@ -68,6 +68,7 @@ function options = MATLODE_OPTIONS(varargin)
     AbsTol_str          = '         AbsTol: [ Absolute error tolerance for Forward integrators. ]\n';
     AbsTol_ADJ_str      = '     AbsTol_ADJ: [ Absolute Newton iteration tolerance for solving adjoint system. ]\n';
     AbsTol_TLM_str      = '     AbsTol_TLM: [ Absolute error estimation for TLM at Newton stages. ]\n';
+    Adaptive_Krylov_str = 'Adaptive Krylov: [ Determines whether krylov is adaptive or a fixed number of basis vectors determined by maximum is used. ]\n';
     Autonomous_str      = '     Autonomous: [ ]\n';
     ChunkSize_str       = '      ChunkSize: [ Appended memory block size ]\n';
     DirectADJ_str       = '      DirectADJ: [ Determines whether direct adjoint sensitivity analysis is performed. ]\n';
@@ -126,9 +127,9 @@ if (nargin == 0) && (nargout == 0)
     fprintf( AbsTol_str );
     fprintf( AbsTol_ADJ_str );
     fprintf( AbsTol_TLM_str ); 
+    fprintf( Adaptive_Krylov_str );
     fprintf( Autonomous_str );
     fprintf( ChunkSize_str );
-        
     fprintf( DirectADJ_str );
     fprintf( DirectTLM_str );
     fprintf( displayStats_str );
@@ -194,7 +195,6 @@ if (nargin == 1) && (nargout == 0)
             fprintf( AbsTol_ADJ_str );
             fprintf( AbsTol_TLM_str );
             fprintf( ChunkSize_str );
-            
             fprintf( displayStats_str );
             fprintf( displaySteps_str );
             fprintf( DRDP_str );
@@ -239,6 +239,7 @@ Names = [
     'AbsTol           '
     'AbsTol_ADJ       '
     'AbsTol_TLM       '
+    'Adaptive_Krylov  '
     'Autonomous       '
     'ChunkSize        '
     'Desired_Mode     '

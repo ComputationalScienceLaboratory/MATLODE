@@ -41,6 +41,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.AbsTol_TLM) == true )
         OPTIONS.AbsTol_TLM = OPTIONS_U.AbsTol_TLM;
     end
+    if ( ~isempty(OPTIONS_U.Adaptive_Krylov) == true )
+        OPTIONS.Adaptive_Krylov = OPTIONS_U.Adaptive_Krylov;
+    end
     if ( ~isempty(OPTIONS_U.Autonomous) == true )
         OPTIONS.Autonomous = OPTIONS_U.Autonomous;
     end

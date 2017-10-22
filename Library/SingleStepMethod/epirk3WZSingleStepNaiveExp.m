@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk3WZSingleStepNaiveExp(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol)    
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov)
 
 
 
@@ -92,6 +92,11 @@ function [y, yerr, ISTATUS] = epirk3WZSingleStepNaiveExp(y0, dt, rhsFun, jacFun,
     arnoldiTol = 1e-12;
     %----------------------------------------------------------------------
 
+    %----------------------------------------------------------------------
+    % Set the number of minimum basis vectors
+    MBasisVectors = 1;
+    %----------------------------------------------------------------------
+    
     % f is already computed outside. Hence commenting out next line.
     % f = rhsFun(Y_s(:,1));                   % Evaluate the rhsFun at y
 

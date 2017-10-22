@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk3WLTSingleStep(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol)    
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov)
 
 
 

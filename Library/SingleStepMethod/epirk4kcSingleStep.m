@@ -90,7 +90,7 @@ function [y, yerr, ISTATUS] = epirk4kcSingleStep(y0, dt, rhsFun, jacFun, ...
     MBasisVectors = 4;
     
     % Compute the Krylov basis matrices
-    [V, H, M] = ArnoldiAdapt(jacFun, f, N, dt, MatrixFree, NBasisVectors, 1e-12, MBasisVectors);
+    [V, H, M] = ArnoldiAdapt(jacFun, f, N, dt, MatrixFree, NBasisVectors, 1e-12, MBasisVectors, adaptiveKrylov);
     
     ISTATUS.Nkdim = ISTATUS.Nkdim + M^2;
 

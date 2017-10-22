@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = exp4SingleStep(y, dt, rhsFun, J, ...
-                            f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol)
+                            f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov)
 
 % Implements exp4 given in equation (5.8) Hochbruck:  "Exponential
 % Integrators For Large Systems of Differential Equations".

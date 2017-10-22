@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = erow4SingleStep(y0, dt, rhsFun, J, ...
-                                              f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol)
+                                              f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov)
     % Based on the form for EROW4 given in "COMPARATIVE PERFORMANCE OF
     % EXPONENTIAL, IMPLICIT, AND EXPLICIT INTEGRATORS FOR STIFF SYSTEMS
     % OF ODES"  by Loffeld and Tokman.  Derived in "Exponential Rosenbrock-
@@ -39,10 +39,15 @@ function [y, yerr, ISTATUS] = erow4SingleStep(y0, dt, rhsFun, J, ...
     arnoldiTol = 1e-12;
     %----------------------------------------------------------------------
 
+    %----------------------------------------------------------------------
+    % Set minimum number of basis vectors
+    MBasisVectors = 1;
+    %----------------------------------------------------------------------
+
     krySteps = 0;
     
     % Compute the Krylov basis matrices
-    [V0, H0, M0] = ArnoldiAdapt(J, f, N, dt, MatrixFree, NBasisVectors, arnoldiTol);
+    [V0, H0, M0] = ArnoldiAdapt(J, f, N, dt, MatrixFree, NBasisVectors, relTol, MBasisVectors, adaptiveKrylov);
     e0 = eye(M0);
     e01 = e0(:,1);
     krySteps = krySteps + M0^2;
@@ -57,7 +62,7 @@ function [y, yerr, ISTATUS] = erow4SingleStep(y0, dt, rhsFun, J, ...
     R1 = Residual(f, rhsFun(Y1), y, Y1, J, MatrixFree);
     normR1 = norm(R1,2);
     
-    [V1, H1, M1] = ArnoldiAdapt(J, R1, N, dt, MatrixFree, NBasisVectors, arnoldiTol);
+    [V1, H1, M1] = ArnoldiAdapt(J, R1, N, dt, MatrixFree, NBasisVectors, relTol, MBasisVectors, adaptiveKrylov);
     e1 = eye(M1);
     e11 = e1(:,1);
     krySteps = krySteps + M1^2;
@@ -75,7 +80,7 @@ function [y, yerr, ISTATUS] = erow4SingleStep(y0, dt, rhsFun, J, ...
     R2 = Residual(f, rhsFun(Y2), y, Y2, J, MatrixFree);
     normR2 = norm(R2,2);
 
-    [V2, H2, M2] = ArnoldiAdapt(J, R2, N, dt, MatrixFree, NBasisVectors, arnoldiTol);
+    [V2, H2, M2] = ArnoldiAdapt(J, R2, N, dt, MatrixFree, NBasisVectors, relTol, MBasisVectors, adaptiveKrylov);
     e2 = eye(M2);
     e21 = e2(:,1);
     krySteps = krySteps + M2^2;

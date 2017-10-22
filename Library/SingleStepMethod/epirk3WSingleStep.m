@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol)    
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov)
 
 
 
@@ -90,6 +90,11 @@ function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
     arnoldiTol = 1e-9;
     %----------------------------------------------------------------------
 
+    %----------------------------------------------------------------------
+    % Set the minimum number of basis vectors for the method
+    MBasisVectors = 1;
+    %----------------------------------------------------------------------    
+
     % f is already computed outside. Hence commenting out next line.
     % f = rhsFun(Y_s(:,1));                   % Evaluate the rhsFun at y
 
@@ -104,7 +109,7 @@ function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
     % Term 2
     % Compute the Krylov basis matrices for column 1 (f)
     [V1, H1, M1] = ArnoldiAdapt(jacFun, f, N, max(g(:,1)) * dt, MatrixFree, ...
-                             NBasisVectors, arnoldiTol);
+                             NBasisVectors, relTol, MBasisVectors, adaptiveKrylov);
     krySteps = krySteps + M1^2;
     
     [psi] = Psi(1, 1, f, N, dt, g, p, V1, H1, M1);
@@ -121,7 +126,7 @@ function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
     % Compute the Krylov basis matrices for column 2 (dr1)
     dr1 = dR(rhsFun, Y_s, 1, 1, jacFun, MatrixFree);
     [V2, H2, M2] = ArnoldiAdapt(jacFun, dr1, N, max(g(:,2)) * dt, MatrixFree, ...
-                         NBasisVectors, arnoldiTol);
+                         NBasisVectors, relTol, MBasisVectors, adaptiveKrylov);
     krySteps = krySteps + M2^2;
     
     [psi] = Psi(2, 2, dr1, N, dt, g, p, V2, H2, M2);
@@ -150,7 +155,7 @@ function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
     dr2 = dR(rhsFun, Y_s, 1, 2, jacFun, MatrixFree);
     % Compute the Krylov basis matrices for column 3 (dr2)
     [V3, H3, M3] = ArnoldiAdapt(jacFun, dr2, N, max(g(:,3)) * dt, MatrixFree, ...
-                         NBasisVectors, arnoldiTol);
+                         NBasisVectors, relTol, MBasisVectors, adaptiveKrylov);
     krySteps = krySteps + M3^2;
     
     [psi] = Psi(s, 3, dr2, N, dt, g, p, V3, H3, M3);
