@@ -23,7 +23,7 @@
 %  Computational Science Laboratory, Virginia Tech.
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
-function [V, H, i] = ArnoldiAdapt(J, f, N, c, MatrixFree, MaxBasisVectors, Tol, MinBasisVectors, AdaptiveKrylov)
+function [V, H, i] = ArnoldiAdapt(J, f, N, c, MatrixFree, MaxBasisVectors, Tol, MinBasisVectors, AdaptiveKrylov, IsJacSymm)
 %
 % MaxBasisVectors = Max number of basis vectors to be used 
 % MinBasisVectors = Min number of basis vectors to be used 
@@ -49,6 +49,11 @@ else
     adaptive = AdaptiveKrylov;
 end
 
+if(~exist('IsJacSymm', 'var'))
+    symmjac = false;
+else
+    symmjac = IsJacSymm;
+end
 
 testIndex = [1,2,3,4,6,8,11,15,20,27,36,46,57,70,85,100];
 
@@ -85,12 +90,26 @@ for i = 1:N
         w = J(V(:,i));
     end
     
-    for j = 1:i
-        H(j,i) = w'*V(:,j);
-        w = w - H(j,i)*V(:,j);
+    if (~symmjac)
+        for j = 1:i
+            H(j, i) = w' * V(:, j);
+            w       = w - H(j, i) * V(:, j);
+        end
+        H(i+1,i) = norm(w);
+        V(:,i+1) = w / H(i+1, i);
+    else
+        H(i, i)  = w' * V(:, i);
+        
+        if i == 1
+            w = w - H(i,i) * V(:, i);
+        else
+            w = w - H(i - 1, i) * V(:, i -1) - H(i, i) * V(:, i);
+        end
+        
+        H(i + 1, i) = norm(w);
+        H(i, i + 1) = H(i + 1, i);
+        V(:, i + 1) = w / H(i + 1, i);
     end
-    H(i+1,i) = norm(w);
-    V(:,i+1) = w/H(i+1,i);
     
     % Perform tolerance check only when the number of basis is not
     % set and only for the chosen testIndex values

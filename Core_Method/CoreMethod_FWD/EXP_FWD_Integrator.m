@@ -177,7 +177,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = EXP_FWD
 
            
            [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H,rhsFun, ...
-                    J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov);
+                    J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, OPTIONS.IsJACSymm);
         
            % disp(norm(ynew));
 

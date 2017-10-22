@@ -147,6 +147,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.ITOL) == true )
         OPTIONS.ITOL = OPTIONS_U.ITOL;
     end
+    if ( ~isempty(OPTIONS_U.IsJACSymm) == true )
+        OPTIONS.IsJACSymm = OPTIONS_U.IsJACSymm;
+    end
     if ( ~isempty(OPTIONS_U.Jacobian) == true )
         OPTIONS.Jacobian = OPTIONS_U.Jacobian;
     end

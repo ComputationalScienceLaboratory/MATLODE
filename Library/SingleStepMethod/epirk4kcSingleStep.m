@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk4kcSingleStep(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov)
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac)
     % Stages
     s = 3;
 
@@ -90,7 +90,7 @@ function [y, yerr, ISTATUS] = epirk4kcSingleStep(y0, dt, rhsFun, jacFun, ...
     MBasisVectors = 4;
     
     % Compute the Krylov basis matrices
-    [V, H, M] = ArnoldiAdapt(jacFun, f, N, dt, MatrixFree, NBasisVectors, 1e-12, MBasisVectors, adaptiveKrylov);
+    [V, H, M] = ArnoldiAdapt(jacFun, f, N, dt, MatrixFree, NBasisVectors, 1e-12, MBasisVectors, adaptiveKrylov, symmjac);
     
     ISTATUS.Nkdim = ISTATUS.Nkdim + M^2;
 

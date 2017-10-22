@@ -92,6 +92,7 @@ function options = MATLODE_OPTIONS(varargin)
     Hmin_str            = '           Hmin: [ Step size lower bound. ]\n';
     Hstart_str          = '         Hstart: [ Initial step size. ]\n';
     ITOL_str            = '           ITOL: [ Depreciated: Determines whether tolerances are vector or scalar ]\n';
+    IsJACSymm_str       = '      IsJACSymm: [ User defined boolean value determines if Jacobian is symmetric ]\n';
     Jacobian_str        = '       Jacobian: [ User defined function: Jacobian ]\n';
     Jacp_str            = '           Jacp: [ User defined function: df/dp ]\n';
     Lambda_str          = '         Lambda: [ Adjoint sensitivity matrix ]\n';
@@ -151,6 +152,7 @@ if (nargin == 0) && (nargout == 0)
     fprintf( Hmin_str );
     fprintf( Hstart_str );
     fprintf( ITOL_str );    
+    fprintf( IsJACSymm_str );    
     fprintf( Jacobian_str );    
     fprintf( Jacp_str );    
     fprintf( Lambda_str );
@@ -207,6 +209,7 @@ if (nargin == 1) && (nargout == 0)
             fprintf( Hmin_str );
             fprintf( Hstart_str );
             fprintf( ITOL_str );
+            fprintf( IsJACSymm_str );
             fprintf( Jacobian_str );
             fprintf( Jacp_str );
             fprintf( Lambda_str );
@@ -271,6 +274,7 @@ Names = [
     'Jacp             '
     'TLMNewtonEst     '
     'ITOL             '
+    'IsJACSymm        '
     'Jacobian         '
     'Lambda           '
     'MatrixFree       '

@@ -23,7 +23,7 @@
 % changes were made to the original code to work with the MATLODE framework.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [y, yerr, ISTATUS] = epirk5P1bVarSingleStep(y0, dt, rhsFun, jacFun, f, ...
-                                                     MatrixFree, NBasisVectors, ISTATUS, absTol, relTol,adaptiveKrylov, varargin)
+                                                     MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, varargin)
     % Coefficients.
     a11 = 0.3512959269505819309205666343669703185949150765418610822442;
     a21 = 0.8440547201165712629778740943954345394870608397760182695023;
