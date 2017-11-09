@@ -175,9 +175,14 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = EXP_FWD
                 end
            end
 
+           if ~isempty(OPTIONS.IsJACSymm)
+               symmjac = OPTIONS.IsJACSymm;
+           else
+               symmjac = false;
+           end              
            
            [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H,rhsFun, ...
-                    J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, OPTIONS.IsJACSymm);
+                    J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, symmjac);
         
            % disp(norm(ynew));
 
