@@ -179,10 +179,20 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = EXP_FWD
                symmjac = OPTIONS.IsJACSymm;
            else
                symmjac = false;
-           end              
-           
-           [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H,rhsFun, ...
-                    J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, symmjac);
+           end
+
+
+           % We duplicate this because each method will set its own minimum number of basis vectors which may
+           % vary from method to method, in case this option is not set.
+           % For instance K-methods need 4-vectors for full convergence order
+           if ~isempty(OPTIONS.MBasisVectors)
+               [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H,rhsFun, ...
+                                                             J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, symmjac, OPTIONS.MBasisVectors);
+           else
+               [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H,rhsFun, ...
+                                                             J, f, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, symmjac);
+           end
+               
         
            % disp(norm(ynew));
 

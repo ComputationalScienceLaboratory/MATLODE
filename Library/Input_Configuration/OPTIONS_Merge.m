@@ -165,6 +165,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.Mu) == true )
         OPTIONS.Mu = OPTIONS_U.Mu;
     end
+    if ( ~isempty(OPTIONS_U.MBasisVectors) == true )
+        OPTIONS.MBasisVectors = OPTIONS_U.MBasisVectors;
+    end
     if ( ~isempty(OPTIONS_U.NBasisVectors) == true )
         OPTIONS.NBasisVectors = OPTIONS_U.NBasisVectors;
     end

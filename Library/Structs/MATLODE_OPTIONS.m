@@ -101,7 +101,8 @@ function options = MATLODE_OPTIONS(varargin)
     Method_str          = '         Method: [ Determines which coefficients to use ]\n';
     Mu_str              = '             Mu: [ Mu vector for sensitivity analysis ]\n';
     NADJ_str            = '           NADJ: [ Depreciated: The number of cost functionals for which adjoints are evaluated simultaneously ]\n';
-    NBasisVectors       = '  NBasisVectors: [ Number of basis vectors ] \n';
+    MBasisVectors       = '  MBasisVectors: [ Number of minimum basis vectors ] \n';
+    NBasisVectors       = '  NBasisVectors: [ Number of maximum basis vectors ] \n';
     NewtonMaxit_str     = '    NewtonMaxIt: [ Maximum number of newton iterations performed ]\n';
     NewtonTol_str       = '      NewtonTol: [ Newtons method stopping criterion. ]\n';
     NP_str              = '             NP: [ Number of parameters ]\n';
@@ -161,6 +162,7 @@ if (nargin == 0) && (nargout == 0)
     fprintf( Method_str );
     fprintf( Mu_str );    
     fprintf( NADJ_str );  
+    fprintf( MBasisVectors );
     fprintf( NBasisVectors );
     fprintf( NewtonMaxit_str );
     fprintf( NewtonTol_str );
@@ -282,6 +284,7 @@ Names = [
     'Method           '
     'Mu               '
     'NADJ             '
+    'MBasisVectors    '
     'NBasisVectors    '
     'NewtonMaxIt      '
     'NewtonTol        '
