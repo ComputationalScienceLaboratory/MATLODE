@@ -508,6 +508,11 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             expName = 'EPIRKK4d';
             expMethod = 17;
             expELO = 4;
+          case 18
+            OPTIONS.OneStepIntegrator = @epirk3WcDSingleStepNaiveExp;
+            expName = 'EPIRKK3WcD';
+            expMethod = 18;
+            expELO = 3;
           otherwise
             OPTIONS.OneStepIntegrator = @exp4SingleStep;
             expName = 'EXP4';
