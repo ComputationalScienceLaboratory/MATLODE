@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk4kcSingleStep(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac)
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
     % Stages
     s = 3;
 
@@ -87,7 +87,9 @@ function [y, yerr, ISTATUS] = epirk4kcSingleStep(y0, dt, rhsFun, jacFun, ...
     % J = jacFun(Y_s(:,1));                   % Evaluate the jacFun at y
 
     % Minimum number of basis vectors needed for 4th order convergence
-    MBasisVectors = 4;
+    if(~exist('MBasisVectors','var'))
+        MBasisVectors = 4;
+    end
     
     % Compute the Krylov basis matrices
     [V, H, M] = ArnoldiAdapt(jacFun, f, N, dt, MatrixFree, NBasisVectors, 1e-12, MBasisVectors, adaptiveKrylov, symmjac);

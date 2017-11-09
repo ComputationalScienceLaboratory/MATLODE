@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk4SingleStep(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac)
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
 
     % Stages
     s = 3;
@@ -75,7 +75,9 @@ function [y, yerr, ISTATUS] = epirk4SingleStep(y0, dt, rhsFun, jacFun, ...
 
     %----------------------------------------------------------------------
     % Set minimum number of basis vectors
-    MBasisVectors = 1;
+    if(~exist('MBasisVectors','var'))
+        MBasisVectors = 1;
+    end
     %----------------------------------------------------------------------
     
     

@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = erow4SingleStep(y0, dt, rhsFun, J, ...
-                                              f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac)
+                                              f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
     % Based on the form for EROW4 given in "COMPARATIVE PERFORMANCE OF
     % EXPONENTIAL, IMPLICIT, AND EXPLICIT INTEGRATORS FOR STIFF SYSTEMS
     % OF ODES"  by Loffeld and Tokman.  Derived in "Exponential Rosenbrock-
@@ -40,8 +40,11 @@ function [y, yerr, ISTATUS] = erow4SingleStep(y0, dt, rhsFun, J, ...
     %----------------------------------------------------------------------
 
     %----------------------------------------------------------------------
-    % Set minimum number of basis vectors
-    MBasisVectors = 1;
+    % Set minimum number of basis vectors    
+    if(~exist('MBasisVectors','var'))
+        MBasisVectors = 1;
+    end
+
     %----------------------------------------------------------------------
 
     krySteps = 0;

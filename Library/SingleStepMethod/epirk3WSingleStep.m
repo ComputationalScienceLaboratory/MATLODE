@@ -24,7 +24,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
-                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac)
+                                    f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
 
 
 
@@ -92,7 +92,9 @@ function [y, yerr, ISTATUS] = epirk3WSingleStep(y0, dt, rhsFun, jacFun, ...
 
     %----------------------------------------------------------------------
     % Set the minimum number of basis vectors for the method
-    MBasisVectors = 1;
+    if(~exist('MBasisVectors','var'))
+        MBasisVectors = 1;
+    end
     %----------------------------------------------------------------------    
 
     % f is already computed outside. Hence commenting out next line.
