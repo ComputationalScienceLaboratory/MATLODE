@@ -1,9 +1,9 @@
 function [w, stats] = phipmPaul(t, A, u, tol, symm, m)
 % PHIPM - Evaluates a linear combinaton of the phi functions
-%         evaluated at tA acting on vectors from u, that is
+%         evaluated at tA acting on vectors from u, that is 
 %
-%         w = phi_0(tA) u(:, 1) + t phi_1(tA) u(:, 2) +
-%             t^2 phi_2(tA) u(:, 3) + ...
+%         w = phi_0(tA) u(:, 1) + t phi_1(tA) u(:, 2) + 
+%             t^2 phi_2(tA) u(:, 3) + ...  
 %
 %         The evaluation expresses eveything in terms of the highest
 %         order phi function and evaluates the action of this on a
@@ -13,14 +13,14 @@ function [w, stats] = phipmPaul(t, A, u, tol, symm, m)
 %         The size of the Krylov subspace is changed dynamically
 %         during the integration. The Krylov subspace is computed
 %         using Arnoldi if A is non-symmetric and Lancozs if A is
-%         symmetric.
+%         symmetric. 
 %
 % PARAMETERS:
 %   t    - constant value represent time.
 %   A    - the matrix argument of the phi functions.
 %   u    - the matrix with columns representing the vectors to be
 %          multiplied by the phi functions.
-%   tol  - the convergence tolarance required.
+%   tol  - the convergence tolarance required. 
 %   symm - true if the matrix A is symmetric.
 %   m    - an estimate of the appropriate Krylov size.
 %
@@ -42,34 +42,34 @@ persistent V int
 [n, p] = size(u);
 Aisahandle = isa(A, 'function_handle');
 if ~Aisahandle
-    nnze = nnz(A);
+  nnze = nnz(A);
 else
-    nnze = 10 * n; % wild guess
+  nnze = 10 * n; % wild guess
 end;
 
 % Add extra column of zeros if p=1
 if p == 1
-    p = 2;
-    u = [u, zeros(size(u))];
+  p = 2;
+  u = [u, zeros(size(u))];
 end
 
 % Check inputs
 if nargin < 6
-    m = 1;
-    if nargin < 5
-        if max(A - A') < 100 * eps
-            symm = true;
-        else
-            symm = false;
-        end
-        if nargin < 4
-            tol = 1.0e-7;
-            if nargin < 3
-                error('phipm:NotEnoughInputs',...
-                      'Not enough input arguments.');
-            end
-        end
+  m = 1;
+  if nargin < 5
+    if max(A - A') < 100 * eps
+      symm = true;
+    else
+      symm = false;
     end
+    if nargin < 4
+      tol = 1.0e-7;
+      if nargin < 3
+        error('phipm:NotEnoughInputs',...
+              'Not enough input arguments.');
+      end  
+    end
+  end
 end
 
 % Krylov parameters
@@ -77,24 +77,20 @@ mmax = 500;
 m_new = m;
 
 % Preallocate matrices
-% V = zeros(n, mmax + 1);
+% V = zeros(n, mmax + 1); 
 % int = zeros(n, p);
 if isempty(V) && isempty(int)
-    V = zeros(n, mmax + 1);
-    int = zeros(n, p);
-end
-
-if numel(int) ~= n * p
-    int = zeros(n, p);
-end
-
-if numel(V) ~= n * (mmax + 1)
-    V = zeros(n, mmax + 1);
-    int = zeros(n, p);
+  V = zeros(n, mmax + 1); 
+  int = zeros(n, p);
+elseif numel(int) ~= n * p
+  int = zeros(n, p);  
+elseif numel(V) ~= n * (mmax + 1)
+  V = zeros(n, mmax + 1); 
+  int = zeros(n, p);  
 end
 
 % Initializing the variables
-step = 0;
+step = 0; 
 krystep = 0;
 ireject = 0;
 reject = 0;
@@ -102,7 +98,7 @@ exps = 0;
 happy = 0;
 %sgn = sign(t);
 sgn = sign(t(1));
-t_now = 0;
+t_now = 0; 
 t_out = abs(t(end));
 j = 0;
 sizet = size(t);
@@ -112,8 +108,8 @@ numSteps = sizet(2);
 tau = t_out;
 
 % Setting the safety factors and tolarance requirements
-gamma = 0.8;
-delta = 1.2;
+gamma = 0.8; 
+delta = 1.2; 
 
 % Used for toeplitz trick
 cidx = (0:p-1)';
