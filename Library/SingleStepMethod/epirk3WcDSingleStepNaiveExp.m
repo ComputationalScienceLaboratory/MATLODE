@@ -26,8 +26,6 @@
 function [y, yerr, ISTATUS] = epirk3WcDSingleStepNaiveExp(y0, dt, rhsFun, jacFun, ...
                                     f, MatrixFree, NBasisVectors, ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
 
-
-
     % Stages
     s = 3;
 
@@ -188,7 +186,6 @@ function r = R(rhsFun, y, y0, A0, MatrixFree)
                                                             % Krylov subspace
                                                             % approximation.
     else
-        
         N = size(A0, 1);
         I = eye(N);
         D = zeros(N);

@@ -45,7 +45,7 @@ function [y, yerr, ISTATUS] = epirk5P1bVarSingleStep(y0, dt, rhsFun, jacFun, f, 
     %g33b = 0.75;
     %g32b = 0.584170797083078;
     %g33b = 0.85;
-
+    
     % Main integration loop.
     N = length(y0);
 
@@ -67,21 +67,21 @@ function [y, yerr, ISTATUS] = epirk5P1bVarSingleStep(y0, dt, rhsFun, jacFun, f, 
     krySteps = 0;
     
     % Stage 1.
-    [temp1, stats] = phipmPaul([g11 g21 g31] , hA, [zeroVec, hF], kryTol, false, 1);
+    [temp1, stats] = phipmPaul([g11 g21 g31] , hA, [zeroVec, hF], kryTol, symmjac, 1);
     r1 = y0 + a11*temp1(:,1);
     %    krySteps = max(stats(3), krySteps);
     krySteps = krySteps + stats(3)^2;
 
     % Stage 2.
     hb1 = h * feval(rhsFun, r1, varargin{:}) - hF - hA*(r1 - y0);
-    [temp2, stats] = phipmPaul([g32b g32 g22] ,hA, [zeroVec, hb1], kryTol, false, 1);
+    [temp2, stats] = phipmPaul([g32b g32 g22] ,hA, [zeroVec, hb1], kryTol, symmjac, 1);
     r2 = y0 + a21*temp1(:,2) + a22*temp2(:,3);
     %    krySteps = max(stats(3), krySteps);
     krySteps = krySteps + stats(3)^2;
 
     % Calculate next time step.
     hb2 = -2*hb1 + h * feval(rhsFun, r2, varargin{:}) - hF - hA*(r2 - y0);
-    [temp3, stats] = phipmPaul([g33 g33b], hA, [zeroVec, zeroVec, zeroVec, hb2], kryTol, false, 1);
+    [temp3, stats] = phipmPaul([g33 g33b], hA, [zeroVec, zeroVec, zeroVec, hb2], kryTol, symmjac, 1);
     fifthOrder = b2*temp2(:,2) + b3*temp3(:,1);
     y = y0 + b1*temp1(:,3) + fifthOrder;
     %    krySteps = max(stats(3), krySteps);
