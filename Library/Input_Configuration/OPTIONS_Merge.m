@@ -219,6 +219,23 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.LU) == true )
         OPTIONS.LU = OPTIONS_U.LU;
     end
+    
+    if ( ~isempty(OPTIONS_U.InitialM) == true )
+        OPTIONS.InitialM = OPTIONS_U.InitialM
+    end
+    
+    if ( ~isempty(OPTIONS_U.RadiusM) == true )
+        OPTIONS.RadiusM = OPTIONS_U.RadiusM;
+    end
+    
+    if ( ~isempty(OPTIONS_U.TimeValSlow) == true )
+        OPTIONS.TimeValSlow = OPTIONS_U.TimeValSlow;
+    end
+    
+    if ( ~isempty(OPTIONS_U.TimeValFast) == true )
+        OPTIONS.TimeValFast = OPTIONS_U.TimeValFast;
+    end
+
 
 end
 

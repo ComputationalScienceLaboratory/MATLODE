@@ -33,25 +33,58 @@ function [ OPTIONS ] = Input_Dimension(Tspan, Y0, OdeFunction, OPTIONS)
 
     OPTIONS.NVAR = size(Y0, 1);
 
+    if numel(OdeFunction) > 1
+        OdeFunctionOne = OdeFunction{1};
+        OdeFunctionTwo = OdeFunction{2};
+    else
+        OdeFunctionOne = OdeFunction;
+    end
+        
     % For any integrator, we check that the ODE function returns a NVAR*1 vector
-    if ~isa(OdeFunction, 'function_handle')
-        error('OdeFunction function should be a function handle like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
+    if ~isa(OdeFunctionOne, 'function_handle')
+        error('OdeFunction function one should be a function handle like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
     end
 
     % Check the number of arguments the function accepts
-    if nargin(OdeFunction) ~= 2
-        error('ODE function should have exactly two arguments like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
+    if nargin(OdeFunctionOne) ~= 2
+        error('ODE function one should have exactly two arguments like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
     end
-
+    
     try
-        Yp0 = OdeFunction(t0, Y0);
+        Yp0One = OdeFunctionOne(t0, Y0);
     catch ME
         error(strcat('Calling ODE function passing (t0, Y0) in order returned the following error:', ME.message));
     end
-
-    if ~iscolumn(Yp0) || size(Yp0, 1) ~= OPTIONS.NVAR
+    
+    if ~iscolumn(Yp0One) || size(Yp0One, 1) ~= OPTIONS.NVAR
         error('The ODE system should return a column vector NVAR*1')
     end
+    
+    if numel(OdeFunction) > 1
+        % For any integrator, we check that the ODE function returns a NVAR*1 vector
+        if ~isa(OdeFunctionTwo, 'function_handle')
+            error('OdeFunction function two should be a function handle like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
+        
+
+        % Check the number of arguments the function accepts
+        if nargin(OdeFunctionTwo) ~= 2
+            error('ODE function two should have exactly two arguments like: OdeFunction=(t,Y)function_name(t,Y,p1,p2,..).')
+        end
+        
+        try
+            Yp0Two = OdeFunctionTwo(t0, Y0);
+        catch ME
+            error(strcat('Calling ODE function two passing (t0, Y0) in order returned the following error:', ME.message));
+        end
+        
+        if ~iscolumn(Yp0Two) || size(Yp0Two, 1) ~= OPTIONS.NVAR
+            error('The ODE system should return a column vector NVAR*1')
+        end
+    end
+
+
+
 
     %% For any integrator that requires the Jacobian of the ODE system, we check
     % it returns a NVAR*NVAR matrix

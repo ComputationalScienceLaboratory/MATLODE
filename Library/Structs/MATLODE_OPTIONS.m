@@ -120,6 +120,10 @@ function options = MATLODE_OPTIONS(varargin)
     TLMtruncErr_str     = '    TLMtruncErr: [ Determiens whether to incorpate sensitivity truncation error ]\n';
     WarningConfig_str   = '  WarningConfig: [ Determines whether warning messages are displayed during option configuration. ]\n';
     Y_TLM_str           = '          Y_TLM: [ Contains the sensitivities of Y with respect to the specified coefficients ]\n';
+    InitialM_str        = '       InitialM: [ Determines the initial number of micro-steps ]\n';
+    RadiusM_str         = '        RadiusM: [ Determines the max increase/decrease of number of micro-steps ]\n';
+    TimeValSlow_str     = '    TimeValSlow: [ Time to compute one slow step. Used for error control ]\n';
+    TimeValFast_str     = '    TimeValFast: [ Time to compute one fast step. Used for error control ]\n';
 
 % Print out all possible values of properties.
 if (nargin == 0) && (nargout == 0)
@@ -178,7 +182,10 @@ if (nargin == 0) && (nargout == 0)
     fprintf( TLMNewtonEst_str );
     fprintf( TLMtruncErr_str );
     fprintf( WarningConfig_str );
-    fprintf( Y_TLM_str );    
+    fprintf( InitialM_str );
+    fprintf( RadiusM_str );
+    fprintf( TimeValSlow_str);
+    fprintf( TimeValFast_str);
     fprintf( '\n' );
   return;
 end
@@ -297,6 +304,10 @@ Names = [
     'WarningConfig    '
     'Y_TLM            '
     'LU               '
+    'InitialM         '
+    'RadiusM          '
+    'TimeValSlow      '
+    'TimeValFast      '
     ];
 m = size(Names,1);
 names = lower(Names);

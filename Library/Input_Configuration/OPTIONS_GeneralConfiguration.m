@@ -145,6 +145,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         switch ( family )
             case 'ERK'
                 OPTIONS.FacMax = 10.0;
+            case 'MRGARK'
+                OPTIONS.FacMax = 6.0;
             case 'EXP'
                 OPTIONS.FacMax = 6.0;
             case 'EXPK'
@@ -247,7 +249,9 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     if ( OPTIONS.Hstart == 0.0 )
         switch ( family )
             case 'ERK'
-                OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );                
+                OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );  
+            case 'MRGARK'
+                OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );
             case 'RK'
                 OPTIONS.Hstart = 0.0;
             case 'ROS'
@@ -338,6 +342,25 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             Coefficient.ELO = erkELO;
             Coefficient.NStage = erkS;
             Coefficient.Name = erkName;
+            
+        %NEED TO MODIFY THISSSSSSS
+        case 'MRGARK'
+            switch ( OPTIONS.Method )
+                case 1
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk23( RK2 );
+                case 2
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk3_Heun( RK3 );
+                case 3
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk43( RK4 );
+                otherwise
+                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk3_Heun( RK3 );
+            end
+            Coefficient.Method = erkMethod;
+            Coefficient.ELO = erkELO;
+            Coefficient.NStage = erkS;
+            Coefficient.Name = erkName;
+        %MAKE THE COEFFICIENTS BETTER PUNK
+        
         case 'RK'
             switch ( OPTIONS.Method )
                 case 1
@@ -630,7 +653,24 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         str = [ 'Error: User selected TLMTruncErr: ', num2str(OPTIONS.TLMTruncErr), '. TLMTruncErr must be 0 or 1.' ];
         error(str);
     end
-
+    
+    % InitialMErr
+    if ( isempty(OPTIONS.InitialM) )
+        OPTIONS.InitialM = 2;
+    elseif ( ~isempty(OPTIONS.InitialM) )
+        
+    else
+        
+    end
+    
+    % RadiusMErr
+    if ( isempty( OPTIONS.RadiusM ) )
+        OPTIONS.RadiusM = 1;
+    elseif ( ~isempty(OPTIONS.RadiusM) )
+        
+    else
+        
+    end
 
 end
 
