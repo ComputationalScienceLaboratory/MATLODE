@@ -44,7 +44,7 @@ if ( nargin == 1 && strcmp('default',varargin) )
     options.Nfun = 0;
     options.Njac = 0;
     options.Nstp = 0;
-    options.Nacc = 0;
+    options.Nacc = 1;
     options.Nrej = 0;
     options.Ndec = 0;
     options.Nsol = 0;

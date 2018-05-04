@@ -37,9 +37,12 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
                 case 'ERK'
                     [ OPTIONS_U ] = OPTIONS_UserSupplied_ERK_FWD( OPTIONS_U );
                     [ OPTIONS ]   = OPTIONS_FineTuned_ERK_FWD;
-                case 'MRGARK'
+                case 'EEMRGARK'
                     [ OPTIONS_U ] = OPTIONS_UserSupplied_MRGARK_FWD( OPTIONS_U );
-                    [ OPTIONS ]   = OPTIONS_FineTuned_MRGARK_FWD;
+                    [ OPTIONS ]   = OPTIONS_FineTuned_EE_MRGARK_FWD;
+                case 'EXIMMRGARK'
+                    [ OPTIONS_U ] = OPTIONS_UserSupplied_MRGARK_FWD( OPTIONS_U );
+                    [ OPTIONS ]   = OPTIONS_FineTuned_EXIM_MRGARK_FWD;
                 case 'EXPK'
                     [ OPTIONS_U ] = OPTIONS_UserSupplied_EXPK_FWD( OPTIONS_U );
                     [ OPTIONS ]   = OPTIONS_FineTuned_EXPK_FWD;

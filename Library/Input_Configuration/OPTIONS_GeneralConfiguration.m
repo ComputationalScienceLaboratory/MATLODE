@@ -44,7 +44,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
 
     % RelTol
     if ( OPTIONS.RelTol == 0 )
-        OPTIONS.RelTol = ones(size(y0,1),1).*10^-4;     
+        OPTIONS.RelTol = 1e-3;     
     elseif ( OPTIONS.RelTol > 0 )
         % DO NOTHING: User supplied or fine tuned value.
     else
@@ -78,7 +78,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     
     % AbsTol
     if ( OPTIONS.AbsTol == 0 )
-        OPTIONS.AbsTol = max(y0)*OPTIONS.RelTol;
+        OPTIONS.AbsTol = 1e-6;
     elseif ( OPTIONS.AbsTol > 0 )
         % DO NOTHING: User supplied or fine tuned value.
     else
@@ -112,7 +112,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
 
     % Hmin
     if ( OPTIONS.Hmin == 0 )
-        OPTIONS.Hmin = 0;
+        OPTIONS.Hmin = 100*eps;
     elseif ( OPTIONS.Hmin > 0 )
         OPTIONS.Hmin = min( abs(OPTIONS.Hmin), abs( tspan(2)-tspan(1) ) );
     else
@@ -122,7 +122,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         
     % Hmax
     if ( OPTIONS.Hmax == 0 )
-        OPTIONS.Hmax = abs( tspan(2)-tspan(1) );
+        OPTIONS.Hmax = inf;
     elseif ( OPTIONS.Hmax > 0.0 )
         OPTIONS.Hmax = min( abs(OPTIONS.Hmax), abs( tspan(2)-tspan(1) ) );
     else
@@ -145,8 +145,10 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         switch ( family )
             case 'ERK'
                 OPTIONS.FacMax = 10.0;
-            case 'MRGARK'
-                OPTIONS.FacMax = 6.0;
+            case 'EEMRGARK'
+                OPTIONS.FacMax = 4.0;
+            case 'EXIMMRGARK'
+                OPTIONS.FacMax = 4.0;
             case 'EXP'
                 OPTIONS.FacMax = 6.0;
             case 'EXPK'
@@ -213,7 +215,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
 
     % NewtonTol
     if ( OPTIONS.NewtonTol == 0 )
-        OPTIONS.NewtonTol = 3.0d-2;
+        OPTIONS.NewtonTol = 1e-6;
     elseif ( OPTIONS.NewtonTol <= roundOff )
         str = [ 'Error: User selected NewtonTol: ', num2str(OPTIONS.NewtonTol), '. NewtonTol must be >= eps/2.' ];
         error(str);
@@ -250,14 +252,16 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         switch ( family )
             case 'ERK'
                 OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );  
-            case 'MRGARK'
-                OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );
+            case 'EXIMMRGARK'
+                OPTIONS.Hstart = 1e-6;
             case 'RK'
                 OPTIONS.Hstart = 0.0;
             case 'ROS'
                 OPTIONS.Hstart = max( OPTIONS.Hmin, 1d-5 );
             case 'SDIRK'
                 OPTIONS.Hstart = max( OPTIONS.Hmin, roundOff );
+            case 'EEMRGARK'
+                OPTIONS.Hstart = 1e-6;
         end
     elseif ( OPTIONS.Hstart > 0.0 )
         OPTIONS.Hstart = min( abs(OPTIONS.Hstart), abs( tspan(2)-tspan(1) ) );
@@ -315,7 +319,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     S2B = 2;
     S3A = 3;
     S4A = 4;
-    S4B = 5;    
+    S4B = 5;
     
     % Method
     switch ( family )
@@ -343,24 +347,31 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             Coefficient.NStage = erkS;
             Coefficient.Name = erkName;
             
-        %NEED TO MODIFY THISSSSSSS
-        case 'MRGARK'
-            switch ( OPTIONS.Method )
-                case 1
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk23( RK2 );
-                case 2
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk3_Heun( RK3 );
-                case 3
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk43( RK4 );
-                otherwise
-                    [ erkMethod, erkELO, erkS, erkName ] = Coefficients_Erk3_Heun( RK3 );
-            end
-            Coefficient.Method = erkMethod;
-            Coefficient.ELO = erkELO;
-            Coefficient.NStage = erkS;
-            Coefficient.Name = erkName;
-        %MAKE THE COEFFICIENTS BETTER PUNK
-        
+        % Multi-Rate constants
+        case 'EEMRGARK'
+            %Case for method order is handled in the coupling script
+            [A, BT, BThat, methodOrder, embeddedOrder, Afs, Asf] = EE_MRGARK_FWD_Coupling(OPTIONS.Method);
+            Coefficient.Method = methodOrder;
+            Coefficient.ELO = embeddedOrder;
+            Coefficient.AMatrix = A;
+            Coefficient.BTranspose = BT;
+            Coefficient.BTransposeHat = BThat;
+            Coefficient.AFastSlow = Afs;
+            Coefficient.ASlowFast = Asf;
+            
+        case 'EXIMMRGARK'
+            [AF, AS,  BTF, BTS, BThatF, BThatS, Gamma, methodOrder, embeddedOrder, Afs, Asf] = EXIM_MRGARK_FWD_Coupling(OPTIONS.Method);
+            Coefficient.Method = methodOrder;
+            Coefficient.ELO = embeddedOrder;
+            Coefficient.AMatrixF = AF;
+            Coefficient.AMatrixS = AS;
+            Coefficient.BTransposeF = BTF;
+            Coefficient.BTransposeS = BTS;
+            Coefficient.BTransposeHatF = BThatF;
+            Coefficient.BTransposeHatS = BThatS;
+            Coefficient.Gamma = Gamma;
+            Coefficient.AFastSlow = Afs;
+            Coefficient.ASlowFast = Asf;
         case 'RK'
             switch ( OPTIONS.Method )
                 case 1

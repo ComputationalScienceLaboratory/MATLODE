@@ -102,8 +102,8 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_MRGARK_FWD( OPTIONS_U )
         OPTIONS_U.TLMTruncErr = [];
     end
     if ( ~isempty(OPTIONS_U.Jacobian) == true )
-        warning('MatlODE:configuration','Jacobian is not used in integrator.');
-        OPTIONS_U.Jacobian = [];
+        %warning('MatlODE:configuration','Jacobian is not used in integrator.');
+        %OPTIONS_U.Jacobian = [];
     end
     if ( ~isempty(OPTIONS_U.MatrixFree) == true )
         warning('MatlODE:configuration','MatrixFree is not used in integrator.');
@@ -113,14 +113,14 @@ function [ OPTIONS_U ] = OPTIONS_UserSupplied_MRGARK_FWD( OPTIONS_U )
         warning('MatlODE:configuration','Mu is not used in integrator.');
         OPTIONS_U.Mu = [];
     end
-    if ( ~isempty(OPTIONS_U.NewtonMaxIt) == true )
-        warning('MatlODE:configuration','NewtonMaxIt is not used in integrator.');
-        OPTIONS_U.NewtonMaxIt = [];
-    end
-    if ( ~isempty(OPTIONS_U.NewtonTol) == true )
-        warning('MatlODE:configuration','NewtonTol is not used in integrator.');
-        OPTIONS_U.NewtonTol = [];
-    end
+%     if ( ~isempty(OPTIONS_U.NewtonMaxIt) == true )
+%         warning('MatlODE:configuration','NewtonMaxIt is not used in integrator.');
+%         OPTIONS_U.NewtonMaxIt = [];
+%     end
+%     if ( ~isempty(OPTIONS_U.NewtonTol) == true )
+%         warning('MatlODE:configuration','NewtonTol is not used in integrator.');
+%         OPTIONS_U.NewtonTol = [];
+%     end
     if ( ~isempty(OPTIONS_U.QFun) == true )
         warning('MatlODE:configuration','QFun is not used in integrator.');
         OPTIONS_U.QFun = [];
