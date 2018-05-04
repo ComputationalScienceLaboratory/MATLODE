@@ -59,17 +59,24 @@
 %     tangent linear integration of ODEs, SIAM Journal on Scientific
 %     Computing, 36(5), C504-C523, 2014.
 %
-function [ Tout, Yout, ISTATUS, RSTATUS, Ierr] = MRGARK_ERK_FWD_Integrator( OdeFunctionOne,...
-    OdeFunctionTwo, Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adj_QuadFlag, stack_ptr)
+function [ Tout, Yout, ISTATUS, RSTATUS, Ierr] = EE_MRGARK_FWD_Integrator( OdeFunctionOne,...
+    OdeFunctionTwo, Tspan, Y, OPTIONS, Coefficient, adjStackFlag, stack_ptr)
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Global Variables
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% global rkA rkB rkC rkE rKAFS rkASF
-% Constant computation
-[A, BT, BThat, methodOrder, embeddedOrder, Afs, Asf] = coupling(OPTIONS.Method);
+% THe coupling method will give us the constant values and functions of a
+% given multi-rate method order.
+% Method 2 = Method order 2, 2 stages , with embedded order 1
+% Method 3 = Method order 3, 3 stages, with embedded order 2
+% Method 4 = Method order 4, 5 stages, with embedded order 3
+% [A, BT, BThat, methodOrder, embeddedOrder, Afs, Asf] = ...
+%     [Coefficient.AMatrix, Coefficient.BTranspose, Coefficient.BTransposeHat,...
+%     Coefficient.Method, Coefficient.ELO, Coefficient.AFastSlow, Coefficient.ASlowFast];
+A = Coefficient.AMatrix;
 AT = A.';
-order = min(methodOrder, embeddedOrder);
+BT = Coefficient.BTranspose;
+BThat = Coefficient.BTransposeHat;
+Afs = Coefficient.AFastSlow;
+Asf = Coefficient.ASlowFast;
+order = min(Coefficient.Method, Coefficient.ELO);
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Local Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,11 +103,6 @@ end
 Yout(:, TYindex) = Y;
 Tout(TYindex) = Tinitial;
 
-% if ( adjQuadFlag == true ) % initial value of the quadrature
-%     quadrature = OPTIONS.Quadrature(Tinitial,Y);
-% else
-%     quadrature = NaN;
-% end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Initial settings
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,12 +140,7 @@ KSlow = zeros(NumVars, NumStages);
 Reject = false;
 FirstStep = true;
 
-%TEMPORARY VALUES I WILL NEED TO FIX
-% scaling Factors when computing next stepsize
-facMax = 4;
-facMin = 1/4;
-fac = 0.9;
-counter = 1;
+% Values to accumulate time execution of fast and slow methods
 WeightedFastSum = 0;
 WeightedFastCount = 0;
 WeightedSlowSum = 0;
@@ -164,13 +161,12 @@ while ( T < Tfinal)
     if H == 0
        fprintf('H IS 0');
     end
-    
 %     case 1: determines if we are close enough to tfinal due to
 %             roundoff error
 %     case 2: cannot distinguish between tnext and tcurrent
     if abs( Tfinal-T) <= 10*Roundoff*abs(Tfinal)
         T = Tfinal;
-        break;
+        %break;
     elseif ( (T+0.1*H == T) || (abs(H) <= Roundoff) )
         fprintf('%d\n', H);
         error('Step size too small; T + 10*H = T or H < eps/2.');
@@ -272,14 +268,17 @@ while ( T < Tfinal)
     errSlow = rms((YTemp - YHatSlow) ./ sc);
     errFast = rms((YTemp - YHatFast) ./ sc);
     
-    % Arash and Steven's Super Cool POS
+    % Arash and Steven's Super Cool EOS
     Err = rms((YTemp - YHat) ./ sc);
+    
+    % Allow fractional M values (1/2, 1/3, 1/4, ... depending on Mradius
     if M <= Mradius
         Mnews(1 : (Mradius - M + 1)) = 1 ./ (2 : (Mradius - M + 2));
         Mnews((Mradius - M + 2) : 2*Mradius+1) = (1 : Mradius + M);
     else
         Mnews = max(1, M - Mradius):(M + Mradius);
     end
+    
     % Finding the M value that minimizes the error
     if (~isempty(OPTIONS.TimeValSlow))
         TimeSlowEnd = OPTIONS.TimeValSlow;
@@ -289,6 +288,8 @@ while ( T < Tfinal)
         TimeFastEnd = OPTIONS.TimeValFast;
     end
 
+    % Do a running average on time to execute a fast method and time
+    % to execute a slow method for more stable error control
     WeightedFastSum = TimeFastEnd + (1 - alpha)*WeightedFastSum;
     WeightedSlowSum = TimeSlowEnd + (1 - alpha)*WeightedSlowSum;
     WeightedFastCount = 1 + (1 - alpha)*WeightedFastCount;
@@ -296,16 +297,13 @@ while ( T < Tfinal)
     TimeSlowAverage = WeightedSlowSum/WeightedSlowCount;
     TimeFastAverage = WeightedFastSum/WeightedFastCount;
 
-%     fprintf('%.5e\n', TimeSlowAverage/TimeFastAverage);
     [~, index] = min ((TimeSlowAverage + Mnews * TimeFastAverage)...
         .* (errSlow + errFast * (M ./ Mnews ).^order)...
         .^(1/(order+1)));
     Mnews = Mnews(index);
     
-    %Switch fast and slow functions if number of Micro-steps is below 1
-    if Mnews <= 0.5
-        counter = counter + 1;
-        fprintf('FLIP-FLOP %d\n', counter);
+    %Switch fast and slow functions if number of Micro-steps is below 0.5
+    if Mnews < 0.5
         temp = OdeFunctionOne;
         OdeFunctionOne = OdeFunctionTwo;
         OdeFunctionTwo = temp;
@@ -315,23 +313,10 @@ while ( T < Tfinal)
     Mnews = round(Mnews);
     
     Hfact = (errSlow + errFast * (M / Mnews)) ^ (-1 / (order + 1));
-    Hnew =  H * min(facMax, max(facMin, fac * Hfact));
+    Hnew =  H * min(OPTIONS.FacMax, max(OPTIONS.FacRej, OPTIONS.FacSafe * Hfact));
     M = Mnews;
-    disp(M);
-    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    % Error estimation
-    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     ISTATUS.Nstp = ISTATUS.Nstp + 1;
-%     TMP = zeros(NVAR,1);
-%     for i = 1:Coefficient.NStage
-%         if (rkE(i) ~= 0.0 )
-%             TMP = TMP + H*rkE(i)*K(:,i);
-%         end
-%     end
-%     
-%     % Perform error norm
-%     Err = sum((TMP.*SCAL).^2,1);
-%     Err = max( sqrt( Err/double(NVAR) ), 1.0d-10 );
 %     
 %     % Computation of new step size Hnew
 %     Fac = OPTIONS.FacSafe*(Err)^(-1.0/Coefficient.ELO);
@@ -341,12 +326,10 @@ while ( T < Tfinal)
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     % Accept/Reject step
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if ( Err <= 1.0 )
-        %fprintf('STEP ACCEPTED\n');
+    if ( Err <= 1.0 || OPTIONS.Hmin == OPTIONS.Hmax)
         FirstStep = false;
         ISTATUS.Nacc = ISTATUS.Nacc + 1;
         
-        % Checkpoints for Adjoint Calculations
         if ( adjStackFlag == true )
             stack_ptr = ERK_Push( NVAR, Coefficient.NStage, T, H, Y, Z, OPTIONS.Max_no_steps, stack_ptr );
         end
@@ -360,13 +343,6 @@ while ( T < Tfinal)
         % Update time
         T = T + H;
 
-        
-        % Update solution
-%         for i = 1:Coefficient.NStage
-%             if ( rkB(i) ~= 0.0 )
-%                 Y = Y + H*rkB(i)*K(:,i);
-%             end
-%         end
         
 %        Store checkpoint values
 %         if ( OPTIONS.storeCheckpoint == true )
@@ -411,13 +387,12 @@ while ( T < Tfinal)
     else % Step is rejected
         % Update step size
         if ( FirstStep || Reject )
-            H = OPTIONS.FacRej*H;
+            H = max(OPTIONS.Hmin, min(OPTIONS.Hmax, OPTIONS.FacRej*H));
         else
             H = max(OPTIONS.Hmin, min(OPTIONS.Hmax, Hnew));
         end
         
         Reject = true;
-%         fprintf('STEP REJECTED\n');
 
 %        Update number of rejections
         if ( ISTATUS.Nacc >= 1.0 )
@@ -437,15 +412,10 @@ end % Time loop
 % Successful return
 Ierr = 1;
 
-% %Deallocate Memory
-% if ( OPTIONS.storeCheckpoint == true )
+%Deallocate Memory
 [ Tout, Yout ] = matlOde_deallocateMemory(Tout,Yout,ISTATUS.Nacc);
 Tout(ISTATUS.Nacc+1:end,:) = [];
 Yout(:,ISTATUS.Nacc+1:end) = [];
-% else
-%     Tout = T;
-%     Yout = Y;
-% end
 
 Tout = transpose(Tout);
 Yout = transpose(Yout);
