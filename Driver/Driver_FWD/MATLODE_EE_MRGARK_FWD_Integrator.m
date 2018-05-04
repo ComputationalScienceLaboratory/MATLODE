@@ -97,7 +97,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [ Tout_FWD, Yout_FWD, FWD_Stats ] = ...
-    MATLODE_MRGARK_ERK_FWD_Integrator( OdeFunctionOne, OdeFunctionTwo, Tspan, Y0, varargin )
+    MATLODE_EE_MRGARK_FWD_Integrator( OdeFunctionOne, OdeFunctionTwo, Tspan, Y0, varargin )
 
     % Display input/output parameters
     if ( nargout == 0 && nargin == 0 )
@@ -123,11 +123,10 @@ function [ Tout_FWD, Yout_FWD, FWD_Stats ] = ...
     end
     
     % Initialize Adjoint Flags
-    adjStackFlag = false;
     adjQuadFlag = false;
         
     % Configure Forward Options
-    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'MRGARK', 'FWD', Y0, Tspan );
+    [ OPTIONS, Coefficient ] = OPTIONS_Configuration(OPTIONS_U, 'EEMRGARK', 'FWD', Y0, Tspan );
     
     % Check input dimensions
     OPTIONS = Input_Dimension(Tspan, Y0, {OdeFunctionOne, OdeFunctionTwo}, OPTIONS);  
@@ -142,12 +141,11 @@ function [ Tout_FWD, Yout_FWD, FWD_Stats ] = ...
     Tout_FWD = Tspan(1);
     ISTATUS_FWD = ISTATUS_Struct('default');
 
-
     for interval=1:tspanMaxSize-1
         tic;
         [ Tout_FWD_interval, Yout_FWD_interval, ISTATUS_FWD_interval, RSTATUS_FWD, Ierr ] = ...
             EE_MRGARK_FWD_Integrator( OdeFunctionOne, OdeFunctionTwo, [Tspan(interval), Tspan(interval+1)], Y0, OPTIONS, ...
-            Coefficient, adjStackFlag, adjQuadFlag );
+            Coefficient, adjQuadFlag );
         elapsedTime(interval) = toc;
         ISTATUS_FWD = ISTATUS_Add(ISTATUS_FWD,ISTATUS_FWD_interval);
          Tout_FWD = [Tout_FWD; transpose(Tout_FWD_interval)];
