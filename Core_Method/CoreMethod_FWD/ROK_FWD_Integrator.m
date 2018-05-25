@@ -37,6 +37,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     OPTIONS.NRecycledVectors = n_recycled_vectors;
     global basis_extend_by_stage
     OPTIONS.BasisExtended = basis_extend_by_stage;
+    global reuse_old_m
+    OPTIONS.ReuseOldBasisSize = reuse_old_m;
     % =================================================================== %
     
     % Force initial value matrix to be 1 X N.
@@ -233,7 +235,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                 lambda(:,1) = lambda1;
             end
 
-            K(:,1) = Varn * lambda(:,1) + H*(Fcn0 - Varn*phi);
+            K(:,1) = Varn * lambda(:,1); % + H*(Fcn0 - Varn*phi);
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Stages
@@ -574,13 +576,13 @@ for i = 1:basisMax
             %fprintf('%d: %e\n', i, residual);
     
             % DEBUG: true residual.
-%            debugK = Varn * lambda1 + H*(f - Varn*phi);
-%            if ( OPTIONS.MatrixFree )
-%                residual_true = norm((debugK - H*gam*J(debugK)) - H*f);
-%            else
-%                residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
-%            end
-%            fprintf('%d: %e, %e\n', i, residual, residual_true);
+%             debugK = Varn * lambda1 + H*(f - Varn*phi);
+%             if ( OPTIONS.MatrixFree )
+%                 residual_true = norm((debugK - H*gam*J(debugK)) - H*f);
+%             else
+%                 residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
+%             end
+%             fprintf('%d: %e, %e\n', i, residual, residual_true);
     
             if ( io_arn_flag && (residual >= residual_old || sing) )
                 % Residual is getting bigger, increase orthogonalization window.
@@ -742,6 +744,11 @@ if ( OPTIONS.MatrixFree )
 end
 
 % Check whether to perform adaptive selection.
+if ( OPTIONS.ReuseOldBasisSize )
+    oldM = M;
+else
+    oldM = 4;
+end
 M = OPTIONS.NBasisVectors;
 adaptive = false;
 if ( M == 0 )
@@ -752,6 +759,7 @@ end
 basisMax = min(N, 200);
 
 testIndex = [4,6,8,11,15,20,27,36,46,57,70,85,100];
+ti = 1;
 V = zeros(N, M);
 W = zeros(N, M);
 T = zeros(M, M);
@@ -761,12 +769,13 @@ residual = Inf;
 
 if ( OPTIONS.Autonomous )
   vt(1) = 0.0;
+  wt(1) = 0.0;
 else
   vt(1) = 1.0;
+  wt(1) = 1.0;
 end
-wt(1) = 0.0;
 
-tau = sqrt(f'*f + vt(1)*wt(1));
+tau = sqrt(f'*f + vt(1)*vt(1));
 V(:,1) = (1.0/tau) * f;
 W(:,1) = (1.0/tau) * f;
 vt(1) = vt(1)/tau;
@@ -778,7 +787,7 @@ what = J'*W(:,1); % + zeros(...) * wt(1);
 if ( OPTIONS.Autonomous )
   y = 0.0;
 else
-  y = dFdT'*W(:,1);
+  y = dFdT'*W(:,1); % + 0 * wt(1);
 end
 
 alpha = vhat'*W(:,1) + x*wt(1);
@@ -816,36 +825,54 @@ for j = 2:basisMax
   vhat = vhat - alpha * V(:,j) - beta * V(:,j-1);
   x = x - alpha * vt(j) - beta * vt(j-1);
   what = what - alpha * W(:,j) - delta * W(:,j-1);
-  y = y - alpha * wt(j) - beta * wt(j-1);
+  y = y - alpha * wt(j) - delta * wt(j-1);
 
   beta = vhat'*what + x*y;
   delta  = sqrt(vhat'*vhat + x*x);
 %  delta = sqrt(abs(beta));
   beta = beta / delta;
 
+  T(j,j) = alpha;
+  
   % Check residual
-  if ( (~adaptive && j == M) || (adaptive && (j > 100 || min(abs(testIndex - j)) == 0)) || (j == basisMax) )
-   [H, Lt, Ut, pt, lambda1, phi, ISTATUS] ...
-                  = computeFirstStage(f, T(1:j,1:j), V(:,1:j), W(:,1:j), vt, wt, [], [], [], H, j, Direction, gam, false, ISTATUS, OPTIONS);
-   residual = abs(H * gam * delta * lambda1(j));
+%  if ( (~adaptive && j == M) || (adaptive && (j > 100 || min(abs(testIndex - j)) == 0)) || (j == basisMax) )
+  if ( ~adaptive && j == M )
+    [H, Lt, Ut, pt, lambda1, phi, ISTATUS] ...
+                  = computeFirstStage(f, T(1:j,1:j), V(:,1:j), W(:,1:j), vt(1:j), wt(1:j), [], [], [], H, j, Direction, gam, false, ISTATUS, OPTIONS);
+    residual = abs(H * gam * delta * lambda1(j));
+    break;
+  elseif ( (adaptive && (j > 100 || testIndex(ti) == j)) )
+   if (j < 100)
+    ti = ti + 1;
+   end
+   if ( j > 100 || testIndex(ti) >= oldM )
+    [H, Lt, Ut, pt, lambda1, phi, ISTATUS] ...
+                  = computeFirstStage(f, T(1:j,1:j), V(:,1:j), W(:,1:j), vt(1:j), wt(1:j), [], [], [], H, j, Direction, gam, false, ISTATUS, OPTIONS);
+    residual = abs(H * gam * delta * lambda1(j));
+   end
    % DEBUG: true residual.
-%   debugK = V * lambda1 + H*(f - V*phi);
-%   residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
-%   fprintf('%d: %e, %e\n', j, residual, residual_true);
-   if ( ~adaptive || (j == basisMax) || residual < OPTIONS.AdaptiveArnoldiTol )
+   %debugK = V * lambda1 + H*(f - V*phi);
+   %residual_true = norm((speye(N) - H*gam*J)*debugK - H*f);
+   %fprintf('%d: %e, %e\n', j, residual, residual_true);
+   if ( residual < OPTIONS.AdaptiveArnoldiTol )
      M = j;
      break;
    end
+  elseif ( j == basisMax )
+    [H, Lt, Ut, pt, lambda1, phi, ISTATUS] ...
+                  = computeFirstStage(f, T(1:j,1:j), V(:,1:j), W(:,1:j), vt(1:j), wt(1:j), [], [], [], H, j, Direction, gam, false, ISTATUS, OPTIONS);
+    residual = abs(H * gam * delta * lambda1(j));
+    M = j;
+    break;
   end
   
-  T(j,j) = alpha;
   T(j,j+1) = beta;
   T(j+1,j) = delta;
   W(:,j+1) = (1.0/beta) * what;
   wt(j+1) = (1.0/beta) * y;
   V(:,j+1) = (1.0/delta) * vhat;
   vt(j+1) = (1.0/delta) * x;
-    
+  
 end
 
 V = V(1:N, 1:M);

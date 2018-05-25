@@ -348,6 +348,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                     [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW2( ROW1 );
                 case 7
                     [ rosMethod, rosELO, rosS, rosName ] = Coefficients_ROS34PW3( ROW2 );
+                case 8
+                    [ rosMethod, rosELO, rosS, rosName ] = Coefficients_Ros_ROK4a( 8 );
                 otherwise % default methods
                     switch ( implementation )
                         case 'FWD'
