@@ -26,9 +26,9 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     
     % TODO: cleanup disgusting hack: ==================================== %
     global lanczos
-    OPTIONS.BiOrthogonalLanczos = lanczos;
+    OPTIONS.BiOrthogonalLanczos = ~isempty(lanczos) && logical(lanczos);
     global io_arnoldi
-    OPTIONS.IOArnoldi = io_arnoldi;
+    OPTIONS.IOArnoldi = ~isempty(io_arnoldi) && logical(io_arnoldi);
     global arnoldi_tol
     OPTIONS.AdaptiveArnoldiTol = arnoldi_tol;
     global basis_block_size
@@ -36,10 +36,13 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
     global n_recycled_vectors
     OPTIONS.NRecycledVectors = n_recycled_vectors;
     global basis_extend_by_stage
-    OPTIONS.BasisExtended = basis_extend_by_stage;
+    OPTIONS.BasisExtended = ~isempty(basis_extend_by_stage) && logical(basis_extend_by_stage);
     global reuse_old_m
-    OPTIONS.ReuseOldBasisSize = reuse_old_m;
+    OPTIONS.RecycleBasisSize = ~isempty(reuse_old_m) && logical(reuse_old_m);
+    global jac_adj_v
+    OPTIONS.JacobianAdjointVec = jac_adj_v;
     % =================================================================== %
+    keyboard
     
     % Force initial value matrix to be 1 X N.
     if ( size(Y,2) == 1 )
@@ -77,7 +80,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
 %   Global Variables
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     global alpha gamma c gam ROK_E b
-    global istage    % Added by Arash to test JacVec convergence
+%     global istage    % Added by Arash to test JacVec convergence
     istage=1;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Initial Settings
@@ -150,6 +153,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         dFdT=0;
         if ( ~OPTIONS.Autonomous )
             [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, Fcn0, OdeFunction, ISTATUS );
+        else
+            dFdT = zeros(NVAR,1);
         end
         
         % Compute the Jacobian at current time
@@ -173,6 +178,21 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             end
         end
         
+        % Setup adjoint vector products
+        if ( OPTIONS.BiOrthogonalLanczos )
+            if ( ~OPTIONS.MatrixFree )
+                fjact = @(v)fjac'*v;
+            else
+                if ( ~isempty(OPTIONS.JacobianAdjointVec) )
+                    fjact = @(v)OPTIONS.JacobianAdjointVec(T,Y,v);
+                elseif ( nargin(OPTIONS.Jacobian) == 2 )
+                    fjact = @(v)Jac'*v;
+                else
+                    error('Using biorthogonal Lanczos requires some form of Jacobian Adjoint product.');
+                end
+            end
+        end
+        
         if ( OPTIONS.BiOrthogonalLanczos )
             io_arn_flag = false;
             Lv = []; Uv = []; pv = [];
@@ -181,7 +201,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
             %     = computeFirstStage(Fcn0, Harn, Varn, Wlzs, w, Lv, Uv, pv, H, M, Direction, gam, io_arn_flag, ISTATUS, OPTIONS);
             %residual = 0;
             [Varn, Wlzs, Harn, vt, wt, M, residual, H, Lh, Uh, ph, lambda1, phi, ISTATUS] = ...
-              ROK_LanczosBiorthogonalize(fjac, dFdT, Fcn0, M, NVAR, H, Direction, gam, OPTIONS, ISTATUS);
+              ROK_LanczosBiorthogonalize(fjac, dFdT, fjact, Fcn0, M, NVAR, H, Direction, gam, OPTIONS, ISTATUS);
         else
 
 %%%%%%%%%% Prepare For Vector Recycling. %%%%%%%%%%%
@@ -254,7 +274,27 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                     locF = OdeFunction(T + H*c(istage), insum);
                     ISTATUS.Nfun = ISTATUS.Nfun + 1;
 
-                    if ( OPTIONS.BasisExtended )
+                    if ( OPTIONS.BasisExtended && OPTIONS.BiOrthogonalLanczos )
+%                         fprintf('OldM = %d\n', M);
+                        wnew = double(~OPTIONS.Autonomous); % no time derivative if problem is autonomous.
+                        [Varn, Wlzs, Harn, vt, wt, M] = ...
+                            ROK_LanczosBiorthogonalEnrichBy1(fjac, dFdT, fjact, Wlzs, wt, Varn, vt, Harn, locF, wnew, M, NVAR, OPTIONS);
+%                         fprintf('NewM = %d\n', M);
+%                         [H, Lh2, Uh2, ph2, ISTATUS] = ROK_PrepareMatrix( M, H, Direction, gam, Harn, ISTATUS, OPTIONS );
+                        hm = Harn(M,1:(M-1));
+                        Lh(M,:) = -H*gam*hm/Uh;
+                        Lh(:,M) = [zeros(M-1,1); 1.0];
+                        ph(M) = M;
+                        Uh(M,1:(M-1)) = zeros(1,M-1);
+                        hm = -H*gam*Harn(1:M,M); hm(M) = 1 + hm(M);
+                        Uh(1:M,M) = Lh\hm(ph);
+                        lambda = [lambda; zeros(1, size(lambda,2))];
+                        outsum = [outsum; 0.0];
+%                         ImHGH = eye(M) - H*gam*Harn;
+%                         assert(norm(Lh * Uh - ImHGH(ph,:))/norm(ImHGH) < 1e-13)
+%                         assert(size(Varn,2) == M && size(Harn,1) == M && size(vt,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
+%                         assert(size(Lh,1) == M && size(Uh,1) == M && size(ph,2) == M)
+                    elseif ( OPTIONS.BasisExtended )
 %                        fprintf('OldM = %d\n', M);
                         wnew = double(~OPTIONS.Autonomous); % no time derivative if problem is autonomous.
                         [Varn, Harn, vt, VtV, Lv, Uv, pv, M, ISTATUS] ...
@@ -270,14 +310,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
                         ph(M) = M;
                         lambda = [lambda; zeros(1, size(lambda,2))];
                         outsum = [outsum; 0.0];
-%                        assert(norm(Uh - Uh2)/norm(Uh2) < 1e-13 && norm(Lh - Lh2)/norm(Lh2) < 1e-13)
-%                        assert(size(Varn,2) == M && size(Harn,1) == M && size(vt,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
-%                        assert(size(Lh,1) == M && size(Uh,1) == M && size(ph,2) == M)
+%                         ImHGH = eye(M) - H*gam*Harn;
+%                         assert(norm(Lh * Uh - ImHGH(ph,:))/norm(ImHGH) < 1e-13)
+%                         assert(size(Varn,2) == M && size(Harn,1) == M && size(vt,1) == M && size(lambda,1) == M && size(outsum,1) == M && (~io_arn_flag || size(VtV,1) == M))
+%                         assert(size(Lh,1) == M && size(Uh,1) == M && size(ph,2) == M)
                     end
                 else
                     locF = Fcn0;
                 end
-
+                
                 if ( OPTIONS.BiOrthogonalLanczos )
                     phi = transpose(Wlzs)*locF + wt;
                 else
@@ -737,14 +778,16 @@ return
 % =========================================================================== %
 
 function [V, W, T, vt, wt, M, residual, H, Lt, Ut, pt, lambda1, phi, ISTATUS] = ...
-    ROK_LanczosBiorthogonalize(J, dFdT, f, M, N, H, Direction, gam, OPTIONS, ISTATUS)
+    ROK_LanczosBiorthogonalize(fjac, dFdT, Jt, f, M, N, H, Direction, gam, OPTIONS, ISTATUS)
 
 if ( OPTIONS.MatrixFree )
-  error('Lanczos biorthogonalization does not support matrix-free Jacobian operators.');
+    J = @(v)fjac(v);
+else
+    J = @(v)fjac*v;
 end
 
 % Check whether to perform adaptive selection.
-if ( OPTIONS.ReuseOldBasisSize )
+if ( OPTIONS.RecycleBasisSize )
     oldM = M;
 else
     oldM = 4;
@@ -781,9 +824,9 @@ W(:,1) = (1.0/tau) * f;
 vt(1) = vt(1)/tau;
 wt(1) = wt(1)/tau;
 
-vhat = J*V(:,1) + dFdT * vt(1);
+vhat = J(V(:,1)) + dFdT * vt(1);
 x = 0.0;
-what = J'*W(:,1); % + zeros(...) * wt(1);
+what = Jt(W(:,1)); % + zeros(...) * wt(1);
 if ( OPTIONS.Autonomous )
   y = 0.0;
 else
@@ -811,9 +854,9 @@ T(1,2) = beta;
 T(2,1) = delta;
 
 for j = 2:basisMax
-  vhat = J*V(:,j) + dFdT * vt(j);
+  vhat = J(V(:,j)) + dFdT * vt(j);
   x = 0.0;
-  what = J'*W(:,j);
+  what = Jt(W(:,j));
   if ( OPTIONS.Autonomous )
     y = 0.0;
   else
@@ -841,7 +884,7 @@ for j = 2:basisMax
                   = computeFirstStage(f, T(1:j,1:j), V(:,1:j), W(:,1:j), vt(1:j), wt(1:j), [], [], [], H, j, Direction, gam, false, ISTATUS, OPTIONS);
     residual = abs(H * gam * delta * lambda1(j));
     break;
-  elseif ( (adaptive && (j > 100 || testIndex(ti) == j)) )
+  elseif ( (adaptive && ((j > 100 && j < basisMax) || testIndex(ti) == j)) )
    if (j < 100)
     ti = ti + 1;
    end
@@ -880,6 +923,113 @@ vt = vt(1:M);
 W = W(1:N, 1:M);
 wt = wt(1:M);
 T = T(1:M, 1:M);
+
+return
+
+% =========================================================================== %
+
+function [V, W, T, vt, wt, M] = ...
+    ROK_LanczosBiorthogonalEnrich(fjac, dFdT, Jt, W, wt, V, vt, T, a, at, b, bt, r, M, N, OPTIONS)
+
+if ( OPTIONS.MatrixFree )
+    J = @(v)fjac(v);
+else
+    J = @(v)fjac*v;
+end
+
+for i = 1:r
+    
+    [va, vat] = ROK_GramSchmidt(W, wt, a(:,i), at(i), M+i-1, N);
+    [wb, wbt] = ROK_GramSchmidt(V, vt, b(:,i), bt(i), M+i-1, N);
+    dot_vw = va'*wb + vat*wbt;
+    binorm = sqrt(abs(dot_vw));
+    va = sign(dot_vw)*va/binorm; vat = sign(dot_vw)*vat/binorm;
+    wb = wb/binorm; wbt = wbt/binorm;
+    
+    jva = J(va) + dFdT * vat;
+    ta = W' * jva;
+    tb = V' * Jt(wb) + vt * (dFdT' * wb);
+    tab = wb' * jva;
+    
+    V(:,M+i) = va;
+    vt(M+i) = vat;
+    W(:,M+i) = wb;
+    wt(M+i) = wbt;
+    
+    T(:, M+i) = ta;
+    T(M+i,1:M+i-1) = tb;
+    T(M+i,M+i) = tab;
+end
+
+M = M+r;
+
+return
+
+function [V, W, T, vt, wt, M] = ...
+    ROK_LanczosBiorthogonalEnrichBy1(fjac, dFdT, Jt, W, wt, V, vt, T, a, at, M, N, OPTIONS)
+
+if ( OPTIONS.MatrixFree )
+    J = @(v)fjac(v);
+else
+    J = @(v)fjac*v;
+end
+
+Wa = W'*a + wt*at;
+va  = (a - V*Wa);
+vat = (at - vt'*Wa);
+Vaug = [V, va, a; vt', vat, at];
+b = [zeros(M,1); 1; 1];
+if ( OPTIONS.NBasisVectors == 0 )
+    [wb, ~] = lsqr(Vaug', b, OPTIONS.AdaptiveArnoldiTol); % Use linear-system tolerance for least-squares solve.
+else
+    wb = Vaug'\b;
+end
+wbt = wb(end);
+wb = wb(1:end-1);
+
+jva = J(va) + dFdT * vat;
+ta = W' * jva;
+tb = V' * Jt(wb) + vt * (dFdT' * wb);
+tab = wb' * jva;
+
+V(:,M+1) = va;
+vt(M+1) = vat;
+W(:,M+1) = wb;
+wt(M+1) = wbt;
+
+T(1:M,M+1) = ta;
+T(M+1,1:M) = tb;
+T(M+1,M+1) = tab;
+
+M = M+1;
+
+return
+
+
+% =========================================================================== %
+
+function [ba, bat] = ROK_GramSchmidt(A, at, b, bt, M, N)
+
+tau = sqrt(b'*b + bt*bt);
+
+ba = b/tau;
+bat = bt/tau;
+
+for j = 1:M
+    scale = ba'*A(:,j) + bat*at(j);
+    ba = ba - scale*A(:,j);
+    bat = bat - scale*at(j);
+end
+nrm = sqrt(ba'*ba + bat*bat);
+if nrm <= 0.25
+    for j = 1:M
+        rho = ba'*A(:,j) + bat*at(j);
+        ba = ba - rho*A(:,j);
+        bat = bat - rho*at(j);
+    end
+end
+ba = ba*tau;
+bat = bat*tau;
 
 return
 
