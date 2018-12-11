@@ -43,6 +43,9 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
                 case 'EXP'
                     [ OPTIONS_U ] = OPTIONS_UserSupplied_EXP_FWD( OPTIONS_U );
                     [ OPTIONS ]   = OPTIONS_FineTuned_EXP_FWD;
+                case 'PEXP'
+                    [ OPTIONS_U ] = OPTIONS_UserSupplied_PEXP_FWD( OPTIONS_U );
+                    [ OPTIONS ]   = OPTIONS_FineTuned_PEXP_FWD;
                 case 'RK'
                     [ OPTIONS_U ] = OPTIONS_UserSupplied_RK_FWD( OPTIONS_U );
                     [ OPTIONS ]   = OPTIONS_FineTuned_RK_FWD;

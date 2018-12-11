@@ -31,7 +31,7 @@
 %  ©2015 Virginia Tech Intellectual Properties, Inc.
 %
 function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
-
+    
     if ( ~isempty(OPTIONS_U.AbsTol) == true )
         OPTIONS.AbsTol = OPTIONS_U.AbsTol;
     end
@@ -66,7 +66,7 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
         OPTIONS.displayStats = OPTIONS_U.displayStats;
     end
     if ( ~isempty(OPTIONS_U.displaySteps) == true )
-        OPTIONS.displaySteps = OPTIONS_U.displaySteps;      
+        OPTIONS.displaySteps = OPTIONS_U.displaySteps;
     end
     if ( ~isempty(OPTIONS_U.DRDP) == true )
         OPTIONS.DRDP = OPTIONS_U.DRDP;
@@ -98,7 +98,6 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.GMRES_TOL) == true )
         OPTIONS.GMRES_TOL = OPTIONS_U.GMRES_TOL;
     end
-    
     if ( ~isempty(OPTIONS_U.GMRES_MaxIt) == true )
         OPTIONS.GMRES_MaxIt = OPTIONS_U.GMRES_MaxIt;
     end
@@ -153,6 +152,12 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.Jacobian) == true )
         OPTIONS.Jacobian = OPTIONS_U.Jacobian;
     end
+    if ( ~isempty(OPTIONS_U.Jacobian1) == true )
+        OPTIONS.Jacobian1 = OPTIONS_U.Jacobian1;
+    end
+    if ( ~isempty(OPTIONS_U.Jacobian2) == true )
+        OPTIONS.Jacobian2 = OPTIONS_U.Jacobian2;
+    end
     if ( ~isempty(OPTIONS_U.Max_no_steps) == true )
         OPTIONS.Max_no_steps = OPTIONS_U.Max_no_steps;
     end
@@ -182,7 +187,7 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     end
     if ( ~isempty(OPTIONS_U.NP) == true )
         OPTIONS.NP = OPTIONS_U.NP;
-    end    
+    end
     if ( ~isempty(OPTIONS_U.QFun) == true )
         OPTIONS.QFun = OPTIONS_U.QFun;
     end
@@ -228,7 +233,7 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.LU) == true )
         OPTIONS.LU = OPTIONS_U.LU;
     end
-
+    
 end
 
 %%
