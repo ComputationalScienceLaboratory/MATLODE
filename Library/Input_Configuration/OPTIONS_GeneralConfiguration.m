@@ -147,6 +147,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             OPTIONS.FacMax = 10.0;
           case 'EXP'
             OPTIONS.FacMax = 6.0;
+          case 'PEXP'
+            OPTIONS.FacMax = 6.0;
           case 'EXPK'
             OPTIONS.FacMax = 6.0;
           case 'RK'
