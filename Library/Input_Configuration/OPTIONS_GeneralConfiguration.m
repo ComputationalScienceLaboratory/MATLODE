@@ -532,9 +532,15 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             expMethod = 1;
             expELO = 3;
           case 2
+              % This may not work properly
             OPTIONS.OneStepIntegrator = @pexp3ASingleStep;
             expName = 'pexp3A';
             expMethod = 2;
+            expELO = 3;
+          case 3
+            OPTIONS.OneStepIntegrator = @pexp3WASingleStep;
+            expName = 'pexp3WA';
+            expMethod = 3;
             expELO = 3;
           otherwise
             OPTIONS.OneStepIntegrator = @pepirk3WSingleStep;
