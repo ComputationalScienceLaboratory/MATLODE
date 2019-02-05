@@ -270,10 +270,10 @@ end
 
 % R function.
 function r = R(rhsFun, y, y0, jacFun, MatrixFree)
-    if MatrixFree
-        r = rhsFun(y) - rhsFun(y0) - jacFun(y - y0);       % Need to find if
+    if ~MatrixFree
+        r = rhsFun(y) - rhsFun(y0) - jacFun * (y - y0);
     else
-        r = rhsFun(y) - rhsFun(y0) - jacFun * ( y - y0);   % Need to find if
+        r = rhsFun(y) - rhsFun(y0) - jacFun(y - y0);
     end
 end
 
