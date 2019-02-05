@@ -31,6 +31,7 @@ function [y, yerr, ISTATUS] = pexp3WBSingleStep(y0, dt, rhsFun1, rhsFun2, ...
     % Coefficients for third-order ExpEx method
     % There is a discrepancy between the A's in the MATLAB file below and the one in Mathematica (depending on how code is written)
     % check with the formulation and adjust as necessary
+    
     A11 = [[0, 0, 0]; [3/5, 0, 0]; [-3/16, 15/16, 0]]; 
     
     A12 = [[0, 0, 0, 0]; [3/5, 0, 0, 0]; [-3/16, 15/16, 0, 0]]; 
