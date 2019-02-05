@@ -31,40 +31,58 @@ function [y, yerr, ISTATUS] = pexp3WASingleStep(y0, dt, rhsFun1, rhsFun2, ...
     % Coefficients for third-order ExpEx method
     % There is a discrepancy between the A's in the MATLAB file below and the one in Mathematica (depending on how code is written)
     % check with the formulation and adjust as necessary
-    A11 = [[0, 0, 0]; [3/5, 0, 0]; [-3/16, 15/16, 0]];
+    A11 = [[0, 0, 0];...
+           [1, 0, 0]; ...
+           [1/9, 2/9, 0]];
     
-    A12 = [[0, 0, 0, 0]; [3/5, 0, 0, 0]; [-3/16, 15/16, 0, 0]];
+    A12 = [[0, 0, 0, 0];...
+           [1, 0, 0, 0];...
+           [1/27, 8/27, 0, 0]];
     
-    A21 = [[0, 0, 0]; [3/5, 0, 0]; [-3/16, 15/16, 0]; [0, 0, 0]];
+    A21 = [[0, 0, 0];...
+           [3/4, 0, 0];...
+           [-2/9, 7/18, 0];...
+           [-4814610206530/1231815301734829, ...
+           47896116458950/4136717768557763, 796429685174991/840813752435365]] ;
     
-    A22 = [[0, 0, 0, 0]; [3/5, 0, 0, 0]; [-3/16, 15/16, 0, 0]; [0, 0, 0, 0]];
+    A22 = [[0, 0, 0, 0]; ...
+           [3/4, 0, 0, 0];...
+           [-19/54, 14/27, 0, 0];...
+           [-4342244433333/1373938055180681, ...
+           38462586786100/1206109566495251, 412671627568009/445575918717283, 0]];
     
     A = {A11, A12; A21, A22};
-    
-    
+
+
     % Coupling happens through the A coefficients
-    G11 = [[1/2, 0, 0]; [-13/40, 1/4, 0]; [41/128, -35/128, 1/8]];
+    G11 = [[1/3, 0, 0];...
+           [-7/12, 1/2, 0]; ...
+           [1/36, -1/6, 1/2]];
     
     G12 = [[0, 0, 0, 0];...
-        [0, 0, 0, 0];...
-        [0, 0, 0, 0]];
+           [0, 0, 0, 0];...
+           [0, 0, 0, 0]];
     
     G21 = [[0, 0, 0];...
-        [0, 0, 0];...
-        [0, 0, 0];...
-        [0, 0, 0]];
+           [0, 0, 0];...
+           [0, 0, 0];...
+           [0, 0, 0]];
     
-    G22 = [[1/2, 0, 0, 0]; [-13/40, 1/4, 0, 0]; [41/128, -35/128, 1/8, 0]; [0, 0, 0, 0]];
+    G22 = [[1/3, 0, 0, 0];...
+           [-11/24, 1/2, 0, 0];...
+           [5/12, -7/18, 1/2, 0];...
+           [-43702424085752/819085085735561, -43527751088650/723413158876079,...
+           -22954849426937/423287615987816, 3464275614480022126/34642756144800221259]];
     
     G = {G11, G12; G21, G22};
-    
-    
-    B1 =  [13/54, 25/54, 8/27];
-    B2 =  [13/54, 25/54, 8/27, 0];
+
+
+    B1 =  [0, 1/4, 3/4];
+    B2 =  [0, 4/7, 3/7, 0];
     B = {B1,B2};
     
     BH1 =  [0, 1/4, 3/4];
-    BH2 =  [0, 0, 0, 1];
+    BH2 =  [214810213883238/709812755774777, 172161769529542/645580111021551, 174858341992795/1238669798658394, 0];
     BH  = {BH1,BH2};
     
     % Size of problem
@@ -74,15 +92,18 @@ function [y, yerr, ISTATUS] = pexp3WASingleStep(y0, dt, rhsFun1, rhsFun2, ...
     K_s = zeros(N, max(s(:)), ps);
     U_s = zeros(N, max(s(:)), ps);
     
+    % create an array of function/matrix handles
+    rhsFuns = {rhsFun1, rhsFun2};
+    jacFuns = {jacFun1, jacFun2};
+
     % optional arguments
     % Set the minimum number of basis vectors for the method
     if(~exist('MBasisVectors','var'))
         MBasisVectors = 1;
     end
     
-    % create an array of function/matrix handles
-    rhsFuns = {rhsFun1, rhsFun2};
-    jacFuns = {jacFun1, jacFun2};
+    U_s(:, 1, 1) = y0;   % partition 1
+    U_s(:, 1, 2) = y0;   % partition 2
     
     % krylov steps
     krySteps = 0;
@@ -93,10 +114,6 @@ function [y, yerr, ISTATUS] = pexp3WASingleStep(y0, dt, rhsFun1, rhsFun2, ...
     % Jacobians or their matrix-vector product functions
     % for all partitions.
     JacJ = cell(ps,1);
-    
-    
-    U_s(:, 1, 1) = y0;   % partition 1
-    U_s(:, 1, 2) = y0;   % partition 2
     
     for j = 1:ps
         if (~MatrixFree)
@@ -115,7 +132,6 @@ function [y, yerr, ISTATUS] = pexp3WASingleStep(y0, dt, rhsFun1, rhsFun2, ...
         % TODO: This can be refactored to accept an array of
         % function handles and use that instead
         for j = 1:ps
-            
             
             if i <= s(j)
                 K_s(:, i , j) = 0;

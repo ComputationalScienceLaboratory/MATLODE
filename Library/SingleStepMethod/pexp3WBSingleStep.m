@@ -1,5 +1,6 @@
-function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, jacFun1, jacFun2, MatrixFree, NBasisVectors, ...
-                         ISTATUS, absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
+function [y, yerr, ISTATUS] = pexp3WBSingleStep(y0, dt, rhsFun1, rhsFun2, ...
+        jacFun1, jacFun2, f1_0, f2_0, MatrixFree, NBasisVectors, ISTATUS, ...
+        absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % EXP framework based GARK type method.
@@ -30,32 +31,19 @@ function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, 
     % Coefficients for third-order ExpEx method
     % There is a discrepancy between the A's in the MATLAB file below and the one in Mathematica (depending on how code is written)
     % check with the formulation and adjust as necessary
+    A11 = [[0, 0, 0]; [3/5, 0, 0]; [-3/16, 15/16, 0]]; 
     
-    A11 = [[0, 0, 0];...
-           [1, 0, 0]; ...
-           [1/9, 2/9, 0]];
+    A12 = [[0, 0, 0, 0]; [3/5, 0, 0, 0]; [-3/16, 15/16, 0, 0]]; 
     
-    A12 = [[0, 0, 0, 0];...
-           [1, 0, 0, 0];...
-           [1/27, 8/27, 0, 0]];
+    A21 = [[0, 0, 0]; [3/5, 0, 0]; [-3/16, 15/16, 0]; [25/2413, 10/997, -25/1226]]; 
     
-    A21 = [[0, 0, 0];...
-           [3/4, 0, 0];...
-           [-2/9, 7/18, 0];...
-           [0, 0, 1/2]] ;
-    
-    A22 = [[0, 0, 0, 0]; ...
-           [3/4, 0, 0, 0];...
-           [-19/54, 14/27, 0, 0];...
-           [0, 0, 1/2, 0]];
+    A22 = [[0, 0, 0, 0]; [3/5, 0, 0, 0]; [-3/16, 15/16, 0, 0]; [13/1254, 13/1296, -35/1716, 0]];
     
     A = {A11, A12; A21, A22};
-
-
+    
+    
     % Coupling happens through the A coefficients
-    G11 = [[1/3, 0, 0];...
-           [-7/12, 1/2, 0]; ...
-           [1/36, -1/6, 1/2]];
+    G11 = [[1/2, 0, 0]; [-13/40, 1/4, 0]; [41/128, -35/128, 1/8]]; 
     
     G12 = [[0, 0, 0, 0];...
            [0, 0, 0, 0];...
@@ -66,25 +54,22 @@ function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, 
            [0, 0, 0];...
            [0, 0, 0]];
     
-    G22 = [[1/3, 0, 0, 0];...
-           [-11/24, 1/2, 0, 0];...
-           [5/12, -7/18, 1/2, 0];...
-           [0, 0, 0, 0]];
+    G22 = [[1/2, 0, 0, 0]; [-13/40, 1/4, 0, 0]; [41/128, -35/128, 1/8, 0]; [7/641, 1/100, 1/100, 407/955]];
     
     G = {G11, G12; G21, G22};
-
-
-    B1 =  [0, 1/4, 3/4];
-    B2 =  [0, 4/7, 3/7, 0];
-    B = {B1,B2};
     
-    BH1 =  [0, 1/4, 3/4];
-    BH2 =  [0, 0, 0, 1];
-    BH  = {BH1,BH2};
+    
+    B1 =  [13/54, 25/54, 8/27];
+    B2 =  [13/54, 25/54, 8/27, 0];
+    B = {B1,B2};
 
+    BH1 =  [13/54, 25/54, 8/27];
+    BH2 =  [2569/11132, 485/1048, 233/786, 48/4799];
+    BH  = {BH1,BH2};
+    
     % Size of problem
     N = length(y0);
-
+    
     % Stage vectors
     K_s = zeros(N, max(s(:)), ps);
     U_s = zeros(N, max(s(:)), ps);
@@ -102,8 +87,25 @@ function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, 
     U_s(:, 1, 1) = y0;   % partition 1
     U_s(:, 1, 2) = y0;   % partition 2
     
+    % krylov steps
     krySteps = 0;
+    
+    % phi_count
     phiCount = 0;
+    
+    % Jacobians or their matrix-vector product functions
+    % for all partitions.
+    JacJ = cell(ps,1);
+    
+    for j = 1:ps
+        if (~MatrixFree)
+            JacJ{j} = jacFuns{j};
+        else
+            % A partial jacobian function with the time
+            % and state vector embedded is created in parent script
+            JacJ{j} = @(v) jacFuns{j}(v);
+        end
+    end
     
     % Do for each stage
     for i = 1 : max(s(:))
@@ -112,26 +114,25 @@ function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, 
         % TODO: This can be refactored to accept an array of
         % function handles and use that instead
         for j = 1:ps
-            JacJ = jacFuns{j};
             
             if i <= s(j)
                 K_s(:, i , j) = 0;
-                for m = 1:ps
-                    for l = 1:min(i-1, s(m))
-                        K_s(:, i , j) = K_s(:, i , j) + G{j,m}(i, l) * K_s(:, l, m);
+
+                    for l = 1:min(i-1, s(j))
+                        K_s(:, i , j) = K_s(:, i , j) + G{j,j}(i, l) * K_s(:, l, j);
                     end
-                end
+
                 
                 if (~MatrixFree)
-                    K_s(:, i , j) = dt * JacJ *  K_s(:, i , j);
+                    K_s(:, i , j) = dt * JacJ{j} *  K_s(:, i , j);
                 else
-                    K_s(:, i , j) = dt * JacJ(K_s(:, i , j));
+                    K_s(:, i , j) = dt * JacJ{j}(K_s(:, i , j));
                 end
                 
                 K_s(:, i , j) = K_s(:, i , j) + dt * rhsFuns{j}(U_s(:, i, j));
                 
                 % Compute the Krylov basis matrices for column the K's
-                [V, H, M] = ArnoldiAdapt(JacJ, K_s(:, i , j), N, dt * G{j,j}(i,i), MatrixFree, ...
+                [V, H, M] = ArnoldiAdapt(JacJ{j}, K_s(:, i , j), N, dt * G{j,j}(i,i), MatrixFree, ...
                     NBasisVectors, relTol, MBasisVectors, adaptiveKrylov, symmjac);
                 
                 krySteps = krySteps + M^2;
@@ -151,7 +152,6 @@ function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, 
                 U_s(:, i + 1, j) =  y0;
                 for m = 1:ps
                     for l = 1:min(i, s(m))
-                        %keyboard;
                         U_s(:, i + 1, j) = U_s(:, i + 1, j) + A{j, m}(i + 1, l) * K_s(:, l, m);
                     end
                 end
@@ -164,7 +164,7 @@ function [y, yerr, ISTATUS] = pexp3ASingleStep(y0, dt, Tspan, rhsFun1, rhsFun2, 
     for m = 1:ps
         for l = 1:s(m)
             y    = y + B{m}(l) * K_s(:, l, m);
-            yerr = yerr + (B{M}(l) - BH{M}(l)) * K_s(:, l, m);
+            yerr = yerr + (B{m}(l) - BH{m}(l)) * K_s(:, l, m);
         end
     end
     
@@ -186,6 +186,13 @@ function [phi1] = Phi_1(gij, v, dt, V, H, M)
     % The multiplier gij has already multiplied HBar.
     % 2) dt between the Psi and vector is not actually multiplied,
     % do it outside the method or here. Outside better for clarity.
+    
+    % if v is zer0, return 0
+    if(norm(v) == 0)
+        phi1 = v;
+        return
+    end
+    
     if gij ~= 0
         e1 = [1; zeros(M - 1, 1)];
         Hbar = [gij * dt * H e1;zeros(1, M+1)];
