@@ -20,6 +20,7 @@ function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
     % jacFun2: Linear piece of the second function to be used in the exponential term
     %
     % Method implemented for autonomous system
+    % Mathematica file: EPIRK_Method15.nb
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     

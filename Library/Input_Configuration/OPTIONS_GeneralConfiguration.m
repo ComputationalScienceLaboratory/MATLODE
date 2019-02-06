@@ -527,14 +527,13 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
       case 'PEXP'
         switch( OPTIONS.Method )
           case 1
-            OPTIONS.OneStepIntegrator = @pepirk3WSingleStep;
+            OPTIONS.OneStepIntegrator = @pepirk3WASingleStep;
             expName = 'pepirk3WA';
             expMethod = 1;
             expELO = 3;
           case 2
-              % This may not work properly
-            OPTIONS.OneStepIntegrator = @pexp3ASingleStep;
-            expName = 'pexp3A';
+            OPTIONS.OneStepIntegrator = @pepirk3WBSingleStep;
+            expName = 'pepirk3WB';
             expMethod = 2;
             expELO = 3;
           case 3
@@ -543,12 +542,17 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             expMethod = 3;
             expELO = 3;
           case 4
-            OPTIONS.OneStepIntegrator = @psepirk3bSingleStep;
-            expName = 'psepirk3b';
+            OPTIONS.OneStepIntegrator = @pexp3WBSingleStep;
+            expName = 'pexp3WB';
             expMethod = 4;
             expELO = 3;
+          case 5
+            OPTIONS.OneStepIntegrator = @psepirk3bSingleStep;
+            expName = 'psepirk3b';
+            expMethod = 5;
+            expELO = 3;
           otherwise
-            OPTIONS.OneStepIntegrator = @pepirk3WSingleStep;
+            OPTIONS.OneStepIntegrator = @pepirk3WASingleStep;
             expName = 'pepirk3WA';
             expMethod = 1;
             expELO = 3;
