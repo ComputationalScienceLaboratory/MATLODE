@@ -176,6 +176,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.NBasisVectors) == true )
         OPTIONS.NBasisVectors = OPTIONS_U.NBasisVectors;
     end
+    if ( ~isempty(OPTIONS_U.NReactants) == true )
+        OPTIONS.NReactants = OPTIONS_U.NReactants;
+    end
     if ( ~isempty(OPTIONS_U.NADJ) == true )
         OPTIONS.NADJ = OPTIONS_U.NADJ;
     end

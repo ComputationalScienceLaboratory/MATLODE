@@ -105,6 +105,7 @@ function options = MATLODE_OPTIONS(varargin)
     NADJ_str            = '           NADJ: [ Depreciated: The number of cost functionals for which adjoints are evaluated simultaneously ]\n';
     MBasisVectors       = '  MBasisVectors: [ Number of minimum basis vectors ] \n';
     NBasisVectors       = '  NBasisVectors: [ Number of maximum basis vectors ] \n';
+    NReactants          = '     NReactants: [ Number of reactants in reaction diffusion framework ] \n';
     NewtonMaxit_str     = '    NewtonMaxIt: [ Maximum number of newton iterations performed ]\n';
     NewtonTol_str       = '      NewtonTol: [ Newtons method stopping criterion. ]\n';
     NP_str              = '             NP: [ Number of parameters ]\n';
@@ -168,6 +169,7 @@ if (nargin == 0) && (nargout == 0)
     fprintf( NADJ_str );  
     fprintf( MBasisVectors );
     fprintf( NBasisVectors );
+    fprintf( NReactants );
     fprintf( NewtonMaxit_str );
     fprintf( NewtonTol_str );
     fprintf( NP_str );
@@ -292,6 +294,7 @@ Names = [
     'NADJ             '
     'MBasisVectors    '
     'NBasisVectors    '
+    'NReactants       '
     'NewtonMaxIt      '
     'NewtonTol        '
     'NP               '

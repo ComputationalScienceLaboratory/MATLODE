@@ -1,6 +1,6 @@
 function [y, yerr, ISTATUS] = pepirk3WASingleStep(y0, dt, rhsFun1, rhsFun2, ...
         jac1, jac2, f1_0, f2_0, MatrixFree, NBasisVectors, ISTATUS, ...
-        absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
+        absTol, relTol, adaptiveKrylov, symmjac, NReactants, Autonomous, MBasisVectors)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %
     % EPIRK-like framework based GARK type method.

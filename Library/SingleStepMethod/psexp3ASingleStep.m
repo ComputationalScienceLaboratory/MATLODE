@@ -1,6 +1,6 @@
 function [y, yerr, ISTATUS] = psexp3ASingleStep(y0, dt, rhsFun1, rhsFun2, ...
         jacFun1, jacFun2, f1_0, f2_0, MatrixFree, NBasisVectors, ISTATUS, ...
-        absTol, relTol, adaptiveKrylov, symmjac, MBasisVectors)
+        absTol, relTol, adaptiveKrylov, symmjac, NReactants, Autonomous, MBasisVectors)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % EXP framework based GARK type method.

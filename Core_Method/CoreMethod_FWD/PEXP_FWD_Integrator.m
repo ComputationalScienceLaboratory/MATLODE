@@ -166,7 +166,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr] = PEXP_FWD_Integrator( OdeFunctio
                 symmjac = false;
             end
             
-            
+                        
             % We duplicate this because each method will set its own minimum
             % number of basis vectors which may vary from method to method,
             % in case this option is not set. For instance K-methods need
@@ -175,12 +175,12 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr] = PEXP_FWD_Integrator( OdeFunctio
                 [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H, rhsFun1, ...
                     rhsFun2, J1, J2, f1, f2, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, ...
                     OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, ...
-                    symmjac, OPTIONS.MBasisVectors);
+                    symmjac, OPTIONS.NReactants, OPTIONS.Autonomous, OPTIONS.MBasisVectors);
             else
                 [ynew, yerr, ISTATUS] = OPTIONS.OneStepIntegrator(y,H,rhsFun1, ...
                     rhsFun2, J1, J2, f1, f2, OPTIONS.MatrixFree, OPTIONS.NBasisVectors, ISTATUS, ...
                     OPTIONS.AbsTol, OPTIONS.RelTol, OPTIONS.Adaptive_Krylov, ...
-                    symmjac);
+                    symmjac, OPTIONS.NReactants, OPTIONS.Autonomous);
             end
             
             if( ~OPTIONS.Autonomous )

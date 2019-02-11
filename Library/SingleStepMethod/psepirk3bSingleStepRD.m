@@ -1,4 +1,4 @@
-function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
+function [y, yerr, ISTATUS] = psepirk3bSingleStepRD(y0, dt, rhsFun1, rhsFun2, ...
         jac1, jac2, f1_0, f2_0, MatrixFree, NBasisVectors, ISTATUS, ...
         absTol, relTol, adaptiveKrylov, symmjac, NReactants, Autonomous, MBasisVectors)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,6 +21,10 @@ function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
     %
     % Method implemented for autonomous system
     % Mathematica file: EPIRK_Method15.nb
+    %
+    %
+    % Adopt the convention that rhsFun1 is diffusion and rhsFun2 is
+    % reaction
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
@@ -162,7 +166,7 @@ function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
         
         for j = 1:ps
             term = A{j}(i, 1) * dt * Psi(i, 1, JacJ{j}, F_0,...
-                N, dt, G{j}, P{j}, MatrixFree, NBasisVectors, krySteps, relTol);
+                N, dt, G{j}, P{j}, MatrixFree, NBasisVectors, NReactants, j, krySteps, relTol);
             Y_s(:, i + 1) = Y_s(:, i + 1) + term;
         end
         
@@ -170,7 +174,7 @@ function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
             for l = 2:min(i, s - 1)
                 dr = dR(F, Y_s, 1, l - 1, JacJ{j}, MatrixFree);
                 term = A{j}(i, l) * dt * Psi(i, l, JacJ{j}, dr,...
-                    N, dt, G{j}, P{j}, MatrixFree, NBasisVectors, krySteps, relTol);
+                    N, dt, G{j}, P{j}, MatrixFree, NBasisVectors, NReactants, j, krySteps, relTol);
                 Y_s(:, i + 1) = Y_s(:, i + 1) + term;
             end
         end
@@ -183,7 +187,7 @@ function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
         %term2 = B{k}(1) * dt * PsiExact(s, 1, JacJ{k}, F_0, ...
         %    N, dt, G{k}, P{k}, MatrixFree, NBasisVectors, krySteps, relTol);
         term = B{k}(1) * dt * Psi(s, 1, JacJ{k}, F_0, ...
-            N, dt, G{k}, P{k}, MatrixFree, NBasisVectors, krySteps, relTol);
+            N, dt, G{k}, P{k}, MatrixFree, NBasisVectors, NReactants, k, krySteps, relTol);
         psi_count = psi_count + 1;
         y = y + term;
         yerr = yerr + term/ B{k}(1) * (B{k}(1) - BH{k}(1)); % Remove divide by bk1
@@ -195,7 +199,7 @@ function [y, yerr, ISTATUS] = psepirk3bSingleStep(y0, dt, rhsFun1, rhsFun2, ...
             %term2 = B{k}(l) * dt * PsiExact(s, l, JacJ{k}, dr, ...
             %    N, dt, G{k}, P{k}, MatrixFree, NBasisVectors, krySteps, relTol);
             term = B{k}(l) * dt * Psi(s, l, JacJ{k}, dr, ...
-                N, dt, G{k}, P{k}, MatrixFree, NBasisVectors, krySteps, relTol);
+                N, dt, G{k}, P{k}, MatrixFree, NBasisVectors, NReactants, k, krySteps, relTol);
             psi_count = psi_count + 1;
             y = y + term;
             yerr = yerr + term/ B{k}(l) * (B{k}(l) - BH{k}(l));
@@ -254,11 +258,13 @@ end
 % i) parameter gij
 % ii) vector being multiplied by Psi function
 % iii) the matrix A0 which stays the same.
-function [psiV, krySteps] = Psi(i, j, A0, v, N, dt, g, p, MatrixFree, NBasisVectors, krySteps, Tol)
+function [psiV, krySteps] = Psi(i, j, A0, v, N, dt, g, p, MatrixFree, NBasisVectors, NReactants, partition, krySteps, Tol)
     % Note: that this function implements the simplified Psi defn
     % given in section 4 of EPIRK paper:
     % A new class of exponential propagation iterative methods of
     % Runge-Kutta type (EPIRK) - M. Tokman
+    % partition 1 is diffusion
+    % partition 2 is reaction
     
     if(~exist('Tol','var'))
         arnoldiTol = 1e-12;
@@ -285,18 +291,44 @@ function [psiV, krySteps] = Psi(i, j, A0, v, N, dt, g, p, MatrixFree, NBasisVect
     if g(i, j) ~= 0
         psiV = zeros(N, 1);
         
-        % Compute the Krylov basis matrices
-        [V, H, M] = ArnoldiAdapt(A0, v, N, g(i, j) * dt, MatrixFree, ...
-            NBasisVectors, arnoldiTol);
-        
-        krySteps = krySteps + M^2;
-        e1 = [1; zeros(M - 1, 1)];
-        Hbar = [g(i,j) * dt * H e1 zeros(M, j-1);zeros(j-1, M+1) eye(j - 1);zeros(1, M+j)];
-        expHbar = expm(Hbar);                    % Tau = 1
-        normv = norm(v, 2);
-        
-        for k = 1:j
-            psiV = psiV + p(j, k) *  normv * V * expHbar(1:M, M + k);
+        if partition == 1 % diffusion partition
+            % number of variables per partition
+            NP = N / NReactants;
+            for pi = 1:NReactants
+                if ~MatrixFree
+                    J0 = A0((pi - 1) * NP + 1: pi * NP, (pi - 1) * NP + 1: pi * NP);
+                else
+                    error('Not implemented yet');
+                end
+                v0 = v((pi - 1) * NP + 1: pi * NP);
+                % Compute the Krylov basis matrices
+                [V, H, M] = ArnoldiAdapt(J0, v0, NP, g(i, j) * dt, MatrixFree, ...
+                    NBasisVectors, arnoldiTol);
+                
+                krySteps = krySteps + M^2;
+                e1 = [1; zeros(M - 1, 1)];
+                Hbar = [g(i,j) * dt * H e1 zeros(M, j-1);zeros(j-1, M+1) eye(j - 1);zeros(1, M+j)];
+                expHbar = expm(Hbar);                    % Tau = 1
+                normv = norm(v0, 2);
+                
+                for k = 1:j
+                    psiV((pi - 1) * NP + 1: pi * NP) = psiV((pi - 1) * NP + 1: pi * NP) + p(j, k) *  normv * V * expHbar(1:M, M + k);
+                end
+            end
+        elseif partition == 2 % reaction partition
+            % Compute the Krylov basis matrices
+            [V, H, M] = ArnoldiAdapt(A0, v, N, g(i, j) * dt, MatrixFree, ...
+                NBasisVectors, arnoldiTol);
+            
+            krySteps = krySteps + M^2;
+            e1 = [1; zeros(M - 1, 1)];
+            Hbar = [g(i,j) * dt * H e1 zeros(M, j-1);zeros(j-1, M+1) eye(j - 1);zeros(1, M+j)];
+            expHbar = expm(Hbar);                    % Tau = 1
+            normv = norm(v, 2);
+            
+            for k = 1:j
+                psiV = psiV + p(j, k) *  normv * V * expHbar(1:M, M + k);
+            end
         end
     else
         p_tilde = 0;

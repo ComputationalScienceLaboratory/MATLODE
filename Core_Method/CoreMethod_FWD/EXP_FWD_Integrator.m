@@ -163,13 +163,12 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr ] = EXP_FWD_Integrator( OdeFunctio
                     J = @(why)([fjac(why(1:end-1)) + dFdT*why(end); 0]);
                 end
 
-            else
-
-                rhsFun = @(why)odeFun(T, why);
+           else
+                rhsFun = @(why)OdeFunction(T, why);
                 y = Y;
                 f = Fcn0;
                 if( ~OPTIONS.MatrixFree )
-                    J = jacFun(T, Y);
+                    J = fjac;
                 else
                     J = fjac;
                 end
