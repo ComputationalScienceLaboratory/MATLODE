@@ -86,6 +86,9 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr] = PEXP_FWD_Integrator( OdeFunctio
     while ( ( Direction > 0 ) && ( (T-Tfinal)+Roundoff <= 0.0 ) ...
             || ( Direction < 0 ) && ( (Tfinal-T)+Roundoff <= 0.0 ) )
         
+        if (any(isnan(Y)))
+            error('Solution is NaN');
+        end
         if ( ISTATUS.Nstp >= OPTIONS.Max_no_steps )
             error('Number of steps exceeds maximum buffer bound \n T= %f;     H= %f', T, H );
         end
