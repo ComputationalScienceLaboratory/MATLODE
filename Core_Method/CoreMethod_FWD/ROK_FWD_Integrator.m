@@ -25,25 +25,24 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROK_FWD
         Tspan, Y, OPTIONS, Coefficient, adjStackFlag, adjQuadFlag )
     
     % TODO: cleanup disgusting hack: ==================================== %
-    global lanczos
-    OPTIONS.BiOrthogonalLanczos = ~isempty(lanczos) && logical(lanczos);
-    global io_arnoldi
-    OPTIONS.IOArnoldi = ~isempty(io_arnoldi) && logical(io_arnoldi);
-    global arnoldi_tol
-    OPTIONS.AdaptiveArnoldiTol = arnoldi_tol;
-    global basis_block_size
-    OPTIONS.BlockSize  = basis_block_size;
-    global n_recycled_vectors
-    OPTIONS.NRecycledVectors = n_recycled_vectors;
-    global basis_extend_by_stage
-    OPTIONS.BasisExtended = ~isempty(basis_extend_by_stage) && logical(basis_extend_by_stage);
-    global reuse_old_m
-    OPTIONS.RecycleBasisSize = ~isempty(reuse_old_m) && logical(reuse_old_m);
-    global jac_adj_v
-    OPTIONS.JacobianAdjointVec = jac_adj_v;
+%     global lanczos
+%     OPTIONS.BiOrthogonalLanczos = ~isempty(lanczos) && logical(lanczos);
+%     global io_arnoldi
+%     OPTIONS.IOArnoldi = ~isempty(io_arnoldi) && logical(io_arnoldi);
+%     global arnoldi_tol
+%     OPTIONS.AdaptiveArnoldiTol = arnoldi_tol;
+%     global basis_block_size
+%     OPTIONS.BlockSize  = basis_block_size;
+%     global n_recycled_vectors
+%     OPTIONS.NRecycledVectors = n_recycled_vectors;
+%     global basis_extend_by_stage
+%     OPTIONS.BasisExtended = ~isempty(basis_extend_by_stage) && logical(basis_extend_by_stage);
+%     global reuse_old_m
+%     OPTIONS.RecycleBasisSize = ~isempty(reuse_old_m) && logical(reuse_old_m);
+%     global jac_adj_v
+%     OPTIONS.JacobianAdjointVec = jac_adj_v;
     % =================================================================== %
-    keyboard
-    
+        
     % Force initial value matrix to be 1 X N.
     if ( size(Y,2) == 1 )
         % DO NOTHING

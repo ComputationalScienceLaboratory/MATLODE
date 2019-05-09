@@ -38,8 +38,20 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.AbsTol_TLM) == true )
         OPTIONS.AbsTol_TLM = OPTIONS_U.AbsTol_TLM;
     end
+    if ( ~isempty(OPTIONS_U.AdaptiveArnoldiTol) == true )
+        OPTIONS.AdaptiveArnoldiTol = OPTIONS_U.AdaptiveArnoldiTol;
+    end
     if ( ~isempty(OPTIONS_U.Autonomous) == true )
         OPTIONS.Autonomous = OPTIONS_U.Autonomous;
+    end
+    if ( ~isempty(OPTIONS_U.BasisExtended) == true )
+        OPTIONS.BasisExtended = OPTIONS_U.BasisExtended;
+    end
+    if ( ~isempty(OPTIONS_U.BiOrthogonalLanczos) == true )
+        OPTIONS.BiOrthogonalLanczos = OPTIONS_U.BiOrthogonalLanczos;
+    end
+    if ( ~isempty(OPTIONS_U.BlockSize) == true )
+        OPTIONS.BlockSize = OPTIONS_U.BlockSize;
     end
     if ( ~isempty(OPTIONS_U.ChunkSize) == true )
         OPTIONS.ChunkSize = OPTIONS_U.ChunkSize;
@@ -92,7 +104,6 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.GMRES_TOL) == true )
         OPTIONS.GMRES_TOL = OPTIONS_U.GMRES_TOL;
     end
-    
     if ( ~isempty(OPTIONS_U.GMRES_MaxIt) == true )
         OPTIONS.GMRES_MaxIt = OPTIONS_U.GMRES_MaxIt;
     end
@@ -125,6 +136,12 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     end
     if ( ~isempty(OPTIONS_U.Hstart) == true )
         OPTIONS.Hstart = OPTIONS_U.Hstart;
+    end
+    if ( ~isempty(OPTIONS_U.IOArnoldi) == true )
+        OPTIONS.IOArnoldi = OPTIONS_U.IOArnoldi;
+    end
+    if ( ~isempty(OPTIONS_U.JacobianAdjointVec) == true )
+        OPTIONS.JacobianAdjointVec = OPTIONS_U.JacobianAdjointVec;
     end
     if ( ~isempty(OPTIONS_U.Jacp) == true )
         OPTIONS.Jacp = OPTIONS_U.Jacp;
@@ -168,6 +185,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.NP) == true )
         OPTIONS.NP = OPTIONS_U.NP;
     end    
+    if ( ~isempty(OPTIONS_U.NRecycledVectors) == true )
+        OPTIONS.NRecycledVectors = OPTIONS_U.NRecycledVectors;
+    end
     if ( ~isempty(OPTIONS_U.QFun) == true )
         OPTIONS.QFun = OPTIONS_U.QFun;
     end
