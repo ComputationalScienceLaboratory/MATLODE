@@ -71,7 +71,9 @@ function options = MATLODE_OPTIONS(varargin)
     FacMax_str          = '         FacMax: [ Step size upper bound change ratio. ]\n';
     FacMin_str          = '         FacMin: [ Step size lower bound change ratio. ]\n';
     FacRej_str          = '         FacRej: [ Decrease step size factor after two successive rejections. ]\n';
-    FacSafe_str         = '        FacSafe: [ Fact by which the new step is slightly smaller than the predicted value. ]\n';
+    FacSafe_str         = '        FacSafe: [ Factor by which the new step is slightly smaller than the predicted value. ]\n';
+    FacSafeHigh_str     = '    FacSafeHigh: [ Factor by which the new step of higher order is slightly smaller than the predicted value. ]\n';
+    FacSafeLow_str      = '     FacSafeLow: [ Factor by which the new step of lower order is slightly smaller than the predicted value. ]\n';
     FDAprox_str         = '        FDAprox: [ Determines whether Jacobian Vector products by finite difference is used. ]\n';
     FDIncrement_str     = '    FDIncrement: [ ]\n';
     Gustafsson_str      = '     Gustafsson: [ An alternative error controller approach which may be advantageous depending on the model characteristics. ]\n';
@@ -89,6 +91,7 @@ function options = MATLODE_OPTIONS(varargin)
     Lambda_str          = '         Lambda: [ ]\n';
     MatrixFree_str      = '     MatrixFree: [ ]\n';
     Max_no_steps_str    = '   Max_no_steps: [ Maximum nunber of steps upper bound ]\n';
+    MaxOrder_str        = '       MaxOrder: [ Maximum allowed order for a variable order multistep method. ]\n';
     Method_str          = '         Method: [ Determines which coefficients to use ]\n';
     Mu_str              = '             Mu: [ ]\n';
     NADJ_str            = '           NADJ: [ The number of cost functionals for which adjoints are evaluated simultaneously ]\n';
@@ -132,6 +135,8 @@ if (nargin == 0) && (nargout == 0)
     fprintf( FacMin_str );
     fprintf( FacRej_str );
     fprintf( FacSafe_str );
+    fprintf( FacSafeHigh_str );
+    fprintf( FacSafeLow_str );
     fprintf( FDAprox_str );
     fprintf( FDIncrement_str );
     fprintf( Gustafsson_str );
@@ -149,6 +154,7 @@ if (nargin == 0) && (nargout == 0)
     fprintf( Lambda_str );
     fprintf( MatrixFree_str );
     fprintf( Max_no_steps_str );
+    fprintf( MaxOrder_str );
     fprintf( Method_str );
     fprintf( Mu_str );    
     fprintf( NADJ_str );  
@@ -229,14 +235,14 @@ end
 if (nargin == 2) && (nargout == 0)
     firstArg = varargin{1};
     secondArg = varargin{2};
-    if ( strcmp(firstArg,'ERK') ||  strcmp(firstArg,'RK') ||  strcmp(firstArg,'ROS') ||  strcmp(firstArg,'SDIRK') )
+    if ( strcmp(firstArg,'ERK') ||  strcmp(firstArg,'RK') ||  strcmp(firstArg,'ROS') ||  strcmp(firstArg,'SDIRK') ||  strcmp(firstArg,'ROK') ||  strcmp(firstArg,'LMM') )
         if ( strcmp(secondArg,'FWD') || strcmp(secondArg,'TLM') || strcmp(secondArg,'ADJ') )
             family = firstArg;
             implementation = secondArg;
         else
             error('Internal Error: Input parameters must be (family,implementation) or (implementation,family)');
         end
-    elseif ( strcmp(secondArg,'ERK') ||  strcmp(secondArg,'RK') ||  strcmp(secondArg,'ROS') ||  strcmp(secondArg,'SDIRK') )
+    elseif ( strcmp(secondArg,'ERK') ||  strcmp(secondArg,'RK') ||  strcmp(secondArg,'ROS') ||  strcmp(secondArg,'SDIRK') || strcmp(secondArg,'ROK') || strcmp(secondArg, 'LMM') )
         if ( strcmp(firstArg,'FWD') || strcmp(firstArg,'TLM') || strcmp(firstArg,'ADJ') ) 
             family = secondArg;
             implementation = firstArg;
@@ -648,6 +654,8 @@ Names = [
     'FacMin             '
     'FacRej             '
     'FacSafe            '
+    'FacSafeHigh        '
+    'FacSafeLow         '
     'FDAprox            '
     'FDIncrement        '
     'GMRES_TOL          '
@@ -672,6 +680,7 @@ Names = [
     'Lambda             '
     'MatrixFree         '
     'Max_no_steps       '
+    'MaxOrder           '
     'Method             '
     'Mu                 '
     'NADJ               '

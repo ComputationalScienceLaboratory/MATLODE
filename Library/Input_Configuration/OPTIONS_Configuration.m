@@ -55,6 +55,9 @@ function [ OPTIONS, Coefficient ] = OPTIONS_Configuration( OPTIONS_U, family, im
                 case 'SDIRK'
                     [ OPTIONS_U ] = OPTIONS_UserSupplied_SDIRK_FWD( OPTIONS_U );
                     [ OPTIONS ]   = OPTIONS_FineTuned_SDIRK_FWD;
+                case 'LMM'
+                    [ OPTIONS_U ] = OPTIONS_UserSupplied_LMM_FWD( OPTIONS_U );
+                    [ OPTIONS ]   = OPTIONS_FineTuned_LMM_FWD;
                 otherwise
                     error('Internal Error: Family parameter is invalid.');
             end

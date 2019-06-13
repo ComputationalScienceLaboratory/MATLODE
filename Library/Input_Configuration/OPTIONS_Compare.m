@@ -174,6 +174,20 @@ function OPTIONS_Compare( option1, option2 )
         fprintf(2,['        FacSafe : ',num2str(option1.FacSafe),' | ',num2str(option2.FacSafe),'\n']);
     end        
     
+    % FacSafeHigh
+    if ( isequal(option1.FacSafeHigh,option2.FacSafeHigh) )
+        fprintf(  ['    FacSafeHigh : ',num2str(option1.FacSafeHigh),' | ',num2str(option2.FacSafeHigh),'\n']);
+    else
+        fprintf(2,['    FacSafeHigh : ',num2str(option1.FacSafeHigh),' | ',num2str(option2.FacSafeHigh),'\n']);
+    end        
+    
+    % FacSafeLow
+    if ( isequal(option1.FacSafeLow,option2.FacSafeLow) )
+        fprintf(  ['     FacSafeLow : ',num2str(option1.FacSafeLow),' | ',num2str(option2.FacSafeLow),'\n']);
+    else
+        fprintf(2,['     FacSafeLow : ',num2str(option1.FacSafeLow),' | ',num2str(option2.FacSafeLow),'\n']);
+    end        
+    
     % FDAprox
     if ( isequal(option1.FDAprox,option2.FDAprox) )
         fprintf(  ['        FDAprox : ',num2str(option1.FDAprox),' | ',num2str(option2.FDAprox),'\n']);
@@ -363,6 +377,13 @@ function OPTIONS_Compare( option1, option2 )
         fprintf(  ['   Max_no_steps : ',num2str(option1.Max_no_steps),' | ',num2str(option2.Max_no_steps),'\n']);
     else
         fprintf(2,['   Max_no_steps : ',num2str(option1.Max_no_steps),' | ',num2str(option2.Max_no_steps),'\n']);
+    end        
+    
+    % MaxOrder
+    if ( isequal(option1.MaxOrder,option2.MaxOrder) )
+        fprintf(  ['       MaxOrder : ',num2str(option1.MaxOrder),' | ',num2str(option2.MaxOrder),'\n']);
+    else
+        fprintf(2,['       MaxOrder : ',num2str(option1.MaxOrder),' | ',num2str(option2.MaxOrder),'\n']);
     end        
     
     % Method

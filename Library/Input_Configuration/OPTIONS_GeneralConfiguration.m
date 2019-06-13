@@ -117,6 +117,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                 OPTIONS.FacMax = 6.0;
             case 'SDIRK'
                 OPTIONS.FacMax = 10.0;
+            case 'LMM'
+                OPTIONS.FacMax = 5.0;
         end
     elseif ( OPTIONS.FacMax > 0.0 )
         % DO NOTHING: User supplied or fine tuned value.
@@ -143,7 +145,25 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     else
         str = [ 'Error: User selected FacSafe: ', num2str(OPTIONS.FacSafe), '. FacSafe must be >= 0.' ];
         error(str);
-    end    
+    end
+    
+    % FacSafe[High, Low]
+    if ( OPTIONS.FacSafeHigh == 0 )
+        OPTIONS.FacSafeHigh = 0.95;
+    elseif ( OPTIONS.FacSafeHigh > 0.0 )
+        % DO NOTHING: User supplied or fine tuned value.
+    else
+        str = [ 'Error: User selected FacSafeHigh: ', num2str(OPTIONS.FacSafeHigh), '. FacSafeHigh must be >= 0.' ];
+        error(str);
+    end
+    if ( OPTIONS.FacSafeLow == 0 )
+        OPTIONS.FacSafeLow = 0.8;
+    elseif ( OPTIONS.FacSafeLow > 0.0 )
+        % DO NOTHING: User supplied or fine tuned value.
+    else
+        str = [ 'Error: User selected FacSafeLow: ', num2str(OPTIONS.FacSafeLow), '. FacSafeLow must be >= 0.' ];
+        error(str);
+    end
     
     % FDincrement 
     if ( OPTIONS.FDIncrement == 0 )
@@ -238,9 +258,19 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                 OPTIONS.ITOL = 0;
         end
     else
-        str = [ 'Error: User selected ITOL: ', num2str(ITOL), '. ITOL must be 0 or 1.' ];
+        str = [ 'Error: User selected ITOL: ', num2str(OPTIONS.ITOL), '. ITOL must be 0 or 1.' ];
         error(str);
-    end    
+    end
+    
+    % MaxOrder
+    if ( OPTIONS.MaxOrder == 0 )
+        OPTIONS.MaxOrder = 5; % Maximum order for both BDF and LIMM methods
+    elseif ( OPTIONS.MaxOrder > 0 && OPTIONS.MaxOrder < 6 )
+        % DO NOTHING: User setting
+    else
+        str = [ 'Error: User selected MaxOrder: ', num2str(OPTIONS.MaxOrder), '. MaxOrder must be between 1 and 5 inclusive.' ];
+        error(str);
+    end
     
     % ERK method number
     RK2 = 1;
@@ -413,6 +443,14 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             Coefficient.ELO = expkELO;
             Coefficient.NStage = expkS;
             Coefficient.Name = expkName;
+        case 'LMM'
+            switch( OPTIONS.Method )
+                case 1 % BDF
+                    Coefficient = LMM_Struct_BDF();
+                case 2 % LIMM
+                    Coefficient = LMM_Struct_LIMM();
+                otherwise
+                    Coefficient = LMM_Struct_BDF();
     end
     
     % Max_no_steps

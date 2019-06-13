@@ -92,6 +92,12 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.FacSafe) == true )
         OPTIONS.FacSafe = OPTIONS_U.FacSafe;
     end
+    if ( ~isempty(OPTIONS_U.FacSafeHigh) == true )
+        OPTIONS.FacSafeHigh = OPTIONS_U.FacSafeHigh;
+    end
+    if ( ~isempty(OPTIONS_U.FacSafeLow) == true )
+        OPTIONS.FacSafeLow = OPTIONS_U.FacSafeLow;
+    end
     if ( ~isempty(OPTIONS_U.FDAprox) == true )
         OPTIONS.FDAprox = OPTIONS_U.FDAprox;
     end
@@ -163,6 +169,9 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     end
     if ( ~isempty(OPTIONS_U.Max_no_steps) == true )
         OPTIONS.Max_no_steps = OPTIONS_U.Max_no_steps;
+    end
+    if ( ~isempty(OPTIONS_U.MaxOrder) == true )
+        OPTIONS.MaxOrder = OPTIONS_U.MaxOrder;
     end
     if ( ~isempty(OPTIONS_U.MatrixFree) == true )
         OPTIONS.MatrixFree = OPTIONS_U.MatrixFree;
