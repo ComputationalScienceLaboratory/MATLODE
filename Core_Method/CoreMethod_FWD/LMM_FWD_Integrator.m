@@ -1,4 +1,4 @@
-%% ROK_FWD_Integrator
+%% LMM_FWD_Integrator
 %
 % <html> Up: <a href="../../../Library/html/Library.html">Library</a> </html>
 %
@@ -49,9 +49,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
     DeltaMin = 1e-5;
     
     if ( OPTIONS.storeCheckpoint == true )
-        [ Tout, Yout ] = matlOde_allocateMemory( NVAR, OPTIONS.ChunkSize );     
-%         Yout = zeros(NVAR,OPTIONS.Max_no_steps);
-%         Tout = zeros(OPTIONS.Max_no_steps,1);
+        [ Tout, Yout ] = matlOde_allocateMemory( NVAR, OPTIONS.ChunkSize );  
     else
         Yout = zeros(NVAR,1);
         Tout = 0;
@@ -72,11 +70,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
     RSTATUS = RSTATUS_Struct('default');
     
     if ( OPTIONS.storeCheckpoint )
-        RSTATUS.S1residual = zeros(OPTIONS.ChunkSize, 1);
         RSTATUS.stepsizes = zeros(OPTIONS.ChunkSize, 1);
-        if ( OPTIONS.IOArnoldi )
-            RSTATUS.blockSizes = zeros(OPTIONS.ChunkSize, 1);
-        end
     end
     
     stack_ptr = 0;
@@ -96,16 +90,21 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
     end
     H = Direction*H;
     
+    Y = Y0;
+    F = zeros(NVAR,1);
     dFdT = zeros(NVAR,1);
+    
+    Order = 1;
     
     % Preallocate integrator internal state
     Coefficients = LMM_struct.coefficients();
-    k = OPTIONS.MaxOrder + 1;
-    Y = [zeros(NVAR, k-1), Y0];
-    F = zeros(NVAR, k);
-    H = [zeros(1,k-1), H];
-    IDX = 1:k; % Y(IDX(k)) is always the current Y, and accepted Ynew are stored in Y(IDX(1)).
-    Order = 1;
+    LMM_state    = LMM_struct.stateInit(OPTIONS.MaxOrder, NVAR, Y0, H);
+    
+%     k = OPTIONS.MaxOrder + 1;
+%     Y = [zeros(NVAR, k-1), Y0];
+%     F = zeros(NVAR, k);
+%     H = [zeros(1,k-1), H];
+%     IDX = 1:k; % Y(IDX(k)) is always the current Y, and accepted Ynew are stored in Y(IDX(1)).
     
     RejectLastH = false;
     RejectMoreH = false;
@@ -117,26 +116,29 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
             || ( Direction < 0 ) && ( (Tfinal-T)+Roundoff <= 0.0 ) )
         
         if ( ISTATUS.Nstp >= OPTIONS.Max_no_steps )
-            error('Number of steps exceeds maximum buffer bound \n T= %f;     H= %f', T, H(IDX(k)) );
+            error('Number of steps exceeds maximum buffer bound \n T= %f;     H= %f', T, H );
         end
-        if ( ( ( T+0.1*H(IDX(k)) ) == T) || ( abs(H(IDX(k))) <= Roundoff ) )
-            error('Step size too small: T + 10*H = T or H < Roundoff \n T= %f;     H= %f', T, H(IDX(k)) );
+        if ( ( ( T+0.1*H ) == T) || ( abs(H) <= Roundoff ) )
+            error('Step size too small: T + 10*H = T or H < Roundoff \n T= %f;     H= %f', T, H );
         end
         
         % Limit H if necessary to avoid going beyond Tfinal
-        H(IDX(k)) = min( H(IDX(k)), abs( Tfinal-T ) );
+        if ( abs(Tfinal-T) < H )
+            H = abs(Tfinal-T);
+            LMM_state = LMM_struct.stateUpdateH(LMM_state, H);
+        end
         
         % Compute the function at current time
-        F(:,IDX(k)) = OdeFunction( T, Y(:,IDX(k)) );
+        F = OdeFunction( T, Y );
         ISTATUS.Nfun = ISTATUS.Nfun + 1;
         
         % Compute the function derivative with respect to T
         if ( ~OPTIONS.Autonomous )
-            [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y(:,IDX(k)), F(:,IDX(k)), OdeFunction, ISTATUS );
+            [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, F, OdeFunction, ISTATUS );
         end
         
         % Compute the Jacobian at current time
-        [fjac, ISTATUS] = EvaluateJacobian(T, Y(:,IDX(k)), F(:,IDX(k)), OPTIONS, ISTATUS);
+        [fjac, ISTATUS] = EvaluateJacobian(T, Y, F, OPTIONS, ISTATUS);
         
         % Setup adjoint vector products
 %         if ( OPTIONS.BiOrthogonalLanczos )
@@ -160,13 +162,13 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
 %   New solutions
 
             % Ynew: Y(n+1) evaluated at Order, Ypm1: Y(n+1) eval at Order-1, Ypp1: Y(n+1) eval at Order+1
-            [Ynew, YE, ELO, H, RejectFlag, ISTATUS] = LMM_struct.onestep(Order, H, Y, F, k, IDX, fjac, dFdT, T, Coefficients, OdeFunction, OPTIONS, ISTATUS);
+            [Ynew, YE, ELO, H, RejectFlag, LMM_state, ISTATUS] = LMM_struct.onestep(Order, H, Y, F, fjac, dFdT, T, LMM_state, Coefficients, OdeFunction, OPTIONS, ISTATUS);
             
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Error Estimation
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             % Compute error norm
-            SCAL = OPTIONS.AbsTol + OPTIONS.RelTol.*max(abs(Y(:,IDX(k))),abs(Ynew));
+            SCAL = OPTIONS.AbsTol + OPTIONS.RelTol.*max(abs(Y),abs(Ynew));
 %             Em1 = max(sqrt(sum((YE(:,1)./SCAL).^2)/NVAR), 1e-10);
 %             E   = max(sqrt(sum((YE(:,2)./SCAL).^2)/NVAR), 1e-10);
 %             Ep1 = max(sqrt(sum((YE(:,3)./SCAL).^2)/NVAR), 1e-10);
@@ -186,7 +188,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
 %             disp(['Order ', num2str(Order+1), ': E = ', num2str(Ep1), ', FAC = ', num2str(usFACp1), '.']);
 %             
 %             opts = odeset('AbsTol', 100*eps, 'RelTol', 100*eps, 'Jacobian', OPTIONS.Jacobian);
-%             [~,Y45] = ode45(OdeFunction, [T T+H(IDX(k))], Y(:,IDX(k)), opts);
+%             [~,Y45] = ode45(OdeFunction, [T T+H], Y, opts);
 %     
 %             disp(['ODE45: E = ', num2str(max(rms((Ynew - Y45(end,:)')./SCAL), 1e-10))])
     
@@ -198,25 +200,25 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             % Check the error magnitude and adjust the step size
             ISTATUS.Nstp = ISTATUS.Nstp + 1;
-            if (~RejectFlag) && ( ( E <= 1.0 ) || ( H(IDX(k)) <= OPTIONS.Hmin ) ) 
+            if (~RejectFlag) && ( ( E <= 1.0 ) || ( H <= OPTIONS.Hmin ) ) 
                 ISTATUS.Nacc = ISTATUS.Nacc + 1;
                 
                 % Update time
-                T = T + Direction*H(IDX(k));          
+                T = T + Direction*H;          
                 
                 %keyboard
                 
                 % Update solution
-                Y(:,IDX(1)) = Ynew;
+                Y = Ynew;
                 
                 % New step size is bounded by FacMin <= Hnew/H <= FacMax
                 FACm1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeLow*usFACm1 ) );
                 FAC   = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafe*usFAC ) );
                 FACp1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeHigh*usFACp1 ) );
                 
-                HNm1 = H(IDX(k))*FACm1;
-                HN   = H(IDX(k))*FAC;
-                HNp1 = H(IDX(k))*FACp1;
+                HNm1 = H*FACm1;
+                HN   = H*FAC;
+                HNp1 = H*FACp1;
             
                 % Select new order and stepsize
                 % Choose the order that corresponds with the maximal H
@@ -226,17 +228,15 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                     Hnew = HNm1;
                     Knew = Order-1;
                 end
-                if ( HNp1 > Hnew && Order ~= OPTIONS.MaxOrder && Order+1 < nnz(H) )
+                if ( HNp1 > Hnew && Order < OPTIONS.MaxOrder && Order+1 < ISTATUS.Nacc )
                     Hnew = HNp1;
                     Knew = Order+1;
                 end
                 if ( RejectLastH ) % No step size or order increase after a rejected step
-                    Hnew = min( Hnew, H(IDX(k)) );
+                    Hnew = min( Hnew, H );
                     Knew = min( Knew, Order );
                 end
                 Hnew = max(OPTIONS.Hmin, min(Hnew, OPTIONS.Hmax)); % apply user-defined limits on Hnew
-                H(IDX(1)) = Hnew;
-                Order = Knew;
                 
                 % Update Memory Allocation
                 if ( (ISTATUS.Nacc > OPTIONS.ChunkSize*ISTATUS.Nchk) && (OPTIONS.storeCheckpoint == true) )
@@ -251,32 +251,38 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 end                
                 
                 % Last T and H
-                RSTATUS.Nhexit = H(IDX(k));
+                RSTATUS.Nhexit = H;
                 RSTATUS.Nhnew = Hnew;
                 RSTATUS.Ntexit = T;
+                
+                H = Hnew;
+                Order = Knew;
                 
                 RejectLastH = false;
                 RejectMoreH = false;
                 acceptStep = true;
                 
+                % advance LMM internal state
+                LMM_state = LMM_struct.stateAdvance(LMM_state, Hnew, Ynew);
+                
                 % cycle IDX for circular buffer
-                tmp = IDX(1);
-                for j = 1:k-1
-                    IDX(j) = IDX(j+1);
-                end
-                IDX(k) = tmp;
+%                 tmp = IDX(1);
+%                 for j = 1:k-1
+%                     IDX(j) = IDX(j+1);
+%                 end
+%                 IDX(k) = tmp;
                 
                 % for debugging
                 if ( OPTIONS.displaySteps == true )
                     optstr = [' Order = ', num2str(Order), '; E = ', num2str(E), '.'];
-                    str = ['Accepted step.', optstr, ' Time = ', num2str(T), '; Stepsize = ', num2str(H(IDX(k)))];
+                    str = ['Accepted step.', optstr, ' Time = ', num2str(T), '; Stepsize = ', num2str(H)];
                     disp(str);
                 end
                 
             else % Reject step
                 
                 if ( RejectMoreH )
-                    Hnew = H(IDX(k))*OPTIONS.FacRej;
+                    Hnew = H*OPTIONS.FacRej;
                     if (Order > 1)
                         Order = Order - 1;
                     end
@@ -284,10 +290,10 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                     FACm1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, 0.9*OPTIONS.FacSafeLow*usFACm1 ) );
                     FAC   = min( OPTIONS.FacMax, max( OPTIONS.FacMin, 0.9*OPTIONS.FacSafe*usFAC ) );
                     
-                    HNm1 = H(IDX(k))*FACm1;
-                    HN   = H(IDX(k))*FAC;
+                    HNm1 = H*FACm1;
+                    HN   = H*FAC;
                     
-                    Hnew = min(H(IDX(k)), max(HN, HNm1));
+                    Hnew = min(H, max(HN, HNm1));
                     if (Order > 1 && HNm1 >= HN)
                        Order = Order - 1;
                     end
@@ -296,7 +302,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 
                 RejectMoreH = RejectLastH;
                 RejectLastH = true;
-                H(IDX(k)) = Hnew;
+                H = Hnew;
+                LMM_state = LMM_struct.stateUpdateH(LMM_state, Hnew);
                 
                 if ( ISTATUS.Nacc >= 1 ) 
                     ISTATUS.Nrej = ISTATUS.Nrej + 1;
@@ -305,7 +312,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 % for debugging
                 if ( OPTIONS.displaySteps == true )
                     optstr = [' Order = ', num2str(Order), '; E = ', num2str(E), '.'];
-                    str = ['Rejected step.', optstr, ' Time = ', num2str(T), '; Stepsize = ', num2str(H(IDX(k)))];
+                    str = ['Rejected step.', optstr, ' Time = ', num2str(T), '; Stepsize = ', num2str(H)];
                     disp(str);
                 end
                 
@@ -324,7 +331,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
         Yout(:,ISTATUS.Nacc+1:end) = [];
     else
         Tout = T;
-        Yout = Y(:,IDX(k));
+        Yout = Y;
     end
     Yout = transpose(Yout);
 

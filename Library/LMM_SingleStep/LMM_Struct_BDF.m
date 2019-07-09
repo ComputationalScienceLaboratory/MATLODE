@@ -6,9 +6,48 @@ function [lmms] = LMM_Struct_BDF()
  
  % Compute the results for 1 step of the method.
  lmms.onestep = @BDF_Onestep;
+ 
+ % Initialize BDF internal state.
+ lmms.stateInit = @BDF_stateInit;
+ 
+ % Advance BDF internal state by 1 step.
+ lmms.stateAdvance = @BDF_stateAdvance;
+ 
+% Update timestep size
+ lmms.stateUpdateH = @BDF_stateUpdateH;
+
+ end
+
+function [state] = BDF_stateInit(MaxOrder, NVAR, Y0, H)
+% Initialize BDF internal state and return the state object.
+
+  state.K = MaxOrder + 1;
+  state.Y = [zeros(NVAR, state.K-1), Y0];
+  state.H = [zeros(1,state.K-1), H];
+  state.IDX = 1:state.K; % Y(IDX(k)) is always the current Y, and accepted Ynew are stored in Y(IDX(1)).
 
 end
 
+function [state] = BDF_stateAdvance(state, Hnew, Ynew)
+% Advance BDF internal state by one step and return the state object.
+
+  state.Y(:,state.IDX(1)) = Ynew;
+  state.H(state.IDX(1)) = Hnew;
+  
+  tmp = state.IDX(1);
+  for j = 1:state.K-1
+      state.IDX(j) = state.IDX(j+1);
+  end
+  state.IDX(state.K) = tmp;
+
+end
+
+function [state] = BDF_stateUpdateH(state, Hnew)
+% Update stepsize H after rejected step.
+
+  state.H(state.IDX(state.K)) = Hnew;
+
+end
 
 function [coeffs] = BDF_Coefficients()
 % Preload all coefficient functions
@@ -48,27 +87,34 @@ function [alphas] = BDF_Coeff_Alpha(Coeffs, Order, H, k)
 
 end
 
-function [Yp, YE, ELO, H, RejectStep, ISTATUS] = BDF_Onestep(Order, H, Y, F, k, IDX, Jacobian, dFdT, T, Coefficients, OdeFunction, OPTIONS, ISTATUS)
+function [Yp, YE, ELO, H, RejectStep, State, ISTATUS] = BDF_Onestep(Order, H, Y, F, Jacobian, dFdT, T, State, Coefficients, OdeFunction, OPTIONS, ISTATUS)
 
 % a_(n+1) y_(n+1) + sum_i a_(n-i+1) y_(n-i+1) - h_n f(y_(n+1)) = 0
 
+% Debug
+assert(H == State.H(State.IDX(State.K)),['H = ', num2str(H), ' State.H = ', num2str(State.H(State.IDX)), ' diff H = ', num2str(H - State.H(State.IDX(State.K)))])
+assert(sum(Y - State.Y(:,State.IDX(State.K))) < 20*eps)
 
     methods = 1:3;
     if (Order == 1)
         methods = methods(2:end);
     end
-    if (Order + 1 > nnz(H))
+    if (Order + 1 > nnz(State.H))
         methods = methods(1:end-1);
     end
+    
+    % shorthand
+    k = State.K;
+    IDX = State.IDX;
     
     RejectStep = false;
     ShrinkStep = false;
     shrinkCount = 0;
     Fac = 0.3;
     
-    normY = norm(Y(:,IDX(k)));
+    normY = norm(Y);
     
-    NVAR = length(Y(:,IDX(k)));
+    NVAR = length(Y);
     
     %keyboard
     
@@ -76,30 +122,30 @@ function [Yp, YE, ELO, H, RejectStep, ISTATUS] = BDF_Onestep(Order, H, Y, F, k, 
     while ~NewtonDone
 
         % get coefficients for current stepsizes
-        alpha = Coefficients.alpha(Coefficients, Order, H(IDX), k);
+        alpha = Coefficients.alpha(Coefficients, Order, State.H(IDX), k);
 
-        Ynew = repmat(Y(:,IDX(k)), [1,3]);
+        Ynew = repmat(Y, [1,3]);
         
         % solve for 1 method at a time
         for j = methods
 
-            Fnew = F(:,IDX(k));
+            Fnew = F;
             Jac = Jacobian;
             SkipLU = false;
             SkipJac = true;
             LHS = struct;
             
             % build Newton iteration invariant RHS
-            RHSfixed = Y(:,IDX) * alpha(1:end-1,j);
+            RHSfixed = State.Y(:,IDX) * alpha(1:end-1,j);
             
-            Ynew(:,j) = (1/alpha(end,j)) * (H(IDX(k))*Fnew - RHSfixed);
+            Ynew(:,j) = (1/alpha(end,j)) * (H*Fnew - RHSfixed);
 
             % Begin Newton iterations
             for iter = 1:OPTIONS.NewtonMaxIt
 
                 % evaluate Jacobian
                 if (~SkipJac)
-                    [Jac, ISTATUS] = EvaluateJacobian(T+H(IDX(k)), Ynew(:,j), Fnew, OPTIONS, ISTATUS);
+                    [Jac, ISTATUS] = EvaluateJacobian(T+H, Ynew(:,j), Fnew, OPTIONS, ISTATUS);
                     SkipJac = true;
                 end
                 
@@ -107,23 +153,23 @@ function [Yp, YE, ELO, H, RejectStep, ISTATUS] = BDF_Onestep(Order, H, Y, F, k, 
                 if (~SkipLU)
                     if (~OPTIONS.MatrixFree)
                         if issparse(Jacobian)
-                            J = alpha(end,j) * speye(NVAR) - H(IDX(k)) * Jac;
+                            J = alpha(end,j) * speye(NVAR) - H * Jac;
                             [LHS.L, LHS.U, LHS.P, LHS.Q, LHS.R] = lu(J);
                         else
-                            J = alpha(end,j) * eye(NVAR) - H(IDX(k)) * Jac;
+                            J = alpha(end,j) * eye(NVAR) - H * Jac;
                             [LHS.L, LHS.U, LHS.p] = lu(J, 'vector');
                         end
                     else % for MatrixFree operation, build J*v function handle
-                        LHS.jv = @(v)(alpha(end,j) * v - H(IDX(k)) * Jac(v));
+                        LHS.jv = @(v)(alpha(end,j) * v - H * Jac(v));
                     end
                     SkipLU = true;
                 end
                 
                 % evaluate F
-                Fnew = OdeFunction(T + H(IDX(k)), Ynew(:,j));
+                Fnew = OdeFunction(T + H, Ynew(:,j));
                 
                 % build RHS
-                RHS = -(Ynew(:,j) * alpha(end,j) - H(IDX(k)) * Fnew + RHSfixed);
+                RHS = -(Ynew(:,j) * alpha(end,j) - H * Fnew + RHSfixed);
 
                 % solve linear system
                 if (~OPTIONS.MatrixFree)
@@ -198,9 +244,10 @@ function [Yp, YE, ELO, H, RejectStep, ISTATUS] = BDF_Onestep(Order, H, Y, F, k, 
             break;
         end
         if ( ShrinkStep )
-            %disp(['Im shrinking... Fac = ', num2str(Fac), '.']);
+            disp(['Im shrinking... Fac = ', num2str(Fac), '.']);
             shrinkCount = shrinkCount + 1;
-            H(IDX(k)) = max(OPTIONS.Hmin, min(Fac*H(IDX(k)), OPTIONS.Hmax));
+            State.H(IDX(k)) = max(OPTIONS.Hmin, min(Fac*H(IDX(k)), OPTIONS.Hmax));
+            H = State.H(IDX(k));
         end
 
     end % NewtonDone loop
@@ -210,9 +257,9 @@ function [Yp, YE, ELO, H, RejectStep, ISTATUS] = BDF_Onestep(Order, H, Y, F, k, 
     % Compute error estimates
     YE = zeros(NVAR,3);
     ELO = ones(1,3);
-    if ( nnz(H) < 2 ) % for the first step only
+    if ( nnz(State.H) < 2 ) % for the first step only
         assert(Order == 1, 'Order is not 1 for the first step.');
-        [Ypp1, failureFlag, ISTATUS] = Midpoint_onestep(H(IDX(k)), Y(:,IDX(k)), F(:,IDX(k)), Jacobian, T, OdeFunction, OPTIONS, ISTATUS);
+        [Ypp1, failureFlag, ISTATUS] = Midpoint_onestep(H, Y, F, Jacobian, T, OdeFunction, OPTIONS, ISTATUS);
 
         YE(:,1) = Yp - Ynew(:,1);
         YE(:,2) = Ypp1 - Yp;

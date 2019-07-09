@@ -1,11 +1,52 @@
 function [lmms] = LMM_Struct_LIMM()
-% Builds a LMM struct for a variable-stepsize BDF method.
+% Builds a LMM struct for a variable-stepsize LIMM method.
 
  % Precompute/preload coefficient matrices if possible.
  lmms.coefficients = @LIMM_Coefficients;
  
  % Compute the results for 1 step of the method.
  lmms.onestep = @LIMM_Onestep;
+
+ % Initialize LIMM internal state.
+ lmms.stateInit = @LIMM_stateInit;
+ 
+ % Advance LIMM internal state by 1 step.
+ lmms.stateAdvance = @LIMM_stateAdvance;
+ 
+ % Update timestep size
+ lmms.stateUpdateH = @LIMM_stateUpdateH;
+ 
+end
+
+function [state] = LIMM_stateInit(MaxOrder, NVAR, Y0, H)
+% Initialize BDF internal state and return the state object.
+
+  state.K = MaxOrder + 1;
+  state.Y = [zeros(NVAR, state.K-1), Y0];
+  state.F = zeros(NVAR, state.K);
+  state.H = [zeros(1,state.K-1), H];
+  state.IDX = 1:state.K; % Y(:,IDX(k)) is always the current Y, and accepted Ynew are stored in Y(IDX(1)).
+
+end
+
+function [state] = LIMM_stateAdvance(state, Hnew, Ynew)
+% Advance BDF internal state by one step and return the state object.
+
+  state.Y(:,state.IDX(1)) = Ynew;
+  state.H(state.IDX(1)) = Hnew;
+  
+  tmp = state.IDX(1);
+  for j = 1:state.K-1
+      state.IDX(j) = state.IDX(j+1);
+  end
+  state.IDX(state.K) = tmp;
+
+end
+
+function [state] = LIMM_stateUpdateH(state, Hnew)
+% Update stepsize H after rejected step.
+
+  state.H(state.IDX(state.K)) = Hnew;
 
 end
 
@@ -103,50 +144,59 @@ function [alphas, betas, gammas, gam] = LIMM_Coeffs(Coeffs, Order, H, k)
     
 end
 
-function [Yp, YE, ELO, H, RejectStep, ISTATUS] = LIMM_Onestep(Order, H, Y, F, k, IDX, Jacobian, dFdT, T, Coefficients, OdeFunction, OPTIONS, ISTATUS)
+function [Yp, YE, ELO, H, RejectStep, State, ISTATUS] = LIMM_Onestep(Order, H, Y, F, Jacobian, dFdT, T, State, Coefficients, OdeFunction, OPTIONS, ISTATUS)
 
-% a_(n+1) y_(n+1) + sum_i a_(n-i+1) y_(n-i+1) - h_n f(y_(n+1)) = 0
+% Debug
+assert(H == State.H(State.IDX(State.K)),['H = ', num2str(H), ' State.H = ', num2str(State.H(State.IDX)), ' diff H = ', num2str(H - State.H(State.IDX(State.K)))])
+assert(sum(Y - State.Y(:,State.IDX(State.K))) < 20*eps)
 
-    [alpha, beta, gamma, gam] = Coefficients.getCoeffs(Coefficients, Order, H(IDX), k);
+    % shorthand
+    IDX = State.IDX;
+    k = State.K;
+    
+    % add new function to state
+    State.F(:,IDX(k)) = F;
+
+    [alpha, beta, gamma, gam] = Coefficients.getCoeffs(Coefficients, Order, State.H(IDX), k);
     
     methods = 1:3;
     if (Order == 1)
         methods = methods(2:end);
     end
-    if (Order + 1 > nnz(H))
+    if (Order + 1 > nnz(State.H))
         methods = methods(1:end-1);
     end
     
     RejectStep = false;
-    NVAR = length(Y(:,IDX(k)));
+    NVAR = length(Y);
     Ynew = zeros(NVAR,3);
     
+    %keyboard
+    
     for i = methods
-
-        %keyboard
         
-        RHS = -(Y(:,IDX) * alpha(:,i)) + H(IDX(k)) * (F(:,IDX) * beta(:,i)) + H(IDX(k)) * Jacobian * (Y(:,IDX) * gamma(:,i));
+        RHS = -(State.Y(:,IDX) * alpha(:,i)) + H * (State.F(:,IDX) * beta(:,i)) + H * Jacobian * (State.Y(:,IDX) * gamma(:,i));
 
         if (~OPTIONS.MatrixFree)
-            LHS = speye(NVAR) - H(IDX(k)) * gam(i) * Jacobian;
+            LHS = speye(NVAR) - H * gam(i) * Jacobian;
             Ynew(:,i) = LHS\RHS;
             ISTATUS.Nsol = ISTATUS.Nsol + 1;
         else
-            LHS = @(v)(v - H(IDX(k)) * gam(i) * Jacobian(v));
+            LHS = @(v)(v - H * gam(i) * Jacobian(v));
             [dY, ISTATUS] = MatrixFreeSolve(LHS, RHS, OPTIONS, ISTATUS);
             Ynew(:,i) = dY;
         end
     end
     
-    Yp   = Ynew(:,2);
+    Yp = Ynew(:,2);
     
     % Compute error estimates
     YE = zeros(NVAR,3);
     ELO = ones(1,3);
     
-    if ( nnz(H) < 2 ) % for the first step only
+    if ( nnz(State.H) < 2 ) % for the first step only
         assert(Order == 1, 'Order is not 1 for the first step.');
-        [Ypp1, failureFlag, ISTATUS] = Rosenbrock2_onestep(H(IDX(k)), Y(:,IDX(k)), F(:,IDX(k)), Jacobian, T, OdeFunction, OPTIONS, ISTATUS);
+        [Ypp1, failureFlag, ISTATUS] = Rosenbrock2_onestep(H, Y, F, Jacobian, T, OdeFunction, OPTIONS, ISTATUS);
         Ynew(:,3) = Ypp1;
         if (failureFlag)
             warning('Rosenbrock2 failed to converge.');

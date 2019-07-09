@@ -1,4 +1,4 @@
-%% MATLODE_ROK_FWD_Integrator
+%% MATLODE_LMM_FWD_Integrator
 %
 % <html>
 %   <div>
@@ -7,9 +7,9 @@
 % </html>
 %
 %% Syntax
-%                    MATLODE_ROK_FWD_Integrator
-%         [ T, Y ] = MATLODE_ROK_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options)
-%  [ T, Y, Stats ] = MATLODE_ROK_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options)
+%                    MATLODE_LMM_FWD_Integrator
+%         [ T, Y ] = MATLODE_LMM_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options)
+%  [ T, Y, Stats ] = MATLODE_LMM_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options)
 %
 %% Input Parameters
 % |Ode_Function|: model function
@@ -28,23 +28,23 @@
 % |Stats|: integrator statistics
 %
 %% Description
-% Driver file to solve the system y' = F(t,y) using a Rosenbrock-Krylov (ROK)
+% Driver file to solve the system y' = F(t,y) using a Linear Multistep Method (LMM)
 % method.
 %
-% |MATLODE_ROK_FWD_Integrator| displays the available methods
+% |MATLODE_LMM_FWD_Integrator| displays the available methods
 % associated with the exponential forward integrator.
 %
-% |[T, Y] = MATLODE_ROK_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)|
+% |[T, Y] = MATLODE_LMM_FWD_Integrator(Ode_Function, Time_Interval, Y0, Options)|
 % computes the ODE solution with respect to the user supplied options
 % configuration.
 %
-% |[T, Y, Stats] = MATLODE_ROK_FWD_Integrator(Ode_Function, Time_Interval, Y0,
+% |[T, Y, Stats] = MATLODE_LMM_FWD_Integrator(Ode_Function, Time_Interval, Y0,
 % Options)| computes the ODE solution with respect to the user supplied
 % options configuration and returns the computation statistics.
 %
 %% Example
 % For the following examples we will use Arenstorf Orbit as a toy problem 
-% to illustrate |MATLODE_ROK_FWD_Integrator| functionalities and features.
+% to illustrate |MATLODE_LMM_FWD_Integrator| functionalities and features.
 % To initially setup Arenstorf Orbit, execute the MATLAB commands below to
 % load our input parameters into our workspace. 
 %
@@ -55,10 +55,10 @@
 %
 % Now that we have our model loaded in our workspace, we can perform a
 % forward exponential integration using MATLODE's prebuilt default
-% settings. We note that a Jacobian is required for an rosenbrock-krylov method.
+% settings. We note that a Jacobian is required for an linear multistep method.
 %
 %   Options  = MATLODE_OPTIONS('Jacobian',Ode_Jacobian);
-%   [ T, Y ] = MATLODE_ROK_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
+%   [ T, Y ] = MATLODE_LMM_FWD_Integrator(Ode_Function,Time_Interval,Y0,Options);
 %
 % Printing out our results, we can analyze our model state at our final
 % time.
@@ -67,13 +67,13 @@
 %   disp(Y);
 %
 % For addition examples, see Help -> Supplemental Software -> Examples ->
-% Forward Integration -> MATLODE_Example_ROK_FWD_Integrator.
+% Forward Integration -> MATLODE_Example_LMM_FWD_Integrator.
 %
 %% Contact Information
 %%
 % Dr. Adrian Sandu                 | Phone: (540) 231-2193 | Email: sandu@cs.vt.edu
 %%
-% Paul Tranquilli                  | Phone: (540) 231-6186 | Email: ptranq3@vt.edu 
+% Ross Glandon                     | Phone: (540) 231-6186 | Email: rossg42@vt.edu 
 %%
 % Computational Science Laboratory | Phone: (540) 231-6186
 %% Reference
@@ -111,7 +111,7 @@ function  [ Tout_FWD, Yout_FWD, Stats_FWD ] = MATLODE_LMM_FWD_Integrator( OdeFun
     adjQuadFlag  = false;      
     
     % Configure Options
-    [ OPTIONS, LMM_Struct ] = OPTIONS_Configuration(OPTIONS_U,'LMM','FWD',Y0, Tspan);
+    [ OPTIONS, LMM_Struct ] = OPTIONS_Configuration(OPTIONS_U, 'LMM', 'FWD', Y0, Tspan);
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Call Forwrad Method
