@@ -91,14 +91,23 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
     H = Direction*H;
     
     Y = Y0;
-    F = zeros(NVAR,1);
-    dFdT = zeros(NVAR,1);
+    
+    % Compute the function at initial time
+    F = OdeFunction( T, Y );
+    ISTATUS.Nfun = ISTATUS.Nfun + 1;
+    
+    % Compute the function derivative with respect to T
+    if ( ~OPTIONS.Autonomous )
+        [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, F, OdeFunction, ISTATUS );
+    else
+        dFdT = zeros(NVAR,1);
+    end
     
     Order = 1;
     
     % Preallocate integrator internal state
     Coefficients = LMM_struct.coefficients();
-    LMM_state    = LMM_struct.stateInit(OPTIONS.MaxOrder, NVAR, Y0, H);
+    LMM_state    = LMM_struct.stateInit(OPTIONS.MaxOrder, NVAR, Y, F, H);
     
 %     k = OPTIONS.MaxOrder + 1;
 %     Y = [zeros(NVAR, k-1), Y0];
@@ -126,15 +135,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
         if ( abs(Tfinal-T) < H )
             H = abs(Tfinal-T);
             LMM_state = LMM_struct.stateUpdateH(LMM_state, H);
-        end
-        
-        % Compute the function at current time
-        F = OdeFunction( T, Y );
-        ISTATUS.Nfun = ISTATUS.Nfun + 1;
-        
-        % Compute the function derivative with respect to T
-        if ( ~OPTIONS.Autonomous )
-            [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, F, OdeFunction, ISTATUS );
         end
         
         % Compute the Jacobian at current time
@@ -169,9 +169,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             % Compute error norm
             SCAL = OPTIONS.AbsTol + OPTIONS.RelTol.*max(abs(Y),abs(Ynew));
-%             Em1 = max(sqrt(sum((YE(:,1)./SCAL).^2)/NVAR), 1e-10);
-%             E   = max(sqrt(sum((YE(:,2)./SCAL).^2)/NVAR), 1e-10);
-%             Ep1 = max(sqrt(sum((YE(:,3)./SCAL).^2)/NVAR), 1e-10);
             Em1 = max(rms(YE(:,1)./SCAL), 1e-10);
             E   = max(rms(YE(:,2)./SCAL), 1e-10);
             Ep1 = max(rms(YE(:,3)./SCAL), 1e-10);
@@ -186,10 +183,9 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
 %             disp(['Order ', num2str(Order-1), ': E = ', num2str(Em1), ', FAC = ', num2str(usFACm1), '.']);
 %             disp(['Order ', num2str(Order), ': E = ', num2str(E), ', FAC = ', num2str(usFAC), '.']);
 %             disp(['Order ', num2str(Order+1), ': E = ', num2str(Ep1), ', FAC = ', num2str(usFACp1), '.']);
-%             
+
 %             opts = odeset('AbsTol', 100*eps, 'RelTol', 100*eps, 'Jacobian', OPTIONS.Jacobian);
 %             [~,Y45] = ode45(OdeFunction, [T T+H], Y, opts);
-%     
 %             disp(['ODE45: E = ', num2str(max(rms((Ynew - Y45(end,:)')./SCAL), 1e-10))])
     
             
@@ -262,8 +258,17 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 RejectMoreH = false;
                 acceptStep = true;
                 
+                % Compute the function at new time
+                F = OdeFunction( T, Y );
+                ISTATUS.Nfun = ISTATUS.Nfun + 1;
+                
+                % Compute the function derivative with respect to T
+                if ( ~OPTIONS.Autonomous )
+                    [ dFdT, ISTATUS ] = fatOde_FunctionTimeDerivative( T, Roundoff, Y, F, OdeFunction, ISTATUS );
+                end
+                
                 % advance LMM internal state
-                LMM_state = LMM_struct.stateAdvance(LMM_state, Hnew, Ynew);
+                LMM_state = LMM_struct.stateAdvance(LMM_state, H, Y, F, Order);
                 
                 % cycle IDX for circular buffer
 %                 tmp = IDX(1);

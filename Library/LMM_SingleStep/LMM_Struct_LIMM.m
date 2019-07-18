@@ -18,21 +18,22 @@ function [lmms] = LMM_Struct_LIMM()
  
 end
 
-function [state] = LIMM_stateInit(MaxOrder, NVAR, Y0, H)
-% Initialize BDF internal state and return the state object.
+function [state] = LIMM_stateInit(MaxOrder, NVAR, Y0, F0, H)
+% Initialize LIMM internal state and return the state object.
 
   state.K = MaxOrder + 1;
   state.Y = [zeros(NVAR, state.K-1), Y0];
-  state.F = zeros(NVAR, state.K);
+  state.F = [zeros(NVAR, state.K-1), F0];
   state.H = [zeros(1,state.K-1), H];
   state.IDX = 1:state.K; % Y(:,IDX(k)) is always the current Y, and accepted Ynew are stored in Y(IDX(1)).
 
 end
 
-function [state] = LIMM_stateAdvance(state, Hnew, Ynew)
-% Advance BDF internal state by one step and return the state object.
+function [state] = LIMM_stateAdvance(state, Hnew, Ynew, Fnew, ~)
+% Advance LIMM internal state by one step and return the state object.
 
   state.Y(:,state.IDX(1)) = Ynew;
+  state.F(:,state.IDX(1)) = Fnew;
   state.H(state.IDX(1)) = Hnew;
   
   tmp = state.IDX(1);
@@ -153,9 +154,6 @@ assert(sum(Y - State.Y(:,State.IDX(State.K))) < 20*eps)
     % shorthand
     IDX = State.IDX;
     k = State.K;
-    
-    % add new function to state
-    State.F(:,IDX(k)) = F;
 
     [alpha, beta, gamma, gam] = Coefficients.getCoeffs(Coefficients, Order, State.H(IDX), k);
     

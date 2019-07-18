@@ -449,6 +449,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
                     Coefficient = LMM_Struct_BDF();
                 case 2 % LIMM
                     Coefficient = LMM_Struct_LIMM();
+                case 3
+                    Coefficient = LMM_Struct_LIMMddif();
                 otherwise
                     Coefficient = LMM_Struct_BDF();
     end

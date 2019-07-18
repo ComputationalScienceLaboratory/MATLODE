@@ -13,12 +13,12 @@ function [lmms] = LMM_Struct_BDF()
  % Advance BDF internal state by 1 step.
  lmms.stateAdvance = @BDF_stateAdvance;
  
-% Update timestep size
+ % Update timestep size
  lmms.stateUpdateH = @BDF_stateUpdateH;
-
+ 
  end
 
-function [state] = BDF_stateInit(MaxOrder, NVAR, Y0, H)
+function [state] = BDF_stateInit(MaxOrder, NVAR, Y0, ~, H)
 % Initialize BDF internal state and return the state object.
 
   state.K = MaxOrder + 1;
@@ -28,7 +28,7 @@ function [state] = BDF_stateInit(MaxOrder, NVAR, Y0, H)
 
 end
 
-function [state] = BDF_stateAdvance(state, Hnew, Ynew)
+function [state] = BDF_stateAdvance(state, Hnew, Ynew, ~, ~)
 % Advance BDF internal state by one step and return the state object.
 
   state.Y(:,state.IDX(1)) = Ynew;
