@@ -118,12 +118,12 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
             case 'SDIRK'
                 OPTIONS.FacMax = 10.0;
             case 'LMM'
-                OPTIONS.FacMax = 5.0;
+                OPTIONS.FacMax = 4.0;
         end
     elseif ( OPTIONS.FacMax > 0.0 )
         % DO NOTHING: User supplied or fine tuned value.
     else
-        str = ['Error: User selected FacMax: ', num2str(OPTIONS.FacMax), '. FacMin must be >= 0.' ];
+        str = ['Error: User selected FacMax: ', num2str(OPTIONS.FacMax), '. FacMax must be >= 0.' ];
         error(str);
     end
     
@@ -133,7 +133,7 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     elseif ( OPTIONS.FacRej > 0 )
         % DO NOTHING: User supplied or fine tuned value.
     else
-        str = [ 'Error: User selected FacRej: ', num2str(OPTIONS.FacRej), '. FacMax must be >= 0.' ];
+        str = [ 'Error: User selected FacRej: ', num2str(OPTIONS.FacRej), '. FacRej must be >= 0.' ];
         error(str);
     end
            
@@ -149,17 +149,21 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     
     % FacSafe[High, Low]
     if ( OPTIONS.FacSafeHigh == 0 )
-        OPTIONS.FacSafeHigh = 0.95;
+        OPTIONS.FacSafeHigh = 0.8;
     elseif ( OPTIONS.FacSafeHigh > 0.0 )
         % DO NOTHING: User supplied or fine tuned value.
+    elseif ( isempty(OPTIONS.FacSafeHigh) )
+        % DO NOTHING: FacSafeHigh is not required by specified integrator.
     else
         str = [ 'Error: User selected FacSafeHigh: ', num2str(OPTIONS.FacSafeHigh), '. FacSafeHigh must be >= 0.' ];
         error(str);
     end
     if ( OPTIONS.FacSafeLow == 0 )
-        OPTIONS.FacSafeLow = 0.8;
+        OPTIONS.FacSafeLow = 0.7;
     elseif ( OPTIONS.FacSafeLow > 0.0 )
         % DO NOTHING: User supplied or fine tuned value.
+    elseif ( isempty(OPTIONS.FacSafeLow) )
+        % DO NOTHING: FacSafeLow is not required by specified integrator.
     else
         str = [ 'Error: User selected FacSafeLow: ', num2str(OPTIONS.FacSafeLow), '. FacSafeLow must be >= 0.' ];
         error(str);
@@ -265,6 +269,8 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
     % MaxOrder
     if ( OPTIONS.MaxOrder == 0 )
         OPTIONS.MaxOrder = 5; % Maximum order for both BDF and LIMM methods
+    elseif ( isempty(OPTIONS.MaxOrder) )
+        % DO NOTHING: MaxOrder is not required by specified integrator.
     elseif ( OPTIONS.MaxOrder > 0 && OPTIONS.MaxOrder < 6 )
         % DO NOTHING: User setting
     else
@@ -446,13 +452,14 @@ function [ OPTIONS, Coefficient ] = OPTIONS_GeneralConfiguration( OPTIONS, famil
         case 'LMM'
             switch( OPTIONS.Method )
                 case 1 % BDF
-                    Coefficient = LMM_Struct_BDF();
+                    Coefficient = LMM_Struct_BDFddif();
                 case 2 % LIMM
-                    Coefficient = LMM_Struct_LIMM();
-                case 3
                     Coefficient = LMM_Struct_LIMMddif();
+                case 3 % LIMW
+                    Coefficient = LMM_Struct_LIMWddif();
                 otherwise
-                    Coefficient = LMM_Struct_BDF();
+                    Coefficient = LMM_Struct_BDFddif();
+            end
     end
     
     % Max_no_steps

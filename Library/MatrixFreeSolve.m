@@ -1,6 +1,6 @@
 function [X, ISTATUS, gmresFlag, singFlag] = MatrixFreeSolve(LHS, RHS, OPTIONS, ISTATUS)
 % wrap gmres and it's warnings
-    [X, gmresFlag, ~, iter] = gmres(LHS, RHS, OPTIONS.GMRES_Restart, OPTIONS.GMRES_TOL, OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
+    [X, gmresFlag, ~, iter] = gmres(LHS, RHS, OPTIONS.GMRES_Restart, OPTIONS.GMRES_TOL, min(OPTIONS.GMRES_MaxIt,length(RHS)), OPTIONS.GMRES_P);
     ISTATUS.Nsol = ISTATUS.Nsol + 1;
 
     if ( ~isempty(OPTIONS.GMRES_Restart) )
@@ -10,6 +10,7 @@ function [X, ISTATUS, gmresFlag, singFlag] = MatrixFreeSolve(LHS, RHS, OPTIONS, 
     end
     ISTATUS.Njac =  ISTATUS.Njac + vecCount;
 
+    singFlag = 0;
     if( gmresFlag ~= 0 )
         resvec = abs(LHS(X) - RHS);
         scalar = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(RHS);

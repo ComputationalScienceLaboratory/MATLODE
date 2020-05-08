@@ -1,25 +1,25 @@
-function [lmms] = LMM_Struct_LIMMddif()
-% Builds a LMM struct for a variable-stepsize LIMM method.
+function [lmms] = LMM_Struct_LIMWddif()
+% Builds a LMM struct for a variable-stepsize LIMW method.
 
  % Precompute/preload coefficient matrices if possible.
- lmms.coefficients = @LIMMddif_Coefficients;
+ lmms.coefficients = @LIMWddif_Coefficients;
  
  % Compute the results for 1 step of the method.
- lmms.onestep = @LIMMddif_Onestep;
+ lmms.onestep = @LIMWddif_Onestep;
 
- % Initialize LIMM internal state.
- lmms.stateInit = @LIMMddif_stateInit;
+ % Initialize LIMW internal state.
+ lmms.stateInit = @LIMWddif_stateInit;
  
- % Advance LIMM internal state by 1 step.
- lmms.stateAdvance = @LIMMddif_stateAdvance;
+ % Advance LIMW internal state by 1 step.
+ lmms.stateAdvance = @LIMWddif_stateAdvance;
  
  % Update timestep size
- lmms.stateUpdateH = @LIMMddif_stateUpdateH;
+ lmms.stateUpdateH = @LIMWddif_stateUpdateH;
  
 end
 
-function [state] = LIMMddif_stateInit(MaxOrder, NVAR, Y0, F0, H)
-% Initialize LIMM internal state and return the state object.
+function [state] = LIMWddif_stateInit(MaxOrder, NVAR, Y0, F0, H)
+% Initialize LIMW internal state and return the state object.
 
   state.NVAR = NVAR;
   state.K = MaxOrder + 3; % 0-K+2
@@ -30,8 +30,8 @@ function [state] = LIMMddif_stateInit(MaxOrder, NVAR, Y0, F0, H)
 
 end
 
-function [state] = LIMMddif_stateAdvance(state, Hnew, Ynew, Fnew, Order)
-% Advance LIMM internal state by one step and return the state object.
+function [state] = LIMWddif_stateAdvance(state, Hnew, Ynew, Fnew, Order)
+% Advance LIMW internal state by one step and return the state object.
 
   Hsums = cumsum(state.H);
 
@@ -63,14 +63,14 @@ function [state] = LIMMddif_stateAdvance(state, Hnew, Ynew, Fnew, Order)
 
 end
 
-function [state] = LIMMddif_stateUpdateH(state, Hnew)
+function [state] = LIMWddif_stateUpdateH(state, Hnew)
 % Update current stepsize H.
 
   state.H(1) = Hnew;
 
 end
 
-function [c] = LIMMddif_cell_eval(w, coeffF)
+function [c] = LIMWddif_cell_eval(w, coeffF)
 % Evaluate a function with multple arguments from a single array.
 
     wc = num2cell(w);
@@ -78,7 +78,7 @@ function [c] = LIMMddif_cell_eval(w, coeffF)
     
 end
 
-function [coeffs] = LIMMddif_Coefficients()
+function [coeffs] = LIMWddif_Coefficients()
 % Preload all coefficient functions with direct expressions
 
     coeffs.maxOrder = 5;
@@ -88,23 +88,23 @@ function [coeffs] = LIMMddif_Coefficients()
     coeffs.gamma = {};
     coeffs.err = {};
     for k = 1:coeffs.maxOrder
-        [c, d, e, gamma, err] = limm_expr_ddif_o16(k);
+        [c, d, e, gamma, err] = limw_expr_ddif_o15(k);
         coeffs.c{k} = c;
         coeffs.d{k} = d;
         coeffs.e{k} = e;
         coeffs.gamma{k} = gamma;
         coeffs.err{k} = err;
-%         coeffs.c{k} = @(w)LIMMddif_cell_eval(w, c);
-%         coeffs.d{k} = @(w)LIMMddif_cell_eval(w, d);
-%         coeffs.e{k} = @(w)LIMMddif_cell_eval(w, e);
-%         coeffs.gamma{k} = @(w)LIMMddif_cell_eval(w, gamma);
-%         coeffs.err{k} = @(w)LIMMddif_cell_eval(w, err);
+%         coeffs.c{k} = @(w)LIMWddif_cell_eval(w, c);
+%         coeffs.d{k} = @(w)LIMWddif_cell_eval(w, d);
+%         coeffs.e{k} = @(w)LIMWddif_cell_eval(w, e);
+%         coeffs.gamma{k} = @(w)LIMWddif_cell_eval(w, gamma);
+%         coeffs.err{k} = @(w)LIMWddif_cell_eval(w, err);
     end
-    coeffs.getCoeffs = @LIMMddif_Coeffs;
+    coeffs.getCoeffs = @LIMWddif_Coeffs;
     
 end
 
-function [coeffs] = LIMMddif_Coefficients_T()
+function [coeffs] = LIMWddif_Coefficients_T()
 % Preload all coefficient functions using Tensor form
 
     coeffs.maxOrder = 6;
@@ -122,12 +122,12 @@ function [coeffs] = LIMMddif_Coefficients_T()
         coeffs.gamma{k} = @(w)limm_tensor_eval(w, gamma);
         coeffs.err{k}  = @(w)limm_tensor_eval(w, err);
     end
-    coeffs.getCoeffs = @LIMMddif_Coeffs;
+    coeffs.getCoeffs = @LIMWddif_Coeffs;
     
 end
 
-function [c, d, e, gamma, err] = LIMMddif_Coeffs(Coeffs, Order, H, k)
-% Returns the [c, d, e, gamma, err] coefficients for LIMM with the current steps
+function [c, d, e, gamma, err] = LIMWddif_Coeffs(Coeffs, Order, H, k)
+% Returns the [c, d, e, gamma, err] coefficients for LIMW with the current steps
 % for order p.
 
     w = H(2:end) ./ H(1);
@@ -154,7 +154,7 @@ function [c, d, e, gamma, err] = LIMMddif_Coeffs(Coeffs, Order, H, k)
     
 end
 
-function [Ynew, YE, ELO, H, StepChanged, RejectStep, State, ISTATUS] = LIMMddif_Onestep(Order, H, Y, F, Jacobian, dFdT, T, State, Coefficients, OdeFunction, OPTIONS, ISTATUS)
+function [Ynew, YE, ELO, H, StepChanged, RejectStep, State, ISTATUS] = LIMWddif_Onestep(Order, H, Y, F, Jacobian, dFdT, T, State, Coefficients, OdeFunction, OPTIONS, ISTATUS)
 
     % debug
     assert(H == State.H(1), ['H = ', num2str(H), ', State.H = ', num2str(State.H)]);

@@ -143,9 +143,6 @@ function [ OPTIONS ] = OPTIONS_Merge( OPTIONS_U, OPTIONS )
     if ( ~isempty(OPTIONS_U.Hstart) == true )
         OPTIONS.Hstart = OPTIONS_U.Hstart;
     end
-    if ( ~isempty(OPTIONS_U.IOArnoldi) == true )
-        OPTIONS.IOArnoldi = OPTIONS_U.IOArnoldi;
-    end
     if ( ~isempty(OPTIONS_U.JacobianAdjointVec) == true )
         OPTIONS.JacobianAdjointVec = OPTIONS_U.JacobianAdjointVec;
     end

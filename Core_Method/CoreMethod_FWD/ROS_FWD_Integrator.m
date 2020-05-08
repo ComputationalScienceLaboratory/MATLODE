@@ -153,27 +153,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
         end
         
         % Compute the Jacobian at current time
-        if ( ~OPTIONS.MatrixFree )
-            fjac = OPTIONS.Jacobian(T,Y);
-            ISTATUS.Njac = ISTATUS.Njac + 1;
-        else
-            if( ~isempty(OPTIONS.Jacobian) )
-                if( nargin(OPTIONS.Jacobian) == 3 )
-                    fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
-                elseif( nargin( OPTIONS.Jacobian )== 2 )
-                    Jac = OPTIONS.Jacobian(T,Y);
-                    %ISTATUS.Njac = ISTATUS.Njac + 1;
-                    fjac = @(vee)(Jac*vee);
-                else
-                    error('Jacobian function takes a fucked up number of variables.')
-                end
-            else
-               % Fcn0 = OdeFunction(T,Y);
-	       % ISTATUS.Nfun= ISTATUS.Nfun+1;
-                normy = norm(Y);
-                fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
-            end
-        end
+        [fjac, ISTATUS] = EvaluateJacobian(T, Y, Fcn0, OdeFunction, OPTIONS, ISTATUS);
         
         % Repeat step calculation until current step accepted
         accepted = false;
@@ -189,7 +169,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 ISING = 0;
             end
             
-            if ( ISING ~= 0 || singCount >= 15 ) % More than 5 consecutive failed decompositions
+            if ( ISING ~= 0 || singCount >= 5 ) % More than 5 consecutive failed decompositions
                 error('Matrix is repeatedly singular');
             end
             
@@ -210,7 +190,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                     end
                 elseif ( ros_NewF(istage) )
                     Ynew = Y;
-                    for j=1:istage-1;
+                    for j=1:istage-1
                         Ynew = Ynew + ros_A((istage-1)*(istage-2)/2+j)*K(NVAR*(j-1)+1:NVAR*(j-1)+NVAR);
                     end
                     Tau = T + ros_Alpha(istage)*Direction*H;
@@ -236,41 +216,50 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = ROS_FWD
                 
                 % Solve the system
                 if ( ~OPTIONS.MatrixFree )
-                    K(ioffset+1:ioffset+NVAR) = e\K(ioffset+1:ioffset+NVAR);
-                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
-                else
-                    [ tempK, gmresFlag, ~, iter] = ...
-                        gmres(e, K(ioffset+1:ioffset+NVAR), ...
-                        OPTIONS.GMRES_Restart,...
-                        OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
-                    
-                    if ( ~isempty(OPTIONS.GMRES_Restart) )
-                         vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
+                    RHS  = K(ioffset+1:ioffset+NVAR);
+                    if issparse(fjac)
+                        K(ioffset+1:ioffset+NVAR) = e.Q * (e.U \ (e.L \ (e.P * (e.R \ RHS))));
                     else
-                         vecCount = iter(2);
+                        K(ioffset+1:ioffset+NVAR) = e.U \ (e.L \ RHS(e.p));
                     end
-                    ISTATUS.Njac =  ISTATUS.Njac + vecCount;
+                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
                     
-                    if( gmresFlag ~= 0 )
-                        resvec = abs(e(tempK) - K(ioffset+1:ioffset+NVAR));
-                        scalar = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(K(ioffset+1:ioffset+NVAR));
-                        if (norm(resvec./scalar) > sqrt(NVAR))
-                            singCount = singCount + 1;
-                            switch(gmresFlag)
-                                case 1
-                                    warning('GMRES: iterated MAXIT times but did not converge');
-                                    break;
-                                case 2
-                                    warning('GMRES: preconditioner M was ill-conditioned');
-                                    break;
-                                case 3
-                                    warning('GMRES: stagnated (two consecutive iterates were the same)');
-                                    break;
-                            end
-                        else
-                            gmresFlag = 0;
-                        end
+%                     [ tempK, bicgFlag, ~, iter] = ...
+%                         bicg(e, K(ioffset+1:ioffset+NVAR), ...
+%                              OPTIONS.GMRES_TOL, OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
+%                     ISTATUS.Nsol = ISTATUS.Nsol + 1;
+%                     
+%                     ISTATUS.Njac =  ISTATUS.Njac + iter;
+%                     
+%                     if( bicgFlag ~= 0 )
+%                         resvec = abs(e*tempK - K(ioffset+1:ioffset+NVAR));
+%                         scalar = OPTIONS.AbsTol + OPTIONS.RelTol.*abs(K(ioffset+1:ioffset+NVAR));
+%                         if (norm(resvec./scalar) > sqrt(NVAR))
+%                             singCount = singCount + 1;
+%                             switch(bicgFlag)
+%                                 case 1
+%                                     warning('BICG: iterated MAXIT times but did not converge');
+%                                     break;
+%                                 case 2
+%                                     warning('BICG: preconditioner M was ill-conditioned');
+%                                     break;
+%                                 case 3
+%                                     warning('BICG: stagnated (two consecutive iterates were the same)');
+%                                     break;
+%                                 case 4
+%                                     warning('BICG: One of the scalar quantities became too small or too large to continue computing.');
+%                                     break;
+%                             end
+%                         else
+%                             bicgFlag = 0;
+%                         end
+%                     end
+%                     K(ioffset+1:ioffset+NVAR) = tempK;
+
+                else
+                    [tempK, ISTATUS, gmresFlag, singFlag] = MatrixFreeSolve(e, K(ioffset+1:ioffset+NVAR), OPTIONS, ISTATUS);
+                    if singFlag
+                        singCount = singCount + 1;
                     end
                     K(ioffset+1:ioffset+NVAR) = tempK;
                 end

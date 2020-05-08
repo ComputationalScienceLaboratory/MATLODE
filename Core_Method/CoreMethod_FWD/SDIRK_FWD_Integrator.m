@@ -123,40 +123,27 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 HGammaInv = 1.0/(H*rkGamma);
                 
                 % Compute the Jacobian
-                if ( ~SkipJac )
-                    if ( ~OPTIONS.MatrixFree )
-         		        fjac = OPTIONS.Jacobian(T,Y);
-          		  	    ISTATUS.Njac = ISTATUS.Njac + 1;
-                    else
-                        if( ~isempty(OPTIONS.Jacobian) )
-                            if( nargin(OPTIONS.Jacobian) == 3 )
-                    				fjac = @(vee)OPTIONS.Jacobian(T,Y,vee);
-                            elseif( nargin( OPTIONS.Jacobian )== 2 )
-                    				Jac = OPTIONS.Jacobian(T,Y);
-                    				%ISTATUS.Njac = ISTATUS.Njac + 1;
-                    				fjac = @(vee)(Jac*vee);
-                			else
-                    			error('Jacobian function takes an invalid number of variables.')
-                            end
-                        else
-                			Fcn0 = OdeFunction(T,Y);
-                            ISTATUS.Nfun = ISTATUS.Nfun+1;
-                			normy = norm(Y);
-                			fjac = @(v)Mat_Free_Jac(T,Y,v,OdeFunction,Fcn0,normy);
-                        end
-                    end
-                end
+                [fjac, ISTATUS] = EvaluateJacobian(T, Y, [], OdeFunction, OPTIONS, ISTATUS);
                 
                 % Decomposition
                 if ( ~OPTIONS.MatrixFree )
-                    e = -fjac + speye(NVAR,NVAR)*HGammaInv; % faster since sparse
-                    condNum = rcond(full(e));
+                    e = struct;
+                    if issparse(fjac)
+                        e1 = -fjac + HGammaInv * speye(NVAR);
+                        [e.L, e.U, e.P, e.Q, e.R] = lu(e1);
+                    else
+                        e1 = -fjac + HGammaInv * eye(NVAR);
+                        [e.L, e.U, e.p] = lu(e1, 'vector');
+                    end
+                    ad = abs(diag(e.U));
+                    condNum = max(ad)/min(ad); % rough estimate of condition number
+                    ISTATUS.Ndec = ISTATUS.Ndec + 1;
                 else
                     e = @(v)( HGammaInv*v -fjac(v));
                     condNum = 1; % Place Holder
                 end
                 
-                if ( condNum < 2.2204e-14 || gmresFlag ~= 0 ) % 2.2204e-14 = 100*eps
+                if ( condNum > 1/(100*eps) || gmresFlag ~= 0 )
                     ISING = true; % ising -> 1
                 else
                     ISING = false; % ising -> 0
@@ -248,40 +235,14 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
                 HGammaInv = 1.0/(H*rkGamma);
                 DZ = DZ*HGammaInv;
                 if( ~OPTIONS.MatrixFree )
-                    DZ = e\DZ;
+                    if issparse(fjac)
+                        DZ = e.Q * (e.U \ (e.L \ (e.P * (e.R \ DZ))));
+                    else
+                        DZ = e.U \ (e.L \ DZ(e.p));
+                    end
                     ISTATUS.Nsol = ISTATUS.Nsol + 1;
                 else
-                   [ DZ, gmresFlag, residual, iter ] = gmres(e, DZ, ...
-                        OPTIONS.GMRES_Restart,...
-                        OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt, OPTIONS.GMRES_P);
-                    ISTATUS.Nsol = ISTATUS.Nsol + 1;
-
-                    if ( ~isempty(OPTIONS.GMRES_Restart) )
-                         vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
-                    else
-                         vecCount = iter(2);
-                    end
-                    ISTATUS.Njac =  ISTATUS.Njac + vecCount;
-                    if( gmresFlag ~= 0 )
-                        %resvec = abs(e(tempDZ) - DZ);
-                        %SCAL = OPTIONS.NewtonTol + abs(DZ);
-                        %if ( norm(resvec./SCAL) > sqrt(NVAR) )
-                        %disp('269');
-                        if ( residual > 0.1 )
-                            switch(gmresFlag)
-                                case 1
-                                    warning('GMRES: iterated MAXIT times but did not converge');
-                                case 2
-                                    warning('GMRES: preconditioner M was ill-conditioned');
-                                case 3
-                                    warning('GMRES: stagnated (two consecutive iterates were the same)');
-                            end
-                            break;
-                        else
-                            gmresFlag = 0;
-                        end
-                    end
-                    
+                    [DZ, ISTATUS, gmresFlag, ~] = MatrixFreeSolve(e, DZ, OPTIONS, ISTATUS);
                 end
 
 
@@ -344,7 +305,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
         if ( GOTO_Tloop_Flag == true )
             GOTO_Tloop_Flag = false;
             continue; % Tloop
-        end;
+        end
         
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Error Estimation
@@ -361,8 +322,12 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
         HGammaInv = 1.0/( H*rkGamma );
         Yerr = Yerr*HGammaInv;
         if(~OPTIONS.MatrixFree)
-            Yerr = e\Yerr;
-            ISTATUS.Nsol = ISTATUS.Nsol + 1;       
+            if issparse(fjac)
+                Yerr = e.Q * (e.U \ (e.L \ (e.P * (e.R \ Yerr))));
+            else
+                Yerr = e.U \ (e.L \ Yerr(e.p));
+            end
+            ISTATUS.Nsol = ISTATUS.Nsol + 1;
         else
             [ tempYerr, gmresFlag, ~, iter ] = gmres(e, Yerr, ...
                 OPTIONS.GMRES_Restart,...
@@ -476,7 +441,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
             if ( OPTIONS.displaySteps == true )
                 str = [ 'Accepted step. Time = ', num2str(T), ';    Stepsize = ', num2str(H) ];
                 disp(str);
-            end;
+            end
 
         else % reject  
             if ( FirstStep || Reject )

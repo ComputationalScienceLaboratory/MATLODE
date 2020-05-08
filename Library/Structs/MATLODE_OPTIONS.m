@@ -671,7 +671,6 @@ Names = [
     'Hmax               '
     'Hmin               '
     'Hstart             '
-    'IOArnoldi          '
     'JacobianAdjointVec '
     'Jacp               '
     'TLMNewtonEst       '

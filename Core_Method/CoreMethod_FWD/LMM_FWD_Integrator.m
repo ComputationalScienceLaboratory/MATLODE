@@ -22,7 +22,7 @@
 %     Computing 36(3), A1313–A1338 
 %
 function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD_Integrator( OdeFunction,...
-        Tspan, Y0, OPTIONS, LMM_struct, adjStackFlag, adjQuadFlag )
+        Tspan, Y0, OPTIONS, LMM_struct, ~, ~ )
     
     %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%
     %OPTIONS.MaxOrder = 5;
@@ -109,14 +109,10 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
     Coefficients = LMM_struct.coefficients();
     LMM_state    = LMM_struct.stateInit(OPTIONS.MaxOrder, NVAR, Y, F, H);
     
-%     k = OPTIONS.MaxOrder + 1;
-%     Y = [zeros(NVAR, k-1), Y0];
-%     F = zeros(NVAR, k);
-%     H = [zeros(1,k-1), H];
-%     IDX = 1:k; % Y(IDX(k)) is always the current Y, and accepted Ynew are stored in Y(IDX(1)).
-    
+    SkipJac = false;
     RejectLastH = false;
     RejectMoreH = false;
+    NConsecutive = 0; % Count consecutive steps with identical stepsize and order.
         
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Time loop
@@ -135,10 +131,13 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
         if ( abs(Tfinal-T) < H )
             H = abs(Tfinal-T);
             LMM_state = LMM_struct.stateUpdateH(LMM_state, H);
+            NConsecutive = 0;
         end
         
         % Compute the Jacobian at current time
-        [fjac, ISTATUS] = EvaluateJacobian(T, Y, F, OPTIONS, ISTATUS);
+        if (~SkipJac)
+            [fjac, ISTATUS] = EvaluateJacobian(T, Y, F, OdeFunction, OPTIONS, ISTATUS);
+        end
         
         % Setup adjoint vector products
 %         if ( OPTIONS.BiOrthogonalLanczos )
@@ -162,7 +161,10 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
 %   New solutions
 
             % Ynew: Y(n+1) evaluated at Order, Ypm1: Y(n+1) eval at Order-1, Ypp1: Y(n+1) eval at Order+1
-            [Ynew, YE, ELO, H, RejectFlag, LMM_state, ISTATUS] = LMM_struct.onestep(Order, H, Y, F, fjac, dFdT, T, LMM_state, Coefficients, OdeFunction, OPTIONS, ISTATUS);
+            [Ynew, YE, ELO, H, StepChanged, RejectFlag, LMM_state, ISTATUS] = LMM_struct.onestep(Order, H, Y, F, fjac, dFdT, T, LMM_state, Coefficients, OdeFunction, OPTIONS, ISTATUS);
+            if StepChanged
+                NConsecutive = 0;
+            end
             
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %   Error Estimation
@@ -207,32 +209,40 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 % Update solution
                 Y = Ynew;
                 
-                % New step size is bounded by FacMin <= Hnew/H <= FacMax
-                FACm1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeLow*usFACm1 ) );
-                FAC   = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafe*usFAC ) );
-                FACp1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeHigh*usFACp1 ) );
+                NConsecutive = min(NConsecutive+1, OPTIONS.MaxOrder+2);
                 
-                HNm1 = H*FACm1;
-                HN   = H*FAC;
-                HNp1 = H*FACp1;
-            
-                % Select new order and stepsize
-                % Choose the order that corresponds with the maximal H
-                Hnew = HN;
-                Knew = Order;
-                if ( HNm1 > Hnew && Order ~= 1 )
-                    Hnew = HNm1;
-                    Knew = Order-1;
+                % Change stepsize/order only after enough consecutive steps
+                if NConsecutive >= Order+2
+                    % New step size is bounded by FacMin <= Hnew/H <= FacMax
+                    FACm1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeLow*usFACm1 ) );
+                    FAC   = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafe*usFAC ) );
+                    FACp1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeHigh*usFACp1 ) );
+
+                    HNm1 = H*FACm1;
+                    HN   = H*FAC;
+                    HNp1 = H*FACp1;
+
+                    % Select new order and stepsize
+                    % Choose the order that corresponds with the maximal H
+                    Hnew = HN;
+                    Knew = Order;
+                    if ( HNm1 > Hnew && Order ~= 1 )
+                        Hnew = HNm1;
+                        Knew = Order-1;
+                    end
+                    if ( HNp1 > Hnew && Order < OPTIONS.MaxOrder && Order+1 < ISTATUS.Nacc )
+                        Hnew = HNp1;
+                        Knew = Order+1;
+                    end
+                    if ( RejectLastH ) % No step size or order increase after a rejected step
+                        Hnew = min( Hnew, H );
+                        Knew = min( Knew, Order );
+                    end
+                    Hnew = max(OPTIONS.Hmin, min(Hnew, OPTIONS.Hmax)); % apply user-defined limits on Hnew
+                else
+                    Hnew = H;
+                    Knew = Order;
                 end
-                if ( HNp1 > Hnew && Order < OPTIONS.MaxOrder && Order+1 < ISTATUS.Nacc )
-                    Hnew = HNp1;
-                    Knew = Order+1;
-                end
-                if ( RejectLastH ) % No step size or order increase after a rejected step
-                    Hnew = min( Hnew, H );
-                    Knew = min( Knew, Order );
-                end
-                Hnew = max(OPTIONS.Hmin, min(Hnew, OPTIONS.Hmax)); % apply user-defined limits on Hnew
                 
                 % Update Memory Allocation
                 if ( (ISTATUS.Nacc > OPTIONS.ChunkSize*ISTATUS.Nchk) && (OPTIONS.storeCheckpoint == true) )
@@ -270,13 +280,6 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 % advance LMM internal state
                 LMM_state = LMM_struct.stateAdvance(LMM_state, H, Y, F, Order);
                 
-                % cycle IDX for circular buffer
-%                 tmp = IDX(1);
-%                 for j = 1:k-1
-%                     IDX(j) = IDX(j+1);
-%                 end
-%                 IDX(k) = tmp;
-                
                 % for debugging
                 if ( OPTIONS.displaySteps == true )
                     optstr = [' Order = ', num2str(Order), '; E = ', num2str(E), '.'];
@@ -292,8 +295,8 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                         Order = Order - 1;
                     end
                 else
-                    FACm1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, 0.9*OPTIONS.FacSafeLow*usFACm1 ) );
-                    FAC   = min( OPTIONS.FacMax, max( OPTIONS.FacMin, 0.9*OPTIONS.FacSafe*usFAC ) );
+                    FACm1 = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafeLow*usFACm1 ) );
+                    FAC   = min( OPTIONS.FacMax, max( OPTIONS.FacMin, OPTIONS.FacSafe*usFAC ) );
                     
                     HNm1 = H*FACm1;
                     HN   = H*FAC;
@@ -305,6 +308,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = LMM_FWD
                 end
                 Hnew = max( OPTIONS.Hmin, min( Hnew, OPTIONS.Hmax ) );
                 
+                NConsecutive = 0;
                 RejectMoreH = RejectLastH;
                 RejectLastH = true;
                 H = Hnew;

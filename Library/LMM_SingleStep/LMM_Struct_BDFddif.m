@@ -110,13 +110,14 @@ function [alpha, ahat, beta, bhat, err] = BDFddif_Coeffs(Coeffs, Order, H, k)
     
 end
 
-function [Ynew, YE, ELO, H, RejectStep, State, ISTATUS] = BDFddif_Onestep(Order, H, Y, F, Jacobian, dFdT, T, State, Coefficients, OdeFunction, OPTIONS, ISTATUS)
+function [Ynew, YE, ELO, H, StepChanged, RejectStep, State, ISTATUS] = BDFddif_Onestep(Order, H, Y, F, Jacobian, dFdT, T, State, Coefficients, OdeFunction, OPTIONS, ISTATUS)
 
     % debug
     assert(H == State.H(1), ['H = ', num2str(H), ', State.H = ', num2str(State.H)]);
     
     %disp(['norm(H*F - Ydif(:,2))/norm(H*F) = ', num2str(norm(State.H(2)*F - State.Ydif(:,2))/norm(State.H(2)*F))])
     
+    StepChanged = false;
     RejectStep = false;
     SkipLU = false;
     LHS = struct;
@@ -206,6 +207,8 @@ function [Ynew, YE, ELO, H, RejectStep, State, ISTATUS] = BDFddif_Onestep(Order,
                 shrinkCount = shrinkCount + 1;
                 State.H(1) = max(OPTIONS.Hmin, min(Fac*H(1), OPTIONS.Hmax));
                 H = State.H(1);
+                SkipLU = false;
+                StepChanged = true;
             
                 % Could also have logic to recompute Jacobian here...
             end

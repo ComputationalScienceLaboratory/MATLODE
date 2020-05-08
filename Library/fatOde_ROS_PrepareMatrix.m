@@ -27,16 +27,26 @@ function [ H, ISING, e, ISTATUS ] = fatOde_ROS_PrepareMatrix( NVAR, H, Direction
 
     Nconsecutive = 0;
     ISING = true;
+    e = struct;
 
     while ( ISING )
         % Construct Ghimj = 1/(H*ham) - Jac0
         ghinv = 1.0/(Direction*H*gam);
         
         % Compute LU decomposition
-        [ ISING, e ] = lss_decomp( NVAR, ghinv, fjac );
+        %[ ISING, e ] = lss_decomp( NVAR, ghinv, fjac );
+        if issparse(fjac)
+            e1 = -fjac + ghinv * speye(NVAR);
+            [e.L, e.U, e.P, e.Q, e.R] = lu(e1);
+        else
+            e1 = -fjac + ghinv * eye(NVAR);
+            [e.L, e.U, e.p] = lu(e1, 'vector');
+        end
+        ad = abs(diag(e.U));
+        ISING = max(ad)/min(ad) > 1/(100*eps); % rough estimate of condition number
         ISTATUS.Ndec = ISTATUS.Ndec + 1;
         
-        if ( ISING == 0 ) % If successful, done.
+        if ( ~ISING ) % If successful, done.
             ISING = false;
         else % If unsuccessful half the step size; If 5 consecutive fails then return.
             ISTATUS.Nsng = ISTATUS.Nsng + 1;
