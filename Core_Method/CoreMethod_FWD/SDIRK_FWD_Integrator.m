@@ -329,35 +329,7 @@ function [ Tout, Yout, ISTATUS, RSTATUS, Ierr, stack_ptr, quadrature ] = SDIRK_F
             end
             ISTATUS.Nsol = ISTATUS.Nsol + 1;
         else
-            [ tempYerr, gmresFlag, ~, iter ] = gmres(e, Yerr, ...
-                OPTIONS.GMRES_Restart,...
-                OPTIONS.GMRES_TOL,OPTIONS.GMRES_MaxIt);
-            ISTATUS.Nsol = ISTATUS.Nsol + 1;       
-            
-            if ( ~isempty(OPTIONS.GMRES_Restart) )
-                vecCount = iter(2) + (OPTIONS.GMRES_Restart - 1)*iter(1);
-            else
-                vecCount = iter(2);
-            end
-            ISTATUS.Njac =  ISTATUS.Njac + vecCount;
-            if(gmresFlag ~= 0)
-                %disp('378');
-                resvec = abs(e(tempYerr) - Yerr);
-                scalar = OPTIONS.AbsTol + OPTIONS.RelTol*abs(Yerr);
-                if ( norm(resvec./scalar) > sqrt(NVAR) )
-                    switch(gmresFlag)
-                        case 1
-                            warning('GMRES: iterated MAXIT times but did not converge');
-                        case 2
-                            warning('GMRES: preconditioner M was ill-conditioned');
-                        case 3
-                            warning('GMRES: stagnated (two consecutive iterates were the same)');
-                    end            
-                else
-                    gmresFlag = 0;
-                end
-            end
-            Yerr = tempYerr;
+            [Yerr, ISTATUS, gmresFlag, ~] = MatrixFreeSolve(e, Yerr, OPTIONS, ISTATUS);
         end
 
 

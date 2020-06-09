@@ -104,27 +104,28 @@ function [coeffs] = LIMMddif_Coefficients()
     
 end
 
-function [coeffs] = LIMMddif_Coefficients_T()
-% Preload all coefficient functions using Tensor form
-
-    coeffs.maxOrder = 6;
-    coeffs.c = {};
-    coeffs.d = {};
-    coeffs.e = {};
-    coeffs.gamma = {};
-    coeffs.err = {};
-    for k = 1:coeffs.maxOrder
-        [cstr, dstr, estr, gstr, rstr] = limm_ddif_o16(k);
-        [c, d, e, gamma, err] = limm_tensor_ddif(cstr, dstr, estr, gstr, rstr);
-        coeffs.c{k} = @(w)limm_tensor_eval(w, c);
-        coeffs.d{k} = @(w)limm_tensor_eval(w, d);
-        coeffs.e{k} = @(w)limm_tensor_eval(w, e);
-        coeffs.gamma{k} = @(w)limm_tensor_eval(w, gamma);
-        coeffs.err{k}  = @(w)limm_tensor_eval(w, err);
-    end
-    coeffs.getCoeffs = @LIMMddif_Coeffs;
-    
-end
+% NOTE: slower than direct evaluation, coefficient files removed
+% function [coeffs] = LIMMddif_Coefficients_T()
+% % Preload all coefficient functions using Tensor form
+% 
+%     coeffs.maxOrder = 6;
+%     coeffs.c = {};
+%     coeffs.d = {};
+%     coeffs.e = {};
+%     coeffs.gamma = {};
+%     coeffs.err = {};
+%     for k = 1:coeffs.maxOrder
+%         [cstr, dstr, estr, gstr, rstr] = limm_ddif_o16(k);
+%         [c, d, e, gamma, err] = limm_tensor_ddif(cstr, dstr, estr, gstr, rstr);
+%         coeffs.c{k} = @(w)limm_tensor_eval(w, c);
+%         coeffs.d{k} = @(w)limm_tensor_eval(w, d);
+%         coeffs.e{k} = @(w)limm_tensor_eval(w, e);
+%         coeffs.gamma{k} = @(w)limm_tensor_eval(w, gamma);
+%         coeffs.err{k}  = @(w)limm_tensor_eval(w, err);
+%     end
+%     coeffs.getCoeffs = @LIMMddif_Coeffs;
+%     
+% end
 
 function [c, d, e, gamma, err] = LIMMddif_Coeffs(Coeffs, Order, H, k)
 % Returns the [c, d, e, gamma, err] coefficients for LIMM with the current steps
