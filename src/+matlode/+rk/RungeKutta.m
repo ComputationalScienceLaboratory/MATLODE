@@ -2,14 +2,19 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
     %RungeKutta integrator
     
     properties (Abstract, SetAccess = immutable)
-        bHat
-        embeddedOrder
-        order
+        A
+        B
+        C
+        BHat
+        E
+        Stage
+        EmbeddedOrder
+        Order
         FSAL
     end
     
     methods
-        function obj = fromCoeffs(a, b, bHat, c, order, embededOrder)
+        function obj = fromCoeffs(a, b, bHat, c, e, bTheta, order, embededOrder)
             
             
             if istril(a)
@@ -19,7 +24,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
                     return
                 end
                 
-                obj = ERK(a, b, bHat, c, order, embededOrder);
+                obj = ERK(a, b, bHat, c, e, bTheta, order, embededOrder);
                 return
             end
             
@@ -31,11 +36,11 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
     end
     
     methods (Access = protected)
-        function opts = matlodeSetsHelper(obj, p, varargin)
+        function opts = matlodeSets(obj, p, varargin)
             
             %RungeKutta sepcific options
             
-            opts = matlodeSetsHelper@matlode.OneStepIntegrator(obj, p, varargin{:});
+            opts = matlodeSets@matlode.OneStepIntegrator(obj, p, varargin{:});
             
         end
     end
