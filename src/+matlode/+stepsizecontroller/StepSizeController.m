@@ -5,14 +5,27 @@ classdef (Abstract) StepSizeController < handle
         Adaptive
     end
     
-    properties (Abstract, SetAccess = immutable)
+    properties (SetAccess = immutable)
         History
+    end
+    
+    methods (Access = protected)
+        function obj = StepSizeController(hist, varargin)
+            
+            p = inputParser;
+            p.KeepUnmatched = false;
+            
+            %Gives better error checking
+            p.parse(varargin{:});
+            
+           obj.History = hist; 
+        end
     end
     
     methods (Abstract)
         %accept0, h0, and err0, respect the amount of history needed for a
         %controller
-        [h0, f0] = startingStep(obj, f, tspan, y0, order, errFunc, intialStep);
+        [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, errFunc, minStep, maxStep);
         [accept, hNew, tNew] = newStepSize(obj, prevAccept, t, tspan, h, err, q, nSteps, nFailed);
     end
     

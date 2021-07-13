@@ -6,7 +6,7 @@ classdef (Abstract) Integrator < handle
         PartitionMethod
     end
     
-    properties (Abstract, SetAccess = immutable)
+    properties (SetAccess = immutable)
         Adaptive
         Datatype
     end
@@ -16,25 +16,32 @@ classdef (Abstract) Integrator < handle
     end
     
     methods
+        function obj = Integrator(adap, datatype)
+            
+            obj.Adaptive = adap;
+            obj.Datatype = datatype;
+        end
+        
         function sol = integrate(obj, f, tspan, y0, varargin)
             
-            if(length(tspan) < 2)
-                error('Unsupported tspan entry');
-            end
+            [n,m] = size(tspan);
             
-            if ~issorted(tspan) && ~issorted(tspan, 'descend')
-                error('tspan must be sorted in order')
+            if ~ismatrix(tspan)
+                error('tspan cannot have this many dimensions');
+            elseif n ~= 1 && m ~= 1
+                error('tspan must be a vector')
+            elseif (length(tspan) < 2)
+                error('tspan must have a initial and final entry');
+            elseif ~issorted(tspan) && ~issorted(tspan, 'descend')
+                error('tspan must be sorted in either descending or ascending order')
             end
-            
-            %TODO
-            %optimize options for when only options struct is given
             
             %Create options
             p = inputParser;
             opts = obj.matlodeSets(p, varargin{:});
             
-            if isempty(opts.Dense) && length(tspan) > 2 && isa(opts.StepSizeController, 'matlode.stepsizecontroller.Fixed')
-                error('IntegrateTo is not supported for fixed step size, please use DenseOutput instead')
+            if isempty(opts.Dense) && length(tspan) > 2 && ~opts.StepSizeController.Adaptive
+                error('IntegrateTo is not supported for a non-adaptable controller, please use DenseOutput instead')
             end
             
             t = [];
@@ -51,12 +58,11 @@ classdef (Abstract) Integrator < handle
                 %determine size of partition
                 if length(f) == 1 && ~obj.PartitionMethod
                     [t, y, stats] = obj.timeLoop(f{1}, tspan, y0, opts);
-                elseif length(f) > 1
+                elseif isempty(f)
+                    error('Partitioned system solves, require atleast one partition to be provided')
+                else
                     %TODO
                     %paritioning setup
-                    
-                else
-                    error('Need at least one function provided')
                 end
                 
             else
@@ -75,12 +81,11 @@ classdef (Abstract) Integrator < handle
         function opts = matlodeSets(obj, p, varargin)
             
             %Assign to controllers
-            p.addParameter('InitialStep', 0);
             p.addParameter('StepSizeController', matlode.stepsizecontroller.Fixed(1000));
-            p.addParameter('ErrNorm', matlode.errnorm.HistNorm.errEstimate(sqrt(eps), sqrt(eps)));
+            p.addParameter('ErrNorm', matlode.errnorm.InfNorm.errEstimate(sqrt(eps), sqrt(eps)));
             p.addParameter('Jacobian', []);
             p.addParameter('ChunkSize', 1000);
-            p.addParameter('Dense', [] );
+            p.addParameter('Dense', []);
             p.addParameter('MaxStep', inf);
             
             p.parse(varargin{:});
@@ -89,8 +94,7 @@ classdef (Abstract) Integrator < handle
             
             %make sure a method can use a adaptive controller
             if ~obj.Adaptive && opts.StepSizeController.Adaptive
-                warning('Current method does not have the ability to use a adaptive step size controller');
-                %overrider user choice???
+                error('Current method does not have the ability to use a adaptive step size controller');
             end
             
             

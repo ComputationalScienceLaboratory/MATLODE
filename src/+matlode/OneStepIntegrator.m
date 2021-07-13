@@ -3,6 +3,10 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
     
     
     methods (Access = protected)
+        function obj = OneStepIntegrator(varargin)
+            obj = obj@matlode.Integrator(varargin{:});
+        end
+        
         function opts = matlodeSets(obj, p, varargin)
             
             %OneStepIntegrator Specific options

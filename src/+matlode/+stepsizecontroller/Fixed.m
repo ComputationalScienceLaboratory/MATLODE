@@ -9,15 +9,11 @@ classdef Fixed < matlode.stepsizecontroller.StepSizeController
         Steps
     end
     
-    properties (SetAccess = immutable)
-        History
-    end
-    
     methods
         
         function obj = Fixed(steps)
+            obj = obj@matlode.stepsizecontroller.StepSizeController(1);
             obj.Steps = steps;
-            obj.History = 1;
         end
         
         function [h0, f0] = startingStep(obj, f, tspan, y0, ~, ~, intialStep)

@@ -1,7 +1,7 @@
 classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
     %RungeKutta integrator
     
-    properties (Abstract, SetAccess = immutable)
+    properties (SetAccess = immutable)
         A
         B
         C
@@ -14,6 +14,22 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
     end
     
     methods
+        function obj = RungeKutta(a, b, bHat, c, e, order, embeddedOrder)
+            
+            obj = obj@matlode.OneStepIntegrator(~isempty(bHat), class(a));
+            
+            obj.A = a;
+            obj.B = b;
+            obj.BHat = bHat;
+            obj.C = c;
+            obj.E = e;
+            obj.EmbeddedOrder = embeddedOrder;
+            obj.Order = order;
+            obj.Stage = size(b, 2);
+            obj.FSAL = all(a(end, :) == b) && all(a(1, :) == 0);
+            
+        end
+        
         function obj = fromCoeffs(a, b, bHat, c, e, bTheta, order, embededOrder)
             
             

@@ -3,38 +3,44 @@ classdef (Abstract) StartingController < matlode.stepsizecontroller.StepSizeCont
     % This class is mostly used to contian the starting procedure of all
     % adaptive controllers and some properties
     
+    properties (Constant)
+        Adaptive = true;
+    end
+    
+    properties (SetAccess = immutable)
+        Fac
+        FacMax
+        FacMin
+        InitalStep
+    end
+    
+    
     methods
-        function [h0, f0] = startingStep(obj, f, tspan, y0, order, errFunc, intialStep)
-            if intialStep ~= 0
-                f0 = f(tspan(1), y0);
-                h0 = intialStep;
-            else
-                f0 = f(tspan(1), y0);
-                d0 = errFunc([y0, y0], 0);
-                d1 = errFunc([f0, f0], 0);
-                if any([d0, d1] < 1e-5)
-                    h0 = 1e-6;
-                else
-                    h0 = 0.01 * d0 / d1;
-                end
-
-                y1 = y0 + h0 * f0;
-                f1 = f(tspan(1) + h0, y1);
-                err0 = errFunc([f1 - f0, f1 - f0], 0);
-                d2 = err0 / h0;
-                dm = max(d1, d2);
-
-                if dm <= 1e-15
-                    h1 = max(1e-6, h0 * 1e-3);
-                else
-                    h1 = (0.01 / dm)^(1 / (order + 1));
-                end
-
-                h0 = min(100 * h0, h1);
-            end
+        function obj = StartingController(hist, varargin)
+            p = inputParser;
+            p.KeepUnmatched = true;
             
-            %allocate for length of history
-            h0 = ones(1, obj.History) * h0;
+            p.addParameter('Fac', 0.8);
+            p.addParameter('FacMin', 0.1);
+            p.addParameter('FacMax', 2);
+            p.addParameter('InitalStep', matlode.startingstep.BookStarting());
+            
+            p.parse(varargin{:});
+            
+            opts = p.Results;
+            varargout = p.Unmatched;
+            
+           obj = obj@matlode.stepsizecontroller.StepSizeController(hist, varargout); 
+           
+            obj.Fac = opts.Fac;
+            obj.FacMin = opts.FacMin;
+            obj.FacMax = opts.FacMax;
+            obj.InitalStep = opts.InitalStep;
+            
+        end
+        
+        function [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, errFunc, minStep, maxStep)
+            [h0, f0, fevals] = obj.InitalStep.startingStep(f, tspan, y0, order, errFunc, minStep, maxStep);
         end
     end
 end

@@ -1,31 +1,20 @@
 classdef Gustafson < matlode.stepsizecontroller.StartingController
-    %TODO Reference Gustaffson paper(1991)
-    %Slight derivation of the Gustafson paper on the coefficents
+    %Gustafsson, K. (1991). Control theoretic techniques for stepsize 
+    % selection in explicit Runge-Kutta methods. ACM Transactions on Mathematical Software
     
-    properties (Constant)
-        Adaptive = true;
-    end
     
     properties (SetAccess = immutable)
-        Fac
-        FacMin
-        FacMax
         Ki
         Kp
         A
-        History
     end
     
     methods
         function obj = Gustafson(varargin)
             
-            obj.History = 2;
-            
             p = inputParser;
+            p.KeepUnmatched = true;
             
-            p.addParameter('Fac', 0.95);
-            p.addParameter('FacMin', 0.1);
-            p.addParameter('FacMax', 2);
             p.addParameter('Ki', 0.3);
             p.addParameter('Kp', -0.4);
             p.addParameter('A', 1);
@@ -33,10 +22,10 @@ classdef Gustafson < matlode.stepsizecontroller.StartingController
             p.parse(varargin{:});
             
             opts = p.Results;
+            varargout = p.Unmatched;
             
-            obj.Fac = opts.Fac;
-            obj.FacMin = opts.FacMin;
-            obj.FacMax = opts.FacMax;
+            obj = obj@matlode.stepsizecontroller.StartingController(2, varargout);
+            
             obj.Ki = opts.Ki;
             obj.Kp = opts.Kp;
             obj.A = opts.A;

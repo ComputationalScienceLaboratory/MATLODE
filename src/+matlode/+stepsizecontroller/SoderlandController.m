@@ -1,57 +1,49 @@
-classdef SoberlandController < matlode.stepsizecontroller.StartingController
+classdef SoderlandController < matlode.stepsizecontroller.StartingController
     %SOBERLANDCONTROLLER 
     %A general controller for all history based non-conditional controllers
     %can be expanded up to any amount of history gien proper coefficents
     
-    properties (Constant)
-        Adaptive = true;
-    end
+    %Söderlind, G. (2003). Digital filters in adaptive time-stepping.
+    % ACM Transactions on Mathematical Software 
     
     properties (SetAccess = immutable)
-        Fac
-        FacMax
-        FacMin
         A
         B
-        AQfunc % Geneall @(q, A) (A / (1+q))
-        History
+        AQfunc % Geneall @(q, A) (A / q)
     end
     
     methods
-        function obj = SoberlandController(varargin)
+        function obj = SoderlandController(varargin)
             
-             p = inputParser;
+            p = inputParser;
+            p.KeepUnmatched = true;
             
-            p.addParameter('Fac', 0.95);
-            p.addParameter('FacMin', 0.1);
-            p.addParameter('FacMax', 2);
-            p.addParameter('B', [0]);
             p.addParameter('A', [1]);
-            p.addRequired('AQfunc');
+            p.addParameter('B', [0]);
+            p.addParameter('AQfunc', @(q, A) (A/q));
             
             p.parse(varargin{:});
             
             opts = p.Results;
-            
-            obj.Fac = opts.Fac;
-            obj.FacMin = opts.FacMin;
-            obj.FacMax = opts.FacMax;
+            varargout = p.Unmatched;
             
             if isempty(opts.A)
-                error('A cannot be empty')
+                error('A cannot be empty');
             end
             
-            obj.A = opts.A;
-            obj.B = opts.B;
+            if isempty(opts.B)
+                error('B cannots be empty');
+            end
             
-            %This is need because input parser struggles with
-            %function_handles
             if ~isa(opts.AQfunc, 'function_handle')
                 error('AQfunc must be a function handle')
             end
             
+            obj = obj@matlode.stepsizecontroller.StartingController(max(length(opts.A), length(opts.B)), varargout);
+            
+            obj.A = opts.A;
+            obj.B = opts.B;
             obj.AQfunc = opts.AQfunc;
-            obj.History = length(obj.A);
         end
         
         function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q, ~, ~)
@@ -66,7 +58,7 @@ classdef SoberlandController < matlode.stepsizecontroller.StartingController
             
             
             facScal = prod(err(1:obj.History).^obj.AQfunc(q,obj.A));
-            hScal = prod((h(1:obj.History - 1) ./ h(2:obj.History)).^obj.B);
+            hScal = prod(abs(h(1:obj.History - 1) ./ h(2:obj.History)).^obj.B);
             prediction = obj.Fac * facScal * hScal;
             
             hNew = h(1) * min(obj.FacMax, max(obj.FacMin,  prediction));

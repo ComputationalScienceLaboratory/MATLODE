@@ -5,38 +5,10 @@ classdef ERK < matlode.rk.RungeKutta
         PartitionMethod = false
     end
     
-    properties (SetAccess = immutable)
-        A
-        B
-        BHat
-        C
-        E
-        Stage
-        Order
-        EmbeddedOrder
-        Adaptive
-        Datatype
-        FSAL
-    end
-    
     methods
-        
         function obj = ERK(a, b, bHat, c, e, order, embeddedOrder)
-            
-            obj.A = a;
-            obj.B = b;
-            obj.BHat = bHat;
-            obj.C = c;
-            obj.E = e;
-            obj.EmbeddedOrder = embeddedOrder;
-            obj.Order = order;
-            obj.Stage = length(b);
-            obj.FSAL = all(a(end, :) == b) && all(a(1, :) == 0);
-            obj.Adaptive = ~isempty(bHat);
-            obj.Datatype = class(a);
+            obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
         end
-        
-        
     end
     
     methods (Access = protected)
@@ -78,7 +50,10 @@ classdef ERK < matlode.rk.RungeKutta
             tCur = tspan(1);
             tNext = tCur;
             ti = 2;
-            hmax = opts.MaxStep;
+            
+            tdir = sign(tspan(end) - tspan(1));
+            hmax = opts.MaxStep * tdir;
+            hmin = 64 * eps(tspan(1)) * tdir;
             
             y(:, 1) = y0;
             yNext = y0;
@@ -86,12 +61,19 @@ classdef ERK < matlode.rk.RungeKutta
             %temporary stats
             nSteps = 1;
             nFailed = 0;
-            nFevals = 1;
             nSmallSteps = 0;
             
-            tdir = sign(tspan(end) - tspan(1));
-            
             q = min(obj.Order, obj.EmbeddedOrder);
+            
+            %First step
+            %allocates memory for first step
+            [h0, f0, nFevals] = stepController.startingStep(f, tspan, y0, obj.Order, errNormFunc, hmin, hmax);
+            
+            hHist = ones(1, stepController.History) * h0;
+            hN = hHist(1);
+            err = zeros(1, length(hHist));
+            
+            accept = true;
             
             %%%%
             % Start of method specific intializing code
@@ -100,17 +82,18 @@ classdef ERK < matlode.rk.RungeKutta
             fsalStart = uint32(obj.FSAL) + 1;
             fevalIterCounts = double(obj.Stage - fsalStart + 1);
             
+            if obj.FSAL
+                if nFevals == 0
+                    k(:, end) = f(tspan(1), y0);
+                    nFevals = nFevals + 1;
+                else
+                    k(:, end) = f0;
+                end
+            end
+            
             %%%%
             % End of method specific intializing code
             %%%%
-            
-            %First step
-            %allocates memory for first step
-            [hHist, k(:,end)] = stepController.startingStep(f, tspan, y0, obj.Order, errNormFunc, opts.InitialStep);
-            hN = hHist(1);
-            err = zeros(1, length(hHist));
-            
-            accept = true;
             
             %Time Loop
             while ti <= length(tspan)
@@ -124,7 +107,7 @@ classdef ERK < matlode.rk.RungeKutta
                 hHist(1) = hN;
                 
                 %Subject to change
-                hmin = 64 * eps(tCur);
+                hmin = 64 * eps(tCur) * tdir;
                 
                 %%%%
                 % Start of method specific before time loop code
@@ -178,13 +161,13 @@ classdef ERK < matlode.rk.RungeKutta
                     
                     %set new step to be in range
                     if stepController.Adaptive
-                        hN = min(hmax, hN);
+                        hN = min(hmax * tdir, hN * tdir) * tdir;
                     end
                     
                     %Check if step is really small
-                    if hN < hmin
+                    if hN * tdir < hmin * tdir
                         if nSmallSteps == 0
-                            warning('The step the integrator is taking is extremely small, results may not be good')
+                            warning('The step the integrator is taking extremely small, results may not be optimum')
                         end
                         %accept step since the step cannot get any smaller
                         nSmallSteps = nSmallSteps + 1;
@@ -207,7 +190,7 @@ classdef ERK < matlode.rk.RungeKutta
                 nSteps = nSteps + 1;
                 
                 %check if controller failed to overstep for dense
-                if isDense && overstep && tNext < tspan(ti)
+                if isDense && overstep && tNext * tdir < tspan(ti) * tdir
                     overstep = false;
                 end
                 
@@ -231,10 +214,9 @@ classdef ERK < matlode.rk.RungeKutta
                     if isDense && multiTspan && ti ~= length(tspan)
                         
                         if overstep
-                            while tNext > tspan(ti) && ti ~= length(tspan)
+                            while tNext * tdir > tspan(ti) * tdir && ti ~= length(tspan)
                                 %Call Dense output function and record
 
-                                %y0 = yCur y1 = yNext
                                 t(:, ti) = tspan(ti);
                                 [y(:, ti), tempFevals] = opts.Dense.denseOut(f, tCur, tspan(ti), yCur, yNext, k, hC);
                                 nFevals = nFevals + tempFevals;
@@ -242,7 +224,7 @@ classdef ERK < matlode.rk.RungeKutta
                                 ti = ti + 1;
                             end
                             
-                            if tspan(ti) - tNext < hmin
+                            if (tspan(ti) - tNext) * tdir < hmin * tdir
                                 t(:, ti) = tspan(ti);
                                 y(:, ti) = yNext;
                                 ti = ti + 1;
@@ -260,7 +242,7 @@ classdef ERK < matlode.rk.RungeKutta
                     else
                         %integrate to/ End point
                         %check if close enough with hmin
-                        if tspan(ti) - tNext < hmin
+                        if (tspan(ti) - tNext) * tdir < hmin * tdir
                             
                             if multiTspan
                                 t(:, ti) = tspan(ti);
