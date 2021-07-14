@@ -7,7 +7,7 @@ classdef BookStarting < matlode.startingstep.StartingStep
             obj = obj@matlode.startingstep.StartingStep(varargin{:});
         end
         
-        function [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, errFunc, minStep, maxStep)
+        function [h0, f0, fevals] = startingStep(~, f, tspan, y0, order, errFunc, minStep, maxStep)
             fevals = 2;
             tdir = sign(tspan(end) - tspan(1));
             
@@ -21,6 +21,8 @@ classdef BookStarting < matlode.startingstep.StartingStep
             else
                 h0 = 0.01 * d0 / d1;
             end
+            
+            h0 = max([min([h0, maxStep * tdir]), minStep * tdir]);
 
             y1 = y0 + h0 * f0 * tdir;
             f1 = f(tspan(1) + h0 * tdir, y1);

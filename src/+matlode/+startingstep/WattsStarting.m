@@ -1,5 +1,5 @@
 classdef WattsStarting < matlode.startingstep.StartingStep
-    %Based of Watts starting procedure
+    %Based of Watt's starting procedure
     %Watts, H. A. (1983). Starting step size for an ODE solver. Journal of Computational and Applied Mathematics
     
     properties (SetAccess = immutable)
@@ -15,10 +15,10 @@ classdef WattsStarting < matlode.startingstep.StartingStep
             p = inputParser;
             p.KeepUnmatched = true;
             
-            p.addParameter('InitTol', eps^(1/2));
-            p.addParameter('InitEpsMax', eps^(1/2));
-            p.addParameter('InitEpsMin', 100 * eps);
-            p.addParameter('Fac', 0.8);
+            p.addParameter('InitTol', eps^(1/2), matlode.util.scalarValidationFunc);
+            p.addParameter('InitEpsMax', eps^(1/2), matlode.util.scalarValidationFunc);
+            p.addParameter('InitEpsMin', 100 * eps, matlode.util.scalarValidationFunc);
+            p.addParameter('Fac', 0.8, matlode.util.scalarValidationFunc);
             
             p.parse(varargin{:});
             

@@ -32,8 +32,8 @@ classdef (Abstract) Integrator < handle
                 error('tspan must be a vector')
             elseif (length(tspan) < 2)
                 error('tspan must have a initial and final entry');
-            elseif ~issorted(tspan) && ~issorted(tspan, 'descend')
-                error('tspan must be sorted in either descending or ascending order')
+            elseif ~issorted(tspan, 'strictascend') && ~issorted(tspan, 'strictdescend')
+                error('tspan must have unique values and be sorted in either descending or ascending order')
             end
             
             %Create options
@@ -43,6 +43,7 @@ classdef (Abstract) Integrator < handle
             if isempty(opts.Dense) && length(tspan) > 2 && ~opts.StepSizeController.Adaptive
                 error('IntegrateTo is not supported for a non-adaptable controller, please use DenseOutput instead')
             end
+            
             
             t = [];
             y = [];
@@ -61,8 +62,12 @@ classdef (Abstract) Integrator < handle
                 elseif isempty(f)
                     error('Partitioned system solves, require atleast one partition to be provided')
                 else
-                    %TODO
                     %paritioning setup
+                    if obj.PartitionMethod
+                        [t, y, stats] = obj.timeLoop(f, tspan, y0, opts);
+                    else
+                       error('This method does not work with a partitioned f');
+                    end
                 end
                 
             else

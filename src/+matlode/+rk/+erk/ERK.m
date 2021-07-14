@@ -24,13 +24,12 @@ classdef ERK < matlode.rk.RungeKutta
             numVars = length(y0);
             multiTspan = length(tspan) > 2;
             isDense = ~isempty(opts.Dense);
-            overstep = false;
-            startupErr = true;
             
             %Structure access optimizations
             errNormFunc = opts.ErrNorm;
             stepController = opts.StepSizeController;
             newStepFunc = @(prevAccept, tCur, tspan, hHist, err, q, nSteps, nFailed) opts.StepSizeController.newStepSize(prevAccept, tCur, tspan, hHist, err, q, nSteps, nFailed);
+            
             
             
             k = zeros(numVars, obj.Stage);
@@ -50,9 +49,15 @@ classdef ERK < matlode.rk.RungeKutta
             tCur = tspan(1);
             tNext = tCur;
             ti = 2;
+            tl = 2;
+            if isDense
+               ti = length(tspan); 
+            else
+                tl = length(tspan);
+            end
             
             tdir = sign(tspan(end) - tspan(1));
-            hmax = opts.MaxStep * tdir;
+            hmax = min([abs(opts.MaxStep), abs(tspan(end) - tspan(1))]) * tdir;
             hmin = 64 * eps(tspan(1)) * tdir;
             
             y(:, 1) = y0;
@@ -71,7 +76,7 @@ classdef ERK < matlode.rk.RungeKutta
             
             hHist = ones(1, stepController.History) * h0;
             hN = hHist(1);
-            err = zeros(1, length(hHist));
+            err = ones(1, length(hHist));
             
             accept = true;
             
@@ -125,7 +130,6 @@ classdef ERK < matlode.rk.RungeKutta
                 %Will keep looping until accepted step
                 while true
                     
-                    
                     %%%%
                     % Start of method specific time loop code
                     %%%%
@@ -145,11 +149,6 @@ classdef ERK < matlode.rk.RungeKutta
                     if stepController.Adaptive
                         yEmbbeded =  k * (hC * obj.E');
                         err(:, 1) = errNormFunc([yNext, yCur], yEmbbeded);
-                        
-                        if startupErr
-                            err(:, 2:end) = err(:, 1);
-                        end
-                        startupErr = false;
                     end
                     
                     %%%%
@@ -159,15 +158,10 @@ classdef ERK < matlode.rk.RungeKutta
                     %Find next Step
                     [accept, hN, tNext] = newStepFunc(prevAccept, tCur, tspan, hHist, err, q, nSteps, nFailed);
                     
-                    %set new step to be in range
-                    if stepController.Adaptive
-                        hN = min(hmax * tdir, hN * tdir) * tdir;
-                    end
-                    
                     %Check if step is really small
-                    if hN * tdir < hmin * tdir
+                    if abs(hN) < abs(hmin)
                         if nSmallSteps == 0
-                            warning('The step the integrator is taking extremely small, results may not be optimum')
+                            warning('The step the integrator is taking extremely small, results may not be optimal')
                         end
                         %accept step since the step cannot get any smaller
                         nSmallSteps = nSmallSteps + 1;
@@ -187,12 +181,12 @@ classdef ERK < matlode.rk.RungeKutta
                     
                 end
                 
-                nSteps = nSteps + 1;
-                
-                %check if controller failed to overstep for dense
-                if isDense && overstep && tNext * tdir < tspan(ti) * tdir
-                    overstep = false;
+                %set new step to be in range
+                if stepController.Adaptive
+                    hN = min(abs(hmax), abs(hN)) * tdir;
                 end
+                
+                nSteps = nSteps + 1;
                 
                 %Check for all memory allocation
                 if ~multiTspan
@@ -209,52 +203,40 @@ classdef ERK < matlode.rk.RungeKutta
                 
                 %check if condition holds
                 %used for end checking,integrate to, and dense output
-                if ~(tspan(ti) * tdir > (tNext + hN) * tdir)
-                    %Dense Output
-                    if isDense && multiTspan && ti ~= length(tspan)
-                        
-                        if overstep
-                            while tNext * tdir > tspan(ti) * tdir && ti ~= length(tspan)
-                                %Call Dense output function and record
+                if ~(tspan(ti) * tdir > (tNext + hN) * tdir) && tl == length(tspan)
+                    
+                    %integrate to/ End point
+                    %check if close enough with hmin
+                    if (tspan(ti) - tNext) * tdir < hmin * tdir
 
-                                t(:, ti) = tspan(ti);
-                                [y(:, ti), tempFevals] = opts.Dense.denseOut(f, tCur, tspan(ti), yCur, yNext, k, hC);
-                                nFevals = nFevals + tempFevals;
-
-                                ti = ti + 1;
-                            end
-                            
-                            if (tspan(ti) - tNext) * tdir < hmin * tdir
-                                t(:, ti) = tspan(ti);
-                                y(:, ti) = yNext;
-                                ti = ti + 1;
-                            end
-
-                            overstep = false;
-                        else
-                            overstep = true;
-                            
-                            %check for tspan(end) to hit exactly
-                            if stepController.Adaptive && ~(tspan(end) * tdir > (tNext + hN) * tdir)
-                                hN = tspan(end) - tNext;
-                            end
+                        if multiTspan
+                            t(:, ti) = tspan(ti);
+                            y(:, ti) = yNext;
                         end
+                        ti = ti + 1;
                     else
-                        %integrate to/ End point
-                        %check if close enough with hmin
-                        if (tspan(ti) - tNext) * tdir < hmin * tdir
-                            
-                            if multiTspan
-                                t(:, ti) = tspan(ti);
-                                y(:, ti) = yNext;
-                            end
-                            ti = ti + 1;
-                        else
-                            if stepController.Adaptive
-                                hN = tspan(ti) - tNext;
-                            end
-                            
+                        
+                        if stepController.Adaptive
+                            hN = tspan(ti) - tNext;
                         end
+                    end
+                    
+                elseif isDense && multiTspan && tl ~= length(tspan) && ~(tspan(tl) * tdir > (tNext + hN) * tdir)
+                    
+                    while tNext * tdir > tspan(tl) * tdir && tl ~= length(tspan)
+                        %Call Dense output function and record
+
+                        t(:, tl) = tspan(tl);
+                        [y(:, tl), tempFevals] = opts.Dense.denseOut(f, tCur, tspan(tl), yCur, yNext, k, hC);
+                        nFevals = nFevals + tempFevals;
+
+                        tl = tl + 1;
+                    end
+
+                    if tl == length(tspan) && (tspan(ti) - tNext) * tdir < hmin * tdir
+                        t(:, ti) = tspan(ti);
+                        y(:, ti) = yNext;
+                        ti = ti + 1;
                     end
                 end
             end
@@ -275,12 +257,7 @@ classdef ERK < matlode.rk.RungeKutta
             stats.nFevals = nFevals;
             stats.nSmallSteps = nSmallSteps;
             
-            
         end
-        
-        
     end
-    
-    
 end
 

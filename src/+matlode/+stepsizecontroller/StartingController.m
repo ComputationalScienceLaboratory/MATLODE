@@ -1,7 +1,7 @@
 classdef (Abstract) StartingController < matlode.stepsizecontroller.StepSizeController
-    %Adaptive controller
-    % This class is mostly used to contian the starting procedure of all
-    % adaptive controllers and some properties
+    % This class is used to contain common adaptive stepsizecontroler
+    % properties and to allow the user to change the starting step
+    % procedure
     
     properties (Constant)
         Adaptive = true;
@@ -20,10 +20,10 @@ classdef (Abstract) StartingController < matlode.stepsizecontroller.StepSizeCont
             p = inputParser;
             p.KeepUnmatched = true;
             
-            p.addParameter('Fac', 0.8);
-            p.addParameter('FacMin', 0.1);
-            p.addParameter('FacMax', 2);
-            p.addParameter('InitalStep', matlode.startingstep.BookStarting());
+            p.addParameter('Fac', 0.8, matlode.util.scalarValidationFunc);
+            p.addParameter('FacMin', 0.1, matlode.util.scalarValidationFunc);
+            p.addParameter('FacMax', 2, matlode.util.scalarValidationFunc);
+            p.addParameter('InitalStep', matlode.startingstep.WattsStarting());
             
             p.parse(varargin{:});
             
