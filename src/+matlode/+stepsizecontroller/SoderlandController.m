@@ -48,7 +48,7 @@ classdef SoderlandController < matlode.stepsizecontroller.StartingController
         
         function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q, ~, ~)
             
-            accept = mean(err) <= 1; 
+            accept = err(1) <= 1; 
             if accept
                 tNew = t + h(1);
                 

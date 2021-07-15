@@ -16,13 +16,10 @@ classdef Fixed < matlode.stepsizecontroller.StepSizeController
             obj.Steps = steps;
         end
         
-        function [h0, f0] = startingStep(obj, f, tspan, y0, ~, ~, intialStep)
-            if intialStep ~= 0
-                warning('Ignoring initialStep option, Controller is Fixed');
-            end
-            
-            f0 = f(tspan(1), y0);
+        function [h0, f0, fevals] = startingStep(obj, ~, tspan, ~, ~, ~, ~, ~)
             h0 = (tspan(2) - tspan(1)) / obj.Steps;
+            f0 = [];
+            fevals = 0;
         end
         
         function [accept, h, tNew] = newStepSize(~, ~, ~, tspan, h, ~, ~, nSteps, ~, ~)

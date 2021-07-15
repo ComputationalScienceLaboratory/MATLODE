@@ -36,13 +36,18 @@ classdef ERK < matlode.rk.RungeKutta
             y = [];
             t = [];
             
+            tlen = 0;
+            
             if multiTspan
                 y = zeros(numVars, length(tspan));
                 t = zeros(1, length(tspan));
             else
                 y = zeros(numVars, opts.ChunkSize);
                 t = zeros(1, opts.ChunkSize);
+                tlen = length(t);
             end
+            
+            
             
             %inital values
             t(1,1) = tspan(1);
@@ -55,6 +60,8 @@ classdef ERK < matlode.rk.RungeKutta
             else
                 tl = length(tspan);
             end
+            
+            tspanlen = length(tspan);
             
             tdir = sign(tspan(end) - tspan(1));
             hmax = min([abs(opts.MaxStep), abs(tspan(end) - tspan(1))]) * tdir;
@@ -101,7 +108,7 @@ classdef ERK < matlode.rk.RungeKutta
             %%%%
             
             %Time Loop
-            while ti <= length(tspan)
+            while ti <= tspanlen
                 %Cycle history
                 err = circshift(err, 1, 2);
                 hHist = circshift(hHist, 1, 2);
@@ -137,23 +144,24 @@ classdef ERK < matlode.rk.RungeKutta
                     for i = fsalStart:obj.Stage
                         k(:, i) = f(tCur + hC * obj.C(i), yCur + k(:, 1:i-1) * (hC * obj.A(i, 1:i-1)'));
                     end
-
-                    yNext = yCur + k * (hC * obj.B');
-
-                    nFevals = nFevals + fevalIterCounts;
                     
-                    prevAccept = accept;
+                    khc = k * hC;
+                    yNext = yCur + khc * obj.B';
 
                     %Perform error estimates
                     %Could maybe leave out of method specific zone?
                     if stepController.Adaptive
-                        yEmbbeded =  k * (hC * obj.E');
+                        yEmbbeded =  khc * obj.E';
                         err(:, 1) = errNormFunc([yNext, yCur], yEmbbeded);
                     end
                     
                     %%%%
                     % End of method specific time loop code
                     %%%%
+                    
+                    nFevals = nFevals + fevalIterCounts;
+                    
+                    prevAccept = accept;
                     
                     %Find next Step
                     [accept, hN, tNext] = newStepFunc(prevAccept, tCur, tspan, hHist, err, q, nSteps, nFailed);
@@ -192,53 +200,54 @@ classdef ERK < matlode.rk.RungeKutta
                 if ~multiTspan
 
                     %Allocate more memory if non-dense
-                    if nSteps > length(t)
+                    if nSteps > tlen
                         y = [y, zeros(numVars, opts.ChunkSize)];
                         t = [t, zeros(1, opts.ChunkSize)];
+                        tlen = length(t);
                     end
 
                     t(:, nSteps) = tNext;
                     y(:, nSteps) = yNext;
+                elseif isDense
+                    %Dense output
+                    while tl ~= tspanlen && tNext * tdir > tspan(tl) * tdir 
+                        
+                        %incase lucky and land on point, can be cheaper
+                        %than dense output if dense requires fevals
+                        if abs(tspan(tl) - tNext) < abs(hmin)
+                            t(:, tl) = tspan(tl);
+                            y(:, tl) = yNext;
+                        else
+                            %Call Dense output function and record
+                            t(:, tl) = tspan(tl);
+                            [y(:, tl), tempFevals] = opts.Dense.denseOut(f, tCur, tspan(tl), yCur, yNext, k, hC);
+                            nFevals = nFevals + tempFevals;
+                        end
+                        tl = tl + 1;
+                    end
                 end
                 
                 %check if condition holds
-                %used for end checking,integrate to, and dense output
-                if ~(tspan(ti) * tdir > (tNext + hN) * tdir) && tl == length(tspan)
+                %used for end checking and integrate to
+                if tspan(ti) * tdir <= (tNext + hN) * tdir
                     
                     %integrate to/ End point
                     %check if close enough with hmin
-                    if (tspan(ti) - tNext) * tdir < hmin * tdir
+                    if abs(tspan(ti) - tNext) < abs(hmin)
 
                         if multiTspan
                             t(:, ti) = tspan(ti);
                             y(:, ti) = yNext;
                         end
                         ti = ti + 1;
-                    else
+                    elseif stepController.Adaptive
                         
-                        if stepController.Adaptive
-                            hN = tspan(ti) - tNext;
-                        end
+                        hN = tspan(ti) - tNext;
                     end
                     
-                elseif isDense && multiTspan && tl ~= length(tspan) && ~(tspan(tl) * tdir > (tNext + hN) * tdir)
-                    
-                    while tNext * tdir > tspan(tl) * tdir && tl ~= length(tspan)
-                        %Call Dense output function and record
-
-                        t(:, tl) = tspan(tl);
-                        [y(:, tl), tempFevals] = opts.Dense.denseOut(f, tCur, tspan(tl), yCur, yNext, k, hC);
-                        nFevals = nFevals + tempFevals;
-
-                        tl = tl + 1;
-                    end
-
-                    if tl == length(tspan) && (tspan(ti) - tNext) * tdir < hmin * tdir
-                        t(:, ti) = tspan(ti);
-                        y(:, ti) = yNext;
-                        ti = ti + 1;
-                    end
                 end
+                
+                
             end
             
             %End of Timeloop work

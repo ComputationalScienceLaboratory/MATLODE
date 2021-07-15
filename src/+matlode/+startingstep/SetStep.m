@@ -16,7 +16,7 @@ classdef SetStep < matlode.startingstep.StartingStep
             fevals = 0;
             f0 = [];
             if sign(obj.StartingStep) ~= sign(tspan(end) - tspan(1))
-                error('The starting step cannot go in the opposite direction')
+                error('The starting step cannot go in the opposite direction, %f', obj.StartingStep)
             end
             if obj.StartingStep > maxStep
                error('The starting step is greater then the maximum step %f', maxStep) 
