@@ -34,12 +34,12 @@ classdef WattsStarting < matlode.startingstep.StartingStep
             
         end
         
-        function [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, errFunc, minStep, maxStep)
+        function [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, ErrNorm, minStep, maxStep)
             fevals = 2;
             tdir = sign(tspan(end) - tspan(1));
             
             f0 = f(tspan(1), y0);
-            fnorm = errFunc([f0, f0], 0);
+            fnorm = ErrNorm.errEstimate([f0, f0], 0);
             
             hstep = abs(tspan(1) - tspan(end));
             
@@ -53,7 +53,7 @@ classdef WattsStarting < matlode.startingstep.StartingStep
             
             ydd = (1/(h0)) * (f(tspan(1) + h0 * tdir, y1) - f0) ;
             
-            fddnorm = errFunc([ydd, ydd], 0);
+            fddnorm = ErrNorm.errEstimate([ydd, ydd], 0);
             
             if fddnorm > eps
                 h0 = obj.Fac * sqrt(2) * obj.InitTol^(1/(order + 1)) / sqrt(fddnorm);

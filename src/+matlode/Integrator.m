@@ -12,7 +12,11 @@ classdef (Abstract) Integrator < handle
     end
     
     methods (Abstract, Access = protected)
-        [t, y, stats] = timeLoop(obj, f, tspan, y0, opts, varargin);
+        [t, y, stats] = timeLoop(obj, f, tspan, y0, opts);
+        [k, yN, err] = timeStep(obj,  f, t, y, h, k, ErrNorm, prevAccept);
+        [k, yN, err] = timeStepErr(obj,  f, t, y, h, k, ErrNorm, prevAccept);
+        [k, fevals, fevalIterCounts] = timeLoopBeforeLoop(obj, f0, t0, y0);
+        [q] = timeLoopInit(obj);
     end
     
     methods
@@ -87,7 +91,7 @@ classdef (Abstract) Integrator < handle
             
             %Assign to controllers
             p.addParameter('StepSizeController', matlode.stepsizecontroller.Fixed(1000));
-            p.addParameter('ErrNorm', matlode.errnorm.InfNorm.errEstimate(sqrt(eps), sqrt(eps)));
+            p.addParameter('ErrNorm', matlode.errnorm.InfNorm(sqrt(eps), sqrt(eps)));
             p.addParameter('Jacobian', []);
             p.addParameter('ChunkSize', 1000);
             p.addParameter('Dense', []);

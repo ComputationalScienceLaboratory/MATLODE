@@ -15,8 +15,8 @@ classdef Gustafson < matlode.stepsizecontroller.StartingController
             p = inputParser;
             p.KeepUnmatched = true;
             
-            p.addParameter('Ki', 0.3, matlode.util.scalarValidationFunc);
-            p.addParameter('Kp', -0.4, matlode.util.scalarValidationFunc);
+            p.addParameter('Ki', -0.7, matlode.util.scalarValidationFunc);
+            p.addParameter('Kp', 0.4, matlode.util.scalarValidationFunc);
             p.addParameter('A', 1, matlode.util.scalarValidationFunc);
             
             p.parse(varargin{:});

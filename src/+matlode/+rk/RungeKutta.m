@@ -11,6 +11,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
         EmbeddedOrder
         Order
         FSAL
+        FsalStart
     end
     
     methods
@@ -27,7 +28,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             obj.Order = order;
             obj.Stage = size(b, 2);
             obj.FSAL = all(a(end, :) == b) && all(a(1, :) == 0);
-            
+            obj.FsalStart = uint32(obj.FSAL) + 1;
         end
         
         function obj = fromCoeffs(a, b, bHat, c, e, bTheta, order, embededOrder)
@@ -58,6 +59,28 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             
             opts = matlodeSets@matlode.OneStepIntegrator(obj, p, varargin{:});
             
+        end
+       
+        
+        function [k, fevals, fevalIterCounts] = timeLoopBeforeLoop(obj, f0, t0, y0)
+            
+            k = zeros(length(y0), obj.Stage);
+            
+            fevalIterCounts = double(obj.Stage - obj.FsalStart + 1);
+            
+            if obj.FSAL
+                if isempty(f0)
+                    k(:, end) = f(t0, y0);
+                    fevals = 1;
+                else
+                    k(:, end) = f0;
+                    fevals = 0;
+                end
+            end
+        end
+        
+        function [q] = timeLoopInit(obj)
+            q = min(obj.Order, obj.EmbeddedOrder);
         end
     end
     

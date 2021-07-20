@@ -13,7 +13,7 @@ classdef StartingStep
     end
     
     methods (Abstract)
-        [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, errFunc, minStep, maxStep);
+        [h0, f0, fevals] = startingStep(obj, f, tspan, y0, order, ErrNorm, minStep, maxStep);
     end
 end
 
