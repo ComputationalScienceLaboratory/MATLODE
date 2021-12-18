@@ -30,7 +30,7 @@ classdef (Abstract) StartingController < matlode.stepsizecontroller.StepSizeCont
             opts = p.Results;
             varargout = p.Unmatched;
             
-           obj = obj@matlode.stepsizecontroller.StepSizeController(hist, varargout); 
+            obj = obj@matlode.stepsizecontroller.StepSizeController(hist, varargout);
            
             obj.Fac = opts.Fac;
             obj.FacMin = opts.FacMin;
