@@ -169,7 +169,7 @@ classdef ERK < matlode.rk.RungeKutta
                     %Check if step is really small
                     if abs(hN) < abs(hmin)
                         if nSmallSteps == 0
-                            warning('The step the integrator is taking extremely small, results may not be optimal')
+                            warning('MATLODE:smallStepSize', 'The step the integrator is taking extremely small, results may not be optimal')
                         end
                         %accept step since the step cannot get any smaller
                         nSmallSteps = nSmallSteps + 1;
