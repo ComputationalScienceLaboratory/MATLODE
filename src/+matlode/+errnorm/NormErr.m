@@ -5,7 +5,7 @@ classdef (Abstract) NormErr
     end
     
     methods (Abstract)
-         errFunc = errEstimate(y, yE)
+         errFunc = errEstimate(obj, y0, y1, yerror)
     end
     
     methods

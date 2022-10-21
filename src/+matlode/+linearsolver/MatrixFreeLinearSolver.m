@@ -1,33 +1,31 @@
 classdef MatrixFreeLinearSolver < matlode.linearsolver.LinearSolver
-    properties (SetAccess = immutable, GetAccess = private)
-        Solver
-    end
-    
+
     methods
-        function obj = MatrixFreeLinearSolver(solver)
-            if nargin < 1
-                solver = @gmres;
-            end
+        function obj = MatrixFreeLinearSolver(solver, solverArgs)
+			arguments
+				solver(1,1) function_handle = @gmres;
+				solverArgs(1,:) cell = {};
+			end
+       
+            obj = obj@matlode.linearsolver.LinearSolver(solver, solverArgs{:});
+        end
+        
+        function [stats] = preprocess(obj, t, y, reeval, mass_scale, jac_scale, stats)
+			if reeval
+                obj.mass = @(v) f.MVectorProduct(t, y, v);
+				stats.nMassEvals = stats.nMassEvals + 1;
+
+                obj.jac = @(v) f.JVectorProduct(t, y, v);
+				stats.nJacobianEvals = stats.nJacobianEvals + 1;
+			end
+
+            obj.system = @(v) mass_scale * obj.mass(v) + jac_scale * obj.jac(v);
+        end
+        
+        function [sol, stats] = solve(obj, x, stats)
+            sol = obj.Solver(obj.system, x, obj.SolverArgs{:});
             
-            obj.Solver = solver;
-        end
-        
-        function system = preprocess(~, ~, ~, system, ~, ~, ~, ~, ~, ~, ~)
-        end
-        
-        function sol = solve(obj, x, ~, t, y, ~, m1, mass, m2, jac)
-            if length(m1) == 1
-                if isempty(jac)
-                    jvp = @(v) m1 * mass(t, y, v);
-                elseif isempty(mass)
-                    jvp = @(v) m1 * v - m2 * jac(t, y, v);
-                else
-                    jvp = @(v) m1 * mass(t, y, v) - m2 * jac(t, y, v);
-                end
-            else
-                error('Matrix-free block systems are not supported yet');
-            end
-            sol = obj.Solver(jvp, x);
+            stats.nLinearSolve = stats.nLinearSolve + 1;
         end
     end
 end

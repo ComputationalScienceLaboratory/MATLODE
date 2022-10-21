@@ -10,11 +10,11 @@ classdef RKDense < matlode.denseoutput.DenseOutput
             obj.bTheta = @(theta) b * theta.^(1:size(b,2))';
         end
         
-        function [denseY, fEvals] = denseOut(obj, ~, t, tNeeded, yC, ~, k, h)
+        function [denseY, fEvals] = denseOut(obj, ~, t, tneed, y0, ~, stages, dt)
             
-            theta = (tNeeded - t) / h;
+            theta = (tneed - t) / dt;
             
-            denseY = yC + (k * h) * obj.bTheta(theta);
+            denseY = y0 + (stages * dt) * obj.bTheta(theta);
             fEvals = 0;
         end
     end

@@ -12,11 +12,11 @@ classdef Direct < matlode.denseoutput.DenseOutput
             obj.kFuncs = kfuncs;
         end
         
-        function [denseY, fEvals] = denseOut(obj, ~, t, tNeeded, yC, ~, k, h)
+        function [denseY, fEvals] = denseOut(obj, ~, t, tneed, y0, ~, stages, dt)
             
-            theta = (tNeeded - t) / h;
+            theta = (tneed - t) / h;
             
-            denseY = yC + (k * h) * obj.kFuncs(theta);
+            denseY = y0 + (stages * dt) * obj.kFuncs(theta);
             fEvals = 0;
         end
     end

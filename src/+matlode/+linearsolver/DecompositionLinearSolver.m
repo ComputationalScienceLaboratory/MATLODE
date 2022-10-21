@@ -1,21 +1,28 @@
 classdef DecompositionLinearSolver < matlode.linearsolver.MatrixLinearSolver
     properties (SetAccess = immutable, GetAccess = private)
-        Args
+        DecompositionType
+		DecompositionArgs
     end
     
     methods
-        function obj = DecompositionLinearSolver(varargin)
-            obj = obj@matlode.linearsolver.MatrixLinearSolver();
-            obj.Args = varargin;
+		function obj = DecompositionLinearSolver(type, solver, decompArgs)
+			arguments
+				type(1,1) string = 'lu';
+				solver(1,1) function_handle = @mldivide;
+				decompArgs(1,:) cell = {};
+			end
+            obj = obj@matlode.linearsolver.MatrixLinearSolver(solver, {});
+			obj.DecompositionType = type;
+			obj.DecompositionArgs = decompArgs;
         end
         
-        function system = preprocess(obj, updateState, updateTimestep, system, t, y, f, m1, mass, m2, jac)
-            system = preprocess@matlode.linearsolver.MatrixLinearSolver( ...
-                obj, updateState, updateTimestep, system, t, y, f, m1, mass, m2, jac);
+        function [stats] = preprocess(obj, t, y, reeval, mass_scale, jac_scale, stats)
             
-            if updateState || updateTimestep
-                system.matrix = decomposition(system.matrix, obj.Args{:});
-            end
+            [stats] = preprocess@matlode.linearsolver.MatrixLinearSolver(obj, t, y, reeval, mass_scale, jac_scale, stats);
+            
+            obj.system = decomposition(obj.system, obj.DecompositionType, obj.DecompositionArgs);
+            
+            stats.nDecompositions = stats.nDecompositions + 1;
         end
     end
 end

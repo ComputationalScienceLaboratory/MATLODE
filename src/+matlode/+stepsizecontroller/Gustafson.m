@@ -1,4 +1,4 @@
-classdef Gustafson < matlode.stepsizecontroller.StartingController
+classdef Gustafson < matlode.stepsizecontroller.StepSizeController
     %Gustafsson, K. (1991). Control theoretic techniques for stepsize 
     % selection in explicit Runge-Kutta methods. ACM Transactions on Mathematical Software
     
@@ -24,7 +24,7 @@ classdef Gustafson < matlode.stepsizecontroller.StartingController
             opts = p.Results;
             varargout = p.Unmatched;
             
-            obj = obj@matlode.stepsizecontroller.StartingController(2, varargout);
+            obj = obj@matlode.stepsizecontroller.StepSizeController(2, varargout);
             
             obj.Ki = opts.Ki;
             obj.Kp = opts.Kp;
@@ -32,7 +32,7 @@ classdef Gustafson < matlode.stepsizecontroller.StartingController
             
         end
         
-        function [accept, hNew, tNew] = newStepSize(obj, prevAccept, t, ~, h, err, q, ~, ~)
+        function [accept, hNew, tNew] = newStepSize(obj, prevAccept, t, ~, h, err, q)
             accept = err(1) <= 1;
             
             scalh = 1;

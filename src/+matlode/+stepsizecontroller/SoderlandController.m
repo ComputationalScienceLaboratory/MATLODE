@@ -1,4 +1,4 @@
-classdef SoderlandController < matlode.stepsizecontroller.StartingController
+classdef SoderlandController < matlode.stepsizecontroller.StepSizeController
     %SOBERLANDCONTROLLER 
     %A general controller for all history based non-conditional controllers
     %can be expanded up to any amount of history gien proper coefficents
@@ -39,14 +39,14 @@ classdef SoderlandController < matlode.stepsizecontroller.StartingController
                 error('AQfunc must be a function handle')
             end
             
-            obj = obj@matlode.stepsizecontroller.StartingController(max(length(opts.A), length(opts.B)), varargout);
+            obj = obj@matlode.stepsizecontroller.StepSizeController(max(length(opts.A), length(opts.B)), varargout);
             
             obj.A = opts.A;
             obj.B = opts.B;
             obj.AQfunc = opts.AQfunc;
         end
         
-        function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q, ~, ~)
+        function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q)
             
             accept = err(1) <= 1; 
             if accept

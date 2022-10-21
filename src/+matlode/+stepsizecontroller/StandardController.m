@@ -1,4 +1,4 @@
-classdef StandardController < matlode.stepsizecontroller.StartingController
+classdef StandardController < matlode.stepsizecontroller.StepSizeController
     %Standard Error Controller as described in Solving ODES I book
     %Seperate from Soberland to help with performance
     
@@ -6,11 +6,11 @@ classdef StandardController < matlode.stepsizecontroller.StartingController
     methods
         function obj = StandardController(varargin)
             
-            obj = obj@matlode.stepsizecontroller.StartingController(1, varargin{:});
+            obj = obj@matlode.stepsizecontroller.StepSizeController(1, varargin{:});
             
         end
         
-        function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q, ~, ~)
+        function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q)
             accept = err <= 1;
             
             if accept

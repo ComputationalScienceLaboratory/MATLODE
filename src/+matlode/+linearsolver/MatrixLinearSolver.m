@@ -1,48 +1,40 @@
 classdef MatrixLinearSolver < matlode.linearsolver.LinearSolver
-    properties (SetAccess = immutable, GetAccess = private)
-        Solver
-    end
+    
     
     methods
-        function obj = MatrixLinearSolver(solver)
-            if nargin < 1
-                solver = @mldivide;
-            end
+        function obj = MatrixLinearSolver(solver, solverArgs)
+			arguments
+				solver(1,1) function_handle = @mldivide;
+				solverArgs(1,:) cell = {};
+			end
             
-            obj.Solver = solver;
+            obj = obj@matlode.linearsolver.LinearSolver(solver, solverArgs{:});
         end
         
-        function system = preprocess(~, updateState, updateTimestep, system, t, y, ~, m1, mass, m2, jac)
-            init = isempty(system);
-            
-            if updateState
-                if ~isnumeric(jac)
-                    system.jac = jac(t, y);
-                elseif init
-                    system.jac = jac;
-                end
-                
-                if ~isnumeric(mass)
-                    system.mass = mass(t, y);
-                elseif init
-                    if isempty(mass)
-                        system.mass = eye(size(system.jac), 'like', system.jac);
-                    else
-                        system.mass = mass;
-                    end
-                end
+        function [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats)
+            if reeval
+				if f.MLinearOperatorType ~= matlode.LinearOperatorType.Identity && f.MLinearOperatorType ~= matlode.LinearOperatorType.Constant
+                	obj.mass = f.Mass(t, y);
+					stats.nMassEvals = stats.nMassEvals + 1;
+				elseif isempty(obj.mass)
+					obj.mass = f.Mass;
+				end
+
+				if f.JLinearOperatorType ~= matlode.LinearOperatorType.Identity && f.JLinearOperatorType ~= matlode.LinearOperatorType.Constant
+                	obj.jac = f.Jacobian(t, y);
+					stats.nJacobianEvals = stats.nJacobianEvals + 1;
+				elseif isempty(obj.jac)
+                	obj.jac = f.Jacobian;
+				end
             end
-            
-            if updateState || updateTimestep
-                system.matrix = kron(m1, system.mass);
-                if m2 ~= 0
-                    system.matrix = system.matrix - kron(m2, jac);
-                end
-            end
+
+            obj.system = mass_scale * obj.mass + jac_scale * obj.jac;
         end
         
-        function sol = solve(obj, x, system, ~, ~, ~, ~, ~, ~, ~)
-            sol = obj.Solver(system.matrix, x);
+        function [sol, stats] = solve(obj, x, stats)
+            sol = obj.Solver(obj.system, x, obj.SolverArgs{:});
+            
+            stats.nLinearSolves = stats.nLinearSolves + 1;
         end
     end
 end

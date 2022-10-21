@@ -7,7 +7,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
         C
         BHat
         E
-        Stage
+        StageNum
         EmbeddedOrder
         Order
         FSAL
@@ -26,7 +26,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             obj.E = e;
             obj.EmbeddedOrder = embeddedOrder;
             obj.Order = order;
-            obj.Stage = size(b, 2);
+            obj.StageNum = size(b, 2);
             obj.FSAL = all(a(end, :) == b) && all(a(1, :) == 0);
             obj.FsalStart = uint32(obj.FSAL) + 1;
         end
@@ -62,19 +62,16 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
         end
        
         
-        function [k, fevals, fevalIterCounts] = timeLoopBeforeLoop(obj, f0, t0, y0)
+        function [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
             
-            k = zeros(length(y0), obj.Stage);
-            
-            fevalIterCounts = double(obj.Stage - obj.FsalStart + 1);
+            stages = zeros(length(y0), obj.StageNum);
             
             if obj.FSAL
                 if isempty(f0)
-                    k(:, end) = f(t0, y0);
-                    fevals = 1;
+                    stages(:, end) = f.F(t0, y0);
+                    stats.FEvals = stats.FEvals + 1;
                 else
-                    k(:, end) = f0;
-                    fevals = 0;
+                    stages(:, end) = f0;
                 end
             end
         end

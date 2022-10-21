@@ -1,7 +1,6 @@
 classdef (Abstract) OneStepIntegrator < matlode.Integrator
     %One Step Integrator template
     
-    
     methods (Access = protected)
         function obj = OneStepIntegrator(varargin)
             obj = obj@matlode.Integrator(varargin{:});
@@ -15,6 +14,7 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
             
         end
         
+		%% Time Loop
         function [t, y, stats] = timeLoop(obj, f, tspan, y0, opts)
             
             numVars = length(y0);
@@ -25,170 +25,157 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
             %Structure access optimizations
             errNorm = opts.ErrNorm;
             stepController = opts.StepSizeController;
-            adap = stepController.Adaptive;
             
             tlen = 0;
             
-            if multiTspan
+			% TODO: Switch to variable and not default
+			if multiTspan
                 y = zeros(numVars, length(tspan));
                 t = zeros(1, length(tspan));
-            else
+			elseif opts.FullTrajectory
                 y = zeros(numVars, opts.ChunkSize);
                 t = zeros(1, opts.ChunkSize);
                 tlen = length(t);
-            end
+			else
+                y = zeros(length(y0), 2);
+                t = tspan;
+			end
+			t(:,1) = tspan(:,1);
+			y(:, 1) = y0;
             
             %inital values
-            t(1,1) = tspan(1);
-            tCur = tspan(1);
-            tNext = tCur;
-            ti = 2;
-            tl = 2;
-            if isDense
-               ti = length(tspan); 
-            else
-                tl = length(tspan);
-            end
+            tcur = tspan(1);
+            tnext = tcur;
+            tindex = 2;
             
             tspanlen = length(tspan);
             
             tdir = sign(tspan(end) - tspan(1));
-            hmax = min([abs(opts.MaxStep), abs(tspan(end) - tspan(1))]) * tdir;
-            hmin = 64 * eps(tspan(1)) * tdir;
+            dtmax = min([abs(opts.MaxStep), abs(tspan(end) - tspan(1))]) * tdir;
+            dtmin = 64 * eps(tspan(1)) * tdir;
             
-            y(:, 1) = y0;
-            yNext = y0;
+            ynext = y0;
             
-            %temporary stats
-            nSteps = 1;
-            nFailed = 0;
-            nSmallSteps = 0;
+			%Create Stats Object
+			stats = obj.intalizeStats();
+			stats.nSteps = 1;
             
             [q] = obj.timeLoopInit;
             
             %First step
             %allocates memory for first step
-            [h0, f0, nFevals] = stepController.startingStep(f, tspan, y0, q, errNorm, hmin, hmax);
+            [dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, q, errNorm, dtmin, dtmax);
             
-            hHist = ones(1, stepController.History) * h0;
-            hN = hHist(1);
-            err = ones(1, length(hHist));
+            dthist = ones(1, stepController.History) * dt0;
+            dtnext = dthist(1);
+            err = ones(1, length(dthist));
             
-            accept = true;
+            prevAccept = true;
             
-            [k, fevals, fevalIterCounts] = obj.timeLoopBeforeLoop(f0, tspan(1), y0);
-            
-            nFevals = nFevals + fevals;
+            [stages, stats] = obj.timeLoopBeforeLoop(f, f0, tspan(1), y0, stats);
             
             %Time Loop
-            while ti <= tspanlen
+            while tindex <= tspanlen
                 %Cycle history
                 err = circshift(err, 1, 2);
-                hHist = circshift(hHist, 1, 2);
+                dthist = circshift(dthist, 1, 2);
                 
-                yCur = yNext;
-                tCur = tNext;
-                hC = hN;
-                hHist(1) = hN;
+                ycur = ynext;
+                tcur = tnext;
+                dtcur = dtnext;
+                dthist(1) = dtnext;
                 
                 %Subject to change
-                hmin = 64 * eps(tCur) * tdir;
+                dtmin = 64 * eps(tcur) * tdir;
                 
                 %Accept Loop
                 %Will keep looping until accepted step
                 while true
                     
-                    prevAccept = accept;
-                    
-                    if adap
-                        [k, yNext, err(:, 1)] = timeStepErr(obj, f, tCur, yCur, hC, k, errNorm, prevAccept);
-                    else
-                        [k, yNext, err(:, 1)] = timeStep(obj, f, tCur, yCur, hC, k, errNorm, prevAccept);
-                    end
-                    
-                    nFevals = nFevals + fevalIterCounts;
+                    [ynext, stages, stats] = timeStep(obj, f, tcur, ycur, dtcur, stages, prevAccept, stats);
+                    [err(:, 1), stats] = timeStepErr(obj, f, tcur, ycur, ynext, dtcur, stages, errNorm, stats);
                     
                     %Find next Step
-                    [accept, hN, tNext] = stepController.newStepSize(prevAccept, tCur, tspan, hHist, err, q, nSteps, nFailed);
+					%TODO: Update to take stats
+                    [prevAccept, dtnext, tnext] = stepController.newStepSize(prevAccept, tcur, tspan, dthist, err, q);
                     
                     %Check if step is really small
-                    if abs(hN) < abs(hmin)
-                        if nSmallSteps == 0
+                    if abs(dtnext) < abs(dtmin)
+						%Prevents excessive output
+                        if stats.nSmallSteps == 0
                             warning('The step the integrator is taking extremely small, results may not be optimal')
                         end
                         %accept step since the step cannot get any smaller
-                        nSmallSteps = nSmallSteps + 1;
-                        hN = hmin;
-                        tNext = tCur + hmin;
-                        accept = true;
+                        stats.nSmallSteps = stats.nSmallSteps + 1;
+                        dtnext = dtmin;
+                        tnext = tcur + dtmin;
+                        prevAccept = true;
                         break;
                     end
                     
                     %check step acception
-                    if accept
+                    if prevAccept
                         break;
                     end
                     
-                    nFailed = nFailed + 1;
-                    hC = hN;
-                    hHist(1) = hN;
+                    stats.nFailed = stats.nFailed + 1;
+                    dtcur = dtnext;
+                    dthist(1) = dtnext;
                     
                 end
                 
                 %set new step to be in range
-                if adap
-                    hN = min(abs(hmax), abs(hN)) * tdir;
-                end
+                dtnext = min(abs(dtmax), abs(dtnext)) * tdir;
                 
-                nSteps = nSteps + 1;
+                stats.nSteps = stats.nSteps + 1;
                 
                 %Check for all memory allocation
-                if ~multiTspan
+                if ~multiTspan && opts.FullTrajectory
 
                     %Allocate more memory if non-dense
-                    if nSteps > tlen
+                    if stats.nSteps > tlen
                         y = [y, zeros(numVars, opts.ChunkSize)];
                         t = [t, zeros(1, opts.ChunkSize)];
                         tlen = length(t);
                     end
 
-                    t(:, nSteps) = tNext;
-                    y(:, nSteps) = yNext;
+                    t(:, stats.nSteps) = tnext;
+                    y(:, stats.nSteps) = ynext;
                 elseif isDense
                     %Dense output
-                    while tl ~= tspanlen && tNext * tdir > tspan(tl) * tdir 
+                    while tindex ~= tspanlen && tnext * tdir > tspan(tindex) * tdir 
                         
                         %incase lucky and land on point, can be cheaper
                         %than dense output if dense requires fevals
-                        if abs(tspan(tl) - tNext) < abs(hmin)
-                            t(:, tl) = tspan(tl);
-                            y(:, tl) = yNext;
+                        if abs(tspan(tindex) - tnext) < abs(dtmin)
+                            t(:, tindex) = tspan(tindex);
+                            y(:, tindex) = ynext;
                         else
                             %Call Dense output function and record
-                            t(:, tl) = tspan(tl);
-                            [y(:, tl), tempFevals] = opts.Dense.denseOut(f, tCur, tspan(tl), yCur, yNext, k, hC);
-                            nFevals = nFevals + tempFevals;
+                            t(:, tindex) = tspan(tindex);
+                            [y(:, tindex), tempFevals] = opts.Dense.denseOut(f, tcur, tspan(tindex), ycur, ynext, stages, dtcur);
+                            stats.nFevals = stats.nFevals + tempFevals;
                         end
-                        tl = tl + 1;
+                        tindex = tindex + 1;
                     end
                 end
                 
                 %check if condition holds
                 %used for end checking and integrate to
-                if tspan(ti) * tdir <= (tNext + hN) * tdir
+                if tspan(tindex) * tdir <= (tnext + dtnext) * tdir
                     
                     %integrate to/ End point
                     %check if close enough with hmin
-                    if abs(tspan(ti) - tNext) < abs(hmin)
+                    if abs(tspan(tindex) - tnext) < abs(dtmin)
 
                         if multiTspan
-                            t(:, ti) = tspan(ti);
-                            y(:, ti) = yNext;
+                            t(:, tindex) = tspan(tindex);
+                            y(:, tindex) = ynext;
                         end
-                        ti = ti + 1;
-                    elseif stepController.Adaptive
+                        tindex = tindex + 1;
+					else
                         
-                        hN = tspan(ti) - tNext;
+                        dtnext = tspan(tindex) - tnext;
                     end
                     
                 end
@@ -198,21 +185,69 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
             
             %End of Timeloop work
             %Truncate extra memory
-            if ~multiTspan
-                t = t(:, 1:nSteps);
-                y = y(:, 1:nSteps);
+            if ~multiTspan && opts.FullTrajectory
+                t = t(:, 1:stats.nSteps);
+                y = y(:, 1:stats.nSteps);
             else
                 t(:, end) = tspan(end);
-                y(:, end) = yNext;
+                y(:, end) = ynext;
             end
             
             %Create Stats
-            stats.nSteps = nSteps - 1;
-            stats.nFailed = nFailed;
-            stats.nFevals = nFevals;
-            stats.nSmallSteps = nSmallSteps;
+            stats.nSteps = stats.nSteps - 1;
             
-        end
+		end
+
+		%% Fixed Time Loop
+		function [t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts)
+            
+            
+            if opts.FullTrajectory
+                y = zeros(length(y0), length(tspan));
+				y(:, 1) = y0;
+                t = tspan;
+			else
+                y = zeros(length(y0), 2);
+                t = tspan;
+			end
+
+			t(:,1) = tspan(:,1);
+			y(:, 1) = y0;
+            
+            %inital values
+            ynext = y0;
+
+			%Start stats
+			stats = obj.intalizeStats;
+			stats.nSteps = length(tspan);
+
+            
+            [stages, stats] = obj.timeLoopBeforeLoop(f0, tspan(1), y0, stats);
+            
+            %Time Loop
+			for i = 1:(length(tspan)-1)
+                yi = ynext;
+                tcur = tspan(i);
+                dtc = tspan(i+1) - tspan(i);
+                
+                [ynext, stages, stats] = timeStep(obj, f, tcur, yi, dtc, stages, true, stats);
+
+				if opts.FullTrajectory || i == (length(tspan)-1)
+					y(:, i + 1) = ynext;
+				end
+			end
+		end
+
+		function stats = intalizeStats(obj)
+
+			stats.nSteps = 0;
+			stats.nFailed = 0;
+			stats.nSmallSteps = 0;
+			stats.nLinearSolves = 0;
+			stats.nMassEvals = 0;
+			stats.nJacobianEvals = 0;
+			stats.nPDTEval = 0;
+		end
         
     end
 end

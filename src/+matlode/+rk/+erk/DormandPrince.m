@@ -4,25 +4,32 @@ classdef DormandPrince < matlode.rk.erk.ERK
     end
     
     methods
-        function obj = DormandPrince(datatype)
+
+        function obj = DormandPrince(varargin)
             
             %TODO
             %include reference for method
             
-            if nargin == 0
-                datatype = 'double';
-            end
+            p = inputParser;
+            p.KeepUnmatched = true;
+            
+            p.addParameter('datatype', 'double');
+            
+            p.parse(varargin{:});
+            opts = p.Results;
+
+            datatype = opts.datatype;
             
             caster = @(x) matlode.util.CoefficentTransformers.transform(x,datatype);
             
             
             a = caster(join(['[[0,          0,           0,          0,        0,           0,     0];',...
-                             '[1/5,        0,           0,          0,        0,           0,     0];',...
-                             '[3/40,       9/40,        0,          0,        0,           0,     0];',...
-                             '[44/45,      -56/15,      32/9,       0,        0,           0,     0];',...
-                             '[19372/6561, -25360/2187, 64448/6561, -212/729, 0,           0,     0];',...
-                             '[9017/3168,  -355/33,     46732/5247, 49/176,   -5103/18656, 0,     0];',...
-                             '[35/384,     0,           500/1113,   125/192,  -2187/6784,  11/84, 0]]']));
+                              '[1/5,        0,           0,          0,        0,           0,     0];',...
+                              '[3/40,       9/40,        0,          0,        0,           0,     0];',...
+                              '[44/45,      -56/15,      32/9,       0,        0,           0,     0];',...
+                              '[19372/6561, -25360/2187, 64448/6561, -212/729, 0,           0,     0];',...
+                              '[9017/3168,  -355/33,     46732/5247, 49/176,   -5103/18656, 0,     0];',...
+                              '[35/384,     0,           500/1113,   125/192,  -2187/6784,  11/84, 0]]']));
              
             b =  caster('[35/384, 0, 500/1113, 125/192, -2187/6784, 11/84, 0]');
             

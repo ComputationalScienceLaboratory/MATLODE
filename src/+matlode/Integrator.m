@@ -4,6 +4,8 @@ classdef (Abstract) Integrator < handle
     
     properties (Abstract, Constant)
         PartitionMethod
+		PartitionNum
+		MultirateMethod
     end
     
     properties (SetAccess = immutable)
@@ -13,13 +15,15 @@ classdef (Abstract) Integrator < handle
     
     methods (Abstract, Access = protected)
         [t, y, stats] = timeLoop(obj, f, tspan, y0, opts);
-        [k, yN, err] = timeStep(obj,  f, t, y, h, k, ErrNorm, prevAccept);
-        [k, yN, err] = timeStepErr(obj,  f, t, y, h, k, ErrNorm, prevAccept);
-        [k, fevals, fevalIterCounts] = timeLoopBeforeLoop(obj, f0, t0, y0);
+		[t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts);
+        [ynew, stages, stats] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats);
+        [err, stats] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats);
+        [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats);
         [q] = timeLoopInit(obj);
     end
     
     methods
+		%Integrate over a adaptive step
         function obj = Integrator(adap, datatype)
             
             obj.Adaptive = adap;
@@ -27,84 +31,153 @@ classdef (Abstract) Integrator < handle
         end
         
         function sol = integrate(obj, f, tspan, y0, varargin)
+
+			if ~obj.Adaptive
+				error('Method does not support adaptive step control. Call integrateFixed for integration')
+			end
             
             [n,m] = size(tspan);
             
-            if ~ismatrix(tspan)
-                error('tspan cannot have this many dimensions');
-            elseif n ~= 1 && m ~= 1
-                error('tspan must be a vector')
-            elseif (length(tspan) < 2)
-                error('tspan must have a initial and final entry');
+            if (n == 1 && m == 1)
+                error('tspan must be a vector');
+			elseif (n > 1 && m > 1)
+                error('tspan must be a vector');
             elseif ~issorted(tspan, 'strictascend') && ~issorted(tspan, 'strictdescend')
                 error('tspan must have unique values and be sorted in either descending or ascending order')
             end
             
             %Create options
-            p = inputParser;
+
+			p = inputParser();
+			p.KeepUnmatched = true;
             opts = obj.matlodeSets(p, varargin{:});
-            
-            if isempty(opts.Dense) && length(tspan) > 2 && ~opts.StepSizeController.Adaptive
-                error('IntegrateTo is not supported for a non-adaptable controller, please use DenseOutput instead')
-            end
-            
             
             t = [];
             y = [];
             stats = [];
+
+			new_model = false;
             
             %Compute
-            if isa(f, 'function_handle') && ~obj.PartitionMethod
+            if isa(f, 'matlode.Model')
+				if isempty(f.Mass)
+					f.Mass = eye(length(y0));
+				end
                 
                 [t, y, stats] = obj.timeLoop(f, tspan, y0, opts);
-                
-            elseif isa(f, 'cell') && cellfun(@(x) isa(x, 'function_handle'), f)
-                
-                %determine size of partition
-                if length(f) == 1 && ~obj.PartitionMethod
-                    [t, y, stats] = obj.timeLoop(f{1}, tspan, y0, opts);
-                elseif isempty(f)
-                    error('Partitioned system solves, require atleast one partition to be provided')
-                else
-                    %paritioning setup
-                    if obj.PartitionMethod
-                        [t, y, stats] = obj.timeLoop(f, tspan, y0, opts);
-                    else
-                       error('This method does not work with a partitioned f');
-                    end
-                end
+			elseif isa(f, 'function_handle') || isa(f, 'cell')
+				if isa(f, 'cell') && ~obj.PartitionMethod
+					error('This method does not support partitioning')
+				end
+				f_mod = matlode.Model(f, varargin{:});
+				new_model = true;
+				if isempty(f_mod.Mass)
+					f_mod.Mass = eye(length(y0));
+				end
+
+                [t, y, stats] = obj.timeLoop(f_mod, tspan, y0, opts);
+
+			elseif isa(f, 'otp.RHS')
+				f_mod = matlode.Model(f, varargin{:});
+				new_model = true;
+				if isempty(f_mod.Mass)
+					f_mod.Mass = eye(length(y0));
+				end
+
+                [t, y, stats] = obj.timeLoop(f_mod, tspan, y0, opts);
                 
             else
-                error('f must be a ''function_handle'' or a ''cell''');
+                error('f must be a ''function_handle'', ''cell'', OTP RHS, or Model object');
             end
             
             sol.t = t;
             sol.y = y;
             sol.stats = stats;
-        end
+
+			if new_model
+				sol.model = f_mod;
+			else
+				sol.model = f;
+			end
+		end
+
+		%Integrate over a fixed interval
+		function sol = integrateFixed(obj, f, tspan, y0, varargin)
+            
+            [n,m] = size(tspan);
+            
+            if (n == 1 && m == 1)
+                error('tspan must be a vector');
+			elseif (n > 1 && m > 1)
+                error('tspan must be a vector');
+            elseif ~issorted(tspan, 'strictascend') && ~issorted(tspan, 'strictdescend')
+                error('tspan must have unique values and be sorted in either descending or ascending order')
+            end
+            
+            %Create options
+			p = inputParser();
+			p.KeepUnmatched = true;
+            opts = obj.matlodeSets(p, varargin{:});
+            
+            
+            t = [];
+            y = [];
+            stats = [];
+
+			new_model = false;
+            
+            %Compute
+            if isa(f, 'matlode.Model')
+                
+                [t, y, stats] = obj.timeLoopFixed(f, tspan, y0, opts);
+			elseif isa(f, 'function_handle') || isa(f, 'cell')
+				if isa(f, 'cell') && ~obj.PartitionMethod
+					error('This method does not support partitioning')
+				end
+				f_mod = matlode.Model(f, varargin{:});
+				new_model = true;
+
+                [t, y, stats] = obj.timeLoopFixed(f_mod, tspan, y0, opts);
+
+			elseif isa(f, 'otp.RHS')
+				f_mod = matlode.Model(f, varargin{:});
+				new_model = true;
+
+                [t, y, stats] = obj.timeLoopFixed(f_mod, tspan, y0, opts);
+                
+            else
+                error('f must be a ''function_handle'', ''cell'', OTP RHS, or Model object');
+            end
+            
+            sol.t = t;
+            sol.y = y;
+            sol.stats = stats;
+
+			if new_model
+				sol.model = f_mod;
+			else
+				sol.model = f;
+			end
+		end
     end
     
     methods (Access = protected)
         
-        
         function opts = matlodeSets(obj, p, varargin)
             
             %Assign to controllers
-            p.addParameter('StepSizeController', matlode.stepsizecontroller.Fixed(1000));
+			p.addParameter('OTPPath', []);
+            p.addParameter('StepSizeController', matlode.stepsizecontroller.StandardController);
             p.addParameter('ErrNorm', matlode.errnorm.InfNorm(sqrt(eps), sqrt(eps)));
-            p.addParameter('Jacobian', []);
             p.addParameter('ChunkSize', 1000);
+			p.addParameter('FullTrajectory', false);
             p.addParameter('Dense', []);
             p.addParameter('MaxStep', inf);
+			
             
             p.parse(varargin{:});
             
             opts = p.Results;
-            
-            %make sure a method can use a adaptive controller
-            if ~obj.Adaptive && opts.StepSizeController.Adaptive
-                error('Current method does not have the ability to use a adaptive step size controller');
-            end
             
             
         end

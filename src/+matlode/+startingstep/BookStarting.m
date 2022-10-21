@@ -11,10 +11,10 @@ classdef BookStarting < matlode.startingstep.StartingStep
             fevals = 2;
             tdir = sign(tspan(end) - tspan(1));
             
-            f0 = f(tspan(1), y0);
+            f0 = f.F(tspan(1), y0);
             
-            d0 = ErrNorm.errEstimate([y0, y0], 0);
-            d1 = ErrNorm.errEstimate([f0, f0], 0);
+            d0 = ErrNorm.errEstimate(y0, y0, 0);
+            d1 = ErrNorm.errEstimate(f0, f0, 0);
             
             if any([d0, d1] < 1e-5)
                 h0 = 1e-6;
@@ -25,8 +25,8 @@ classdef BookStarting < matlode.startingstep.StartingStep
             h0 = max([min([h0, maxStep * tdir]), minStep * tdir]);
 
             y1 = y0 + h0 * f0 * tdir;
-            f1 = f(tspan(1) + h0 * tdir, y1);
-            err0 = ErrNorm.errEstimate([f1 - f0, f1 - f0], 0);
+            f1 = f.F(tspan(1) + h0 * tdir, y1);
+            err0 = ErrNorm.errEstimate(f1 - f0, f1 - f0, 0);
             d2 = err0 / h0;
             dm = max(d1, d2);
 

@@ -4,14 +4,9 @@ classdef InfNorm < matlode.errnorm.NormErr
            obj = obj@matlode.errnorm.NormErr(abstol, reltol);
        end
         
-        function err = errEstimate(obj, y, yE)
-            persistent abstol reltol
-            if isempty(abstol)
-                abstol = obj.AbsTol;
-                reltol = obj.RelTol;
-            end
-            sc = abstol + max(abs(y(:, 1)), abs(y(:, 2))) * reltol;
-            err = norm(yE ./ sc, inf);
+        function err = errEstimate(obj, y0, y1, yerror)
+            sc = obj.AbsTol + max(abs(y0), abs(y1)) * obj.RelTol;
+            err = norm(yerror ./ sc, inf);
         end
     end
 end
