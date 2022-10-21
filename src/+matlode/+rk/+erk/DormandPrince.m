@@ -1,24 +1,14 @@
 classdef DormandPrince < matlode.rk.erk.ERK
-    properties (SetAccess = immutable)
-        DenseOut
-    end
+%Method: Dormand PRince
+% p = 5 s = 7 pe = 4
+%Reference: 
     
     methods
 
-        function obj = DormandPrince(varargin)
-            
-            %TODO
-            %include reference for method
-            
-            p = inputParser;
-            p.KeepUnmatched = true;
-            
-            p.addParameter('datatype', 'double');
-            
-            p.parse(varargin{:});
-            opts = p.Results;
-
-            datatype = opts.datatype;
+        function obj = DormandPrince(datatype)
+            arguments
+				datatype(1,1) string = 'double';
+			end
             
             caster = @(x) matlode.util.CoefficentTransformers.transform(x,datatype);
             

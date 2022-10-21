@@ -24,16 +24,20 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 
     properties (SetAccess = immutable, GetAccess = private)
         FsalStart
-    end
+	end
+
+	properties (SetAccess = protected)
+        DenseOut
+	end
     
-    properties
+    properties 
         LinearSolver
 	end
 
 	methods (Static)
 		%% Coefficent Transformation Methods
 		%Coefficent transformer
-		function [gammadia, gammasum, alphasum, a, c, m, me] = RosCoefMethTrans(gamma, alpha, b, be)
+		function [gammadia, gammasum, alphasum, a, c, m, me, e] = RosCoefMethTrans(gamma, alpha, b, be)
 			gammadia = diag(gamma);
 			gammasum = sum(gamma, 2);
 			alphasum = sum(alpha, 2);
@@ -42,8 +46,10 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 			%TODO: Fix
 			if isempty(be)
 				me = [];
+				e = [];
 			else
 				me = mrdivide(be, gamma);
+				e = m - me;
 			end
 
 			eta = gamma * diag(1 ./ gammadia) + eye(length(gammadia));
@@ -86,9 +92,9 @@ classdef Rosenbrock < matlode.OneStepIntegrator
     
     methods
 
-        function obj = Rosenbrock(gammadia, gammasum, alphasum, a, c, m, me, order, embeddedOrder)
+        function obj = Rosenbrock(gammadia, gammasum, alphasum, a, c, m, e, order, embeddedOrder)
             
-            obj = obj@matlode.OneStepIntegrator(~isempty(me), class(gammadia));
+            obj = obj@matlode.OneStepIntegrator(~isempty(e), class(gammadia));
 
 			obj.GammaDia = gammadia;
 			obj.GammaSum = gammasum;
@@ -97,13 +103,14 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 			obj.A = a;
 			obj.C = c;
 			obj.M = m;
-			obj.E = me;
+			obj.E = e;
             
             obj.EmbeddedOrder = embeddedOrder;
             obj.Order = order;
             obj.StageNum = size(obj.M, 2);
             obj.FSAL = all(obj.A(end, :) == obj.M) && all(obj.A(1, :) == 0) && all(obj.C(1, :) == 0) && obj.AlphaSum(1) == 0;
             obj.FsalStart = uint32(obj.FSAL) + 1;
+            obj.DenseOut = matlode.denseoutput.Linear(obj.M);
 		end
         
 	end

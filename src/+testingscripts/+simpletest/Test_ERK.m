@@ -4,7 +4,7 @@ close all
 
 integrator = matlode.rk.erk.DormandPrince();
 
-options.ErrNorm = matlode.errnorm.InfNorm(1e-6, 1e-6);
+options.ErrNorm = matlode.errnorm.InfNorm(1e-12, 1e-12);
 options.StepSizeController = matlode.stepsizecontroller.StandardController;
 
 lambda = -1;

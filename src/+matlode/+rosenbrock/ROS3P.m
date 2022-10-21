@@ -1,13 +1,13 @@
 classdef ROS3P < matlode.rosenbrock.Rosenbrock
-    properties
-       Dense 
-    end
+%Method: ROS3P
+% p = 3 s = 3 pe = 2
+%Reference: 
     
     methods
         function obj = ROS3P(datatype)
-            if nargin == 0
-                datatype = 'double';
-            end
+            arguments
+				datatype(1,1) string = 'double';
+			end
             
             caster = @(x) matlode.util.CoefficentTransformers.transform(x,datatype);
             
@@ -23,15 +23,14 @@ classdef ROS3P < matlode.rosenbrock.Rosenbrock
                              '[−1.607695154586736, 0, 0];',...
                              '[−3.464101615137755, −1.732050807568877, 0]']));
             m = caster('[2, 5.773502691896258e−01, 4.226497308103742e−01]');
-            me = caster('[2.113248654051871, 1,  4.226497308103742e−01]');
+            e = caster('[2.113248654051871, 1,  4.226497308103742e−01]');
             
             order = 3;
             
             embbededOrder = 2;
             
-            obj = obj@matlode.rosenbrock.Rosenbrock(gammadia, gammasum, alphasum, a, c, m, me, order, embbededOrder);
+            obj = obj@matlode.rosenbrock.Rosenbrock(gammadia, gammasum, alphasum, a, c, m, e, order, embbededOrder);
             
-            obj.Dense = matlode.denseoutput.Linear(m);
         end
         
         function sol = integrate(obj, f, tspan, y0, varargin)

@@ -1,7 +1,7 @@
 classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
     %RungeKutta integrator
     
-    properties (SetAccess = immutable)
+    properties (SetAccess = protected)
         A
         B
         C
@@ -12,7 +12,11 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
         Order
         FSAL
         FsalStart
-    end
+	end
+
+	properties (SetAccess = protected)
+        DenseOut
+	end
     
     methods
         function obj = RungeKutta(a, b, bHat, c, e, order, embeddedOrder)
@@ -29,6 +33,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             obj.StageNum = size(b, 2);
             obj.FSAL = all(a(end, :) == b) && all(a(1, :) == 0);
             obj.FsalStart = uint32(obj.FSAL) + 1;
+			obj.DenseOut = matlode.denseoutput.Linear(obj.B);
         end
         
         function obj = fromCoeffs(a, b, bHat, c, e, bTheta, order, embededOrder)

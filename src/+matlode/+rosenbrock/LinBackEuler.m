@@ -1,23 +1,13 @@
 classdef LinBackEuler < matlode.rosenbrock.Rosenbrock
-    %LINBACKEULER Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties
-        Dense
-    end
+%Method: Linearly Implicit Euler
+% p = 1 s = 1 pe = 0
+%Reference: 
     
     methods
-        function obj = LinBackEuler(varargin)
-            
-            p = inputParser;
-            p.KeepUnmatched = true;
-            
-            p.addParameter('datatype', 'double');
-            
-            p.parse(varargin{:});
-            opts = p.Results;
-
-            datatype = opts.datatype;
+        function obj = LinBackEuler(datatype)
+            arguments
+				datatype(1,1) string = 'double';
+			end
             
             caster = @(x) matlode.util.CoefficentTransformers.transform(x,datatype);
             
@@ -26,21 +16,18 @@ classdef LinBackEuler < matlode.rosenbrock.Rosenbrock
             b = caster('[1]');
             be = [];
 
-			[gammadia, gammasum, alphasum, a, c, m, me] = RosCoefMethTrans(gamma, alpha, b, be);
+			[gammadia, gammasum, alphasum, a, c, m, me, e] = RosCoefMethTrans(gamma, alpha, b, be);
             
             order = 1;
             
             embbededOrder = 0;
             
-            
-            obj = obj@matlode.rosenbrock.Rosenbrock(gammadia, gammasum, alphasum, a, c, m, me, order, embbededOrder);
-            
-            obj.Dense = matlode.denseoutput.Linear(b);
+            obj = obj@matlode.rosenbrock.Rosenbrock(gammadia, gammasum, alphasum, a, c, m, e, order, embbededOrder);
             
         end
         
         function sol = integrate(obj, f, tspan, y0, varargin)
-            sol = integrate@matlode.rosenbrock.Rosenbrock(obj, f, tspan, y0, 'StepSizeController', matlode.stepsizecontroller.Fixed(1000), 'Dense', obj.DenseOut, varargin{:});
+            sol = integrate@matlode.rosenbrock.Rosenbrock(obj, f, tspan, y0, 'Dense', obj.DenseOut, varargin{:});
         end
     end
 end

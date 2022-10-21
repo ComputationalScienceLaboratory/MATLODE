@@ -2,7 +2,7 @@ clear
 format long e
 close all
 
-integrator = matlode.rosenbrock.RODAS3();
+integrator = matlode.rosenbrock.ROS34PW2();
 
 options.ErrNorm = matlode.errnorm.InfNorm(1e-12, 1e-12);
 options.StepSizeController = matlode.stepsizecontroller.StandardController;
