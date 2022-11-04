@@ -13,13 +13,15 @@ classdef OrderChecking < handle
 		
 		function [error, statsCumlative] = getErrorWRTExactValue(obj, model, t0, tf, y0, ytrue, stepamount, opts)
 			
-            error = zeros(1,length(step_amount));
-			statsCumlative = cell(1, length(step_amount));
+            error = zeros(1,length(stepamount));
+			statsCumlative = cell(1, length(stepamount));
+			
 
-			for i = length(error)
-				steps = t0:((tf - t0) / stepamount):tf;
-				[~, yf, statsCumlative{i}] = obj.Integrator.timeLoopFixed(model, steps, y0, opts);
-				error(i) = norm(yf - ytrue) / norm(ytrue);
+			for i = 1:length(error)
+				steps = t0:((tf - t0) / stepamount(i)):tf;
+				sol = obj.Integrator.integrateFixed(model, steps, y0, opts);
+				statsCumlative{i} = sol.stats;
+				error(i) = norm(sol.y(end) - ytrue) / norm(ytrue);
 			end
 		end
 

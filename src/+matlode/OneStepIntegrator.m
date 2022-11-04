@@ -202,13 +202,13 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 		function [t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts)
             
             
-            if opts.FullTrajectory
+			if opts.FullTrajectory
                 y = zeros(length(y0), length(tspan));
 				y(:, 1) = y0;
                 t = tspan;
 			else
                 y = zeros(length(y0), 2);
-                t = tspan;
+                t = zeros(size(tspan,1),2);
 			end
 
 			t(:,1) = tspan(:,1);
@@ -221,8 +221,8 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 			stats = obj.intalizeStats;
 			stats.nSteps = length(tspan);
 
-            
-            [stages, stats] = obj.timeLoopBeforeLoop(f0, tspan(1), y0, stats);
+
+            [stages, stats] = obj.timeLoopBeforeLoop(f, [], tspan(1), y0, stats);
             
             %Time Loop
 			for i = 1:(length(tspan)-1)
@@ -232,14 +232,18 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                 
                 [ynext, stages, stats] = timeStep(obj, f, tcur, yi, dtc, stages, true, stats);
 
-				if opts.FullTrajectory || i == (length(tspan)-1)
+				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
 				end
 			end
+
+			y(:, end) = ynext;
 		end
 
+		%Statistics intialization
 		function stats = intalizeStats(obj)
 
+			stats.nFevals = 0;
 			stats.nSteps = 0;
 			stats.nFailed = 0;
 			stats.nSmallSteps = 0;
@@ -247,6 +251,7 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 			stats.nMassEvals = 0;
 			stats.nJacobianEvals = 0;
 			stats.nPDTEval = 0;
+            stats.nDecompositions = 0;
 		end
         
     end

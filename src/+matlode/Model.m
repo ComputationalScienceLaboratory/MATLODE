@@ -70,7 +70,7 @@ classdef Model < handle
 				p.addParameter('Vectorized', []);
 	
 				p.addParameter('Mass', []);
-				p.addParameter('MLinearOperatorType', matlode.LinearOperatorType.Identity);
+				p.addParameter('MLinearOperatorType', matlode.LinearOperatorType.Empty);
 				p.addParameter('MassSingular', false);
 				p.addParameter('MStateDependence', false);
 				p.addParameter('MvPattern', []);
@@ -99,7 +99,7 @@ classdef Model < handle
         		
 				p.addParameter('PDTOperatorType', matlode.OperatorType.Zero);
 				p.addParameter('PDPOperatorType', matlode.OperatorType.Zero);
-				p.addParameter('MLinearOperatorType', matlode.LinearOperatorType.Identity);
+				p.addParameter('MLinearOperatorType', matlode.LinearOperatorType.Empty);
 				p.addParameter('JLinearOperatorType', matlode.LinearOperatorType.Empty);
 				p.addParameter('FOperatorType', matlode.OperatorType.TSDep);
 
@@ -191,17 +191,25 @@ classdef Model < handle
 
 			obj = obj.opTypeSet('PartialDerivativeTime', 'PDTOperatorType', matlode.OperatorType.Zero, matlode.OperatorType.TSDep);
 			obj = obj.opTypeSet('Jacobian', 'JLinearOperatorType', matlode.LinearOperatorType.Empty, matlode.LinearOperatorType.TSDepedent);
+			if obj.JLinearOperatorType == matlode.LinearOperatorType.Empty && ~isempty(obj.JacobianVectorProduct)
+				obj.JLinearOperatorType = matlode.LinearOperatorType.TSDepedent;
+			end
 			% Currently only support constant Mass
 			% TODO: Support Time Dependent Mass
 			% TODO: Support State Dependent Mass
-			obj = obj.opTypeSet('Mass', 'MLinearOperatorType', matlode.LinearOperatorType.Identity, matlode.LinearOperatorType.Constant);
+			obj = obj.opTypeSet('Mass', 'MLinearOperatorType', matlode.LinearOperatorType.Empty, matlode.LinearOperatorType.Constant);
+			if obj.MLinearOperatorType == matlode.LinearOperatorType.Empty && ~isempty(obj.MVectorProduct)
+				obj.MLinearOperatorType = matlode.LinearOperatorType.TSDepedent;
+			end
 
 			switch(obj.MLinearOperatorType)
 				case matlode.LinearOperatorType.Zero
 				case matlode.LinearOperatorType.Identity
 				case matlode.LinearOperatorType.Constant
 				otherwise
-					error('Not Supported Functionality')
+					if strcmp(obj.MassSingular, 'yes')
+						error('Non-Constant Singular Mass Matrices are not Supported')
+					end
 			end
 		end
 

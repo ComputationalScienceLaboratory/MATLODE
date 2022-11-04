@@ -52,53 +52,17 @@ classdef (Abstract) Integrator < handle
 			p.KeepUnmatched = true;
             opts = obj.matlodeSets(p, varargin{:});
             
-            t = [];
-            y = [];
-            stats = [];
 
-			new_model = false;
-            
-            %Compute
-            if isa(f, 'matlode.Model')
-				if isempty(f.Mass)
-					f.Mass = eye(length(y0));
-				end
-                
-                [t, y, stats] = obj.timeLoop(f, tspan, y0, opts);
-			elseif isa(f, 'function_handle') || isa(f, 'cell')
-				if isa(f, 'cell') && ~obj.PartitionMethod
-					error('This method does not support partitioning')
-				end
-				f_mod = matlode.Model(f, varargin{:});
-				new_model = true;
-				if isempty(f_mod.Mass)
-					f_mod.Mass = eye(length(y0));
-				end
+			fmod = matlode.Model(f, varargin{:});
 
-                [t, y, stats] = obj.timeLoop(f_mod, tspan, y0, opts);
+            [t, y, stats] = obj.timeLoop(fmod, tspan, y0, opts);
 
-			elseif isa(f, 'otp.RHS')
-				f_mod = matlode.Model(f, varargin{:});
-				new_model = true;
-				if isempty(f_mod.Mass)
-					f_mod.Mass = eye(length(y0));
-				end
-
-                [t, y, stats] = obj.timeLoop(f_mod, tspan, y0, opts);
-                
-            else
-                error('f must be a ''function_handle'', ''cell'', OTP RHS, or Model object');
-            end
             
             sol.t = t;
             sol.y = y;
             sol.stats = stats;
 
-			if new_model
-				sol.model = f_mod;
-			else
-				sol.model = f;
-			end
+			sol.model = fmod;
 		end
 
 		%Integrate over a fixed interval
@@ -118,46 +82,16 @@ classdef (Abstract) Integrator < handle
 			p = inputParser();
 			p.KeepUnmatched = true;
             opts = obj.matlodeSets(p, varargin{:});
-            
-            
-            t = [];
-            y = [];
-            stats = [];
 
-			new_model = false;
-            
-            %Compute
-            if isa(f, 'matlode.Model')
-                
-                [t, y, stats] = obj.timeLoopFixed(f, tspan, y0, opts);
-			elseif isa(f, 'function_handle') || isa(f, 'cell')
-				if isa(f, 'cell') && ~obj.PartitionMethod
-					error('This method does not support partitioning')
-				end
-				f_mod = matlode.Model(f, varargin{:});
-				new_model = true;
+			fmod = matlode.Model(f, varargin{:});
 
-                [t, y, stats] = obj.timeLoopFixed(f_mod, tspan, y0, opts);
-
-			elseif isa(f, 'otp.RHS')
-				f_mod = matlode.Model(f, varargin{:});
-				new_model = true;
-
-                [t, y, stats] = obj.timeLoopFixed(f_mod, tspan, y0, opts);
-                
-            else
-                error('f must be a ''function_handle'', ''cell'', OTP RHS, or Model object');
-            end
+            [t, y, stats] = obj.timeLoop(fmod, tspan, y0, opts);
             
             sol.t = t;
             sol.y = y;
             sol.stats = stats;
 
-			if new_model
-				sol.model = f_mod;
-			else
-				sol.model = f;
-			end
+			sol.model = fmod;
 		end
     end
     

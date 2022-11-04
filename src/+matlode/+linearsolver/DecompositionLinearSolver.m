@@ -16,11 +16,15 @@ classdef DecompositionLinearSolver < matlode.linearsolver.MatrixLinearSolver
 			obj.DecompositionArgs = decompArgs;
         end
         
-        function [stats] = preprocess(obj, t, y, reeval, mass_scale, jac_scale, stats)
+        function [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats)
             
-            [stats] = preprocess@matlode.linearsolver.MatrixLinearSolver(obj, t, y, reeval, mass_scale, jac_scale, stats);
+            [stats] = preprocess@matlode.linearsolver.MatrixLinearSolver(obj, f, t, y, reeval, mass_scale, jac_scale, stats);
             
-            obj.system = decomposition(obj.system, obj.DecompositionType, obj.DecompositionArgs);
+			if isempty(obj.DecompositionArgs)
+				obj.system = decomposition(obj.system, obj.DecompositionType);
+			else
+				obj.system = decomposition(obj.system, obj.DecompositionType, obj.DecompositionArgs);
+			end
             
             stats.nDecompositions = stats.nDecompositions + 1;
         end

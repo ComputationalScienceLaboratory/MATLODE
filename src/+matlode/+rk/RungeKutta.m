@@ -74,7 +74,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             if obj.FSAL
                 if isempty(f0)
                     stages(:, end) = f.F(t0, y0);
-                    stats.FEvals = stats.FEvals + 1;
+                    stats.nFevals = stats.nFevals + 1;
                 else
                     stages(:, end) = f0;
                 end
