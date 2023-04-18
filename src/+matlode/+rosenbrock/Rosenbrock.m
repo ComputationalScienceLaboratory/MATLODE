@@ -138,7 +138,7 @@ classdef Rosenbrock < matlode.OneStepIntegrator
             end
             
 			%Check if time derivative is avalible
-			if f.PDTOperatorType ~= matlode.OperatorType.Zero
+			if ~isempty(f.PartialDerivativeTime)
             	dfdt_0 = f.PartialDerivativeTime(t, y);
 				stats.nPDTEval = stats.nPDTEval + 1;
 			end
@@ -160,7 +160,7 @@ classdef Rosenbrock < matlode.OneStepIntegrator
                 end
 
 
-				if f.PDTOperatorType ~= matlode.OperatorType.Zero && obj.GammaSum(i) ~= 0
+				if ~isempty(f.PartialDerivativeTime) && obj.GammaSum(i) ~= 0
 					ynew = ynew + obj.GammaSum(i) * dt * dfdt_0;
 				end
 

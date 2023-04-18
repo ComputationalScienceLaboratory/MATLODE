@@ -1,22 +1,23 @@
-classdef ERK < matlode.rk.RungeKutta
-    %Explicit Runge Kutta class
-    
+classdef DIRK < matlode.rk.RungeKutta
+	%DIRK Will support DIRK, ESDIRK, and SDIRK
+	
     properties (Constant)
         PartitionMethod = false;
 		PartitionNum = 1;
 		MultirateMethod = false;
     end
 
-    methods
-        function obj = ERK(a, b, bHat, c, e, order, embeddedOrder)
+	
+	methods
+        function obj = DIRK(a, b, bHat, c, e, order, embeddedOrder)
             obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
         end
-    end
-    
-    methods (Access = protected)
+	end
+
+	methods (Access = protected)
         function opts = matlodeSets(obj, p, varargin)
             
-            %ERK specific options
+            %DIRK specific options
             
             opts = matlodeSets@matlode.rk.RungeKutta(obj, p, varargin{:});
         end
@@ -56,5 +57,6 @@ classdef ERK < matlode.rk.RungeKutta
             stats.nFevals = stats.nFevals + fevalIterCounts;
 		end
     end
+
 end
 

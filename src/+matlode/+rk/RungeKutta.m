@@ -83,6 +83,22 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
         
         function [q] = timeLoopInit(obj)
             q = min(obj.Order, obj.EmbeddedOrder);
+		end
+
+        function [err, stats] = timeStepErr(obj, ~, ~, y, ynew, dt, stages, ErrNorm, stats)
+            persistent e s
+            if isempty(e)
+                e = obj.E;
+                s = obj.StageNum;
+            end
+            
+            yerror = 0;
+			for i = 1:s
+				if e(i) ~= 0
+					yerror = yerror + stages(:, i) .* (dt .* e(i));
+				end
+			end
+            err = ErrNorm.errEstimate(y, ynew, yerror);
         end
     end
     

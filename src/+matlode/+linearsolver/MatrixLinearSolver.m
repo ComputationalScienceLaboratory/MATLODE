@@ -13,31 +13,32 @@ classdef MatrixLinearSolver < matlode.linearsolver.LinearSolver
         
         function [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats)
             if reeval
-				if f.JLinearOperatorType ~= matlode.LinearOperatorType.Identity && f.JLinearOperatorType ~= matlode.LinearOperatorType.Constant
-                	obj.jac = f.Jacobian(t, y);
+				if isa(f.Jacobian,'double')
+					%TODO: Replace with Data Type
+					if  isempty(obj.jac)
+						obj.jac = f.Jacobian;
+					end
+				else 
+					obj.jac = f.Jacobian(t, y);
 					stats.nJacobianEvals = stats.nJacobianEvals + 1;
-				elseif isempty(obj.jac)
-                	obj.jac = f.Jacobian;
 				end
 
-
-				if f.MLinearOperatorType ~= matlode.LinearOperatorType.Empty
-					if f.MLinearOperatorType ~= matlode.LinearOperatorType.Identity && f.MLinearOperatorType ~= matlode.LinearOperatorType.Constant
-                		obj.mass = f.Mass(t, y);
-						stats.nMassEvals = stats.nMassEvals + 1;
-					else
-						if isempty(obj.mass)
-							obj.mass = f.Mass;
-						end
-					end
-				else
+				if isempty(f.Mass)
 					if isempty(obj.mass)
 						if issparse(obj.jac)
-							obj.mass = speye(length(obj.jac));
+							obj.mass = speye(length(y));
 						else
-							obj.mass = eye(length(obj.jac));
+							obj.mass = eye(length(y));
 						end
 					end
+				elseif isa(f.Mass, 'double') 
+					%TODO: Replace with Data Type
+					if isempty(obj.mass)
+						obj.mass = f.Mass;
+					end
+				else
+					obj.mass = f.Mass(t,y);
+					stats.nMassEvals = stats.nMassEvals + 1;
 				end
             end
 

@@ -6,35 +6,28 @@ classdef Model < handle
 	
 	properties
 		F
-		FOperatorType
 
 		Jacobian
-		JLinearOperatorType
         JacobianVectorProduct
 		JacobianAdjointVectorProduct
         JPattern
         Vectorized
 
         Mass
-		MLinearOperatorType
 		MVectorProduct
+
+		%For complatency with MATLAB standard. May have DAEModel instead
         MassSingular
         MStateDependence
         MvPattern
 
 		PartialDerivativeTime
-		PDTOperatorType
 
 		PartialDerivativeParameters
-		PDPOperatorType
-
-        HessianVectorProduct
-        HessianAdjointVectorProduct
 		
 		%FIXME: Not Supported
 		Events
 		OnEvent
-
 
         NonNegative
 	end
@@ -45,7 +38,7 @@ classdef Model < handle
 			'MvPattern', 'MassSingular', 'Events', 'NonNegative'}
 		OTPSetVars = {'Jacobian', 'JPattern', 'Vectorized', 'Mass', 'MStateDependence', ...
 			'MvPattern', 'MassSingular', 'Events', 'F', 'JacobianVectorProduct', 'JacobianAdjointVectorProduct', ...
-			'PartialDerivativeTime' ,'PartialDerivativeParameters', 'HessianVectorProduct', 'HessianAdjointVectorProduct', ...
+			'PartialDerivativeTime' ,'PartialDerivativeParameters', ...
 			'OnEvent', 'NonNegative'}
 	end
 	
@@ -60,29 +53,20 @@ classdef Model < handle
 			if isa(f, 'function_handle') || (isa(f, 'cell') && cellfun(@(x) isa(x, 'function_handle'), f))
 				%% Create new model based of f
 				obj.F = f;
-				
-				p.addParameter('FOperatorType', matlode.OperatorType.TSDep);
 	
 				p.addParameter('Jacobian', []);
-				p.addParameter('JLinearOperatorType', matlode.LinearOperatorType.Empty);
 				p.addParameter('JPattern', []);
 				p.addParameter('JacobianVectorProduct', []);
 				p.addParameter('Vectorized', []);
 	
 				p.addParameter('Mass', []);
-				p.addParameter('MLinearOperatorType', matlode.LinearOperatorType.Empty);
 				p.addParameter('MassSingular', false);
 				p.addParameter('MStateDependence', false);
 				p.addParameter('MvPattern', []);
 	
 				p.addParameter('PartialDerivativeTime', []);
-				p.addParameter('PDTOperatorType', matlode.OperatorType.Zero);
 	
 				p.addParameter('PartialDerivativeParameters', []);
-				p.addParameter('PDPOperatorType', matlode.OperatorType.Zero);
-	
-				p.addParameter('HessianVectorProduct', []);
-				p.addParameter('HessianAdjointVectorProduct', []);
 	
 	
 				p.addParameter('Events', []);
@@ -96,14 +80,8 @@ classdef Model < handle
 				for i = 1:length(obj.OTPSetVars)
 					p.addParameter(obj.OTPSetVars{i}, obj.(obj.OTPSetVars{i}));
 				end
-        		
-				p.addParameter('PDTOperatorType', matlode.OperatorType.Zero);
-				p.addParameter('PDPOperatorType', matlode.OperatorType.Zero);
-				p.addParameter('MLinearOperatorType', matlode.LinearOperatorType.Empty);
-				p.addParameter('JLinearOperatorType', matlode.LinearOperatorType.Empty);
-				p.addParameter('FOperatorType', matlode.OperatorType.TSDep);
 
-			elseif isa(f, 'matlode.Model')
+			elseif isa(f, 'matlode.model.Model')
 				%% Model Copying
 				
 				obj = modelCopy(obj, f);
@@ -130,8 +108,6 @@ classdef Model < handle
 					obj.(f) = parms.(f);
 				end
 			end
-
-			obj = modelOperatorTypeSet(obj);
 
 		end
 
@@ -179,46 +155,5 @@ classdef Model < handle
 
 	end
 
-	methods (Access = protected)
-
-		function obj = modelOperatorTypeSet(obj)
-			if isnumeric(obj.Jacobian)
-				obj.JLinearOperatorType = matlode.LinearOperatorType.Constant;
-			end
-
-			%% Operator Type Checking
-			%TODO: Support Constant Operators
-
-			obj = obj.opTypeSet('PartialDerivativeTime', 'PDTOperatorType', matlode.OperatorType.Zero, matlode.OperatorType.TSDep);
-			obj = obj.opTypeSet('Jacobian', 'JLinearOperatorType', matlode.LinearOperatorType.Empty, matlode.LinearOperatorType.TSDepedent);
-			if obj.JLinearOperatorType == matlode.LinearOperatorType.Empty && ~isempty(obj.JacobianVectorProduct)
-				obj.JLinearOperatorType = matlode.LinearOperatorType.TSDepedent;
-			end
-			% Currently only support constant Mass
-			% TODO: Support Time Dependent Mass
-			% TODO: Support State Dependent Mass
-			obj = obj.opTypeSet('Mass', 'MLinearOperatorType', matlode.LinearOperatorType.Empty, matlode.LinearOperatorType.Constant);
-			if obj.MLinearOperatorType == matlode.LinearOperatorType.Empty && ~isempty(obj.MVectorProduct)
-				obj.MLinearOperatorType = matlode.LinearOperatorType.TSDepedent;
-			end
-
-			switch(obj.MLinearOperatorType)
-				case matlode.LinearOperatorType.Zero
-				case matlode.LinearOperatorType.Identity
-				case matlode.LinearOperatorType.Constant
-				otherwise
-					if strcmp(obj.MassSingular, 'yes')
-						error('Non-Constant Singular Mass Matrices are not Supported')
-					end
-			end
-		end
-
-		function obj = opTypeSet(obj, op, optype, opttypedef, optnew)
-			if ~isempty(obj.(op)) && (obj.(optype) == opttypedef)
-				obj.(optype) = optnew;
-			end
-
-		end
-	end
 end
 
