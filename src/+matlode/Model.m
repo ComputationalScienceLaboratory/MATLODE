@@ -6,6 +6,8 @@ classdef Model < handle
 	
 	properties
 		F
+		AddPartitionNum
+		ComponentPartitionNum
 
 		Jacobian
         JacobianVectorProduct
@@ -107,6 +109,16 @@ classdef Model < handle
 				if ~isempty(index)
 					obj.(f) = parms.(f);
 				end
+			end
+
+			%Check Dimension of F
+			%TODO Turn into Function
+			if isa(f, 'cell')
+				obj.AddPartitionNum = size(f,2);
+				obj.ComponentPartitionNum = size(f,1);
+			else
+				obj.AddPartitionNum = 1;
+				obj.ComponentPartitionNum = 1;
 			end
 
 		end

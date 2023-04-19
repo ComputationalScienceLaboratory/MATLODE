@@ -250,6 +250,7 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 			stats.nLinearSolves = 0;
 			stats.nMassEvals = 0;
 			stats.nJacobianEvals = 0;
+			stats.nNonLinIterations = 0;
 			stats.nPDTEval = 0;
             stats.nDecompositions = 0;
 		end

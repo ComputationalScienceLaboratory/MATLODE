@@ -20,6 +20,10 @@ classdef LUDecomposition < matlode.linearsolver.MatrixLinearSolver
             stats.nDecompositions = stats.nDecompositions + 1;
 		end
 
+		function [stats] = computeMass(obj, f, t, y, stats)
+			stats = computeMass@matlode.linearsolver.MatrixLinearSolver(obj, f, t, y, stats);
+		end
+
 		function [sol, stats] = solve(obj, x, stats)
             sol = obj.system(x);
             

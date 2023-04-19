@@ -7,6 +7,8 @@ classdef NonlinearSolver < handle
 	
 	properties (SetAccess = protected)
 		LinearSolver
+		MaxIterations
+		Tolerance
 	end
 	
 	methods
@@ -20,6 +22,8 @@ classdef NonlinearSolver < handle
             
             obj.NonLinearArgs = args;
 			obj.LinearSolver = linsolve;
+			obj.MaxIterations = maxiter;
+			obj.Tolerance = tolerance;
 		end
 		
 		function obj = SetLinearSolver(obj,linsolve)
@@ -29,7 +33,7 @@ classdef NonlinearSolver < handle
 
 	methods(Abstract)
 		
-		[xf, optout, stats] = solve(nonlinsystem, f, mass_scale, jac_scale, x0, optin);
+		[xn, xnf, optout, stats] = solve(obj,f, t, x0, sys_const, mass_scale, jac_scale,  optin, stats);
 	end
 end
 

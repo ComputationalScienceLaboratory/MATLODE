@@ -11,6 +11,8 @@ classdef MatrixFreeLinearSolver < matlode.linearsolver.LinearSolver
         end
         
         function [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats)
+			%TODO: Add Case for array of t and y and matrix jac_scale for
+			%FIRK
 			if reeval
 
 
@@ -29,32 +31,37 @@ classdef MatrixFreeLinearSolver < matlode.linearsolver.LinearSolver
 					end
 				end
 
-				if ~isempty(f.MVectorProduct)
-					obj.mass = @(v) f.MVectorProduct(t, y, v);
-					stats.nMassEvals = stats.nMassEvals + 1;
-				else
-					if isempty(f.Mass)
-						if isempty(obj.mass)
-							obj.mass = @(v) v;
-						end
-					elseif isa(f.Mass, 'double')
-						%TODO: Replace with Data Type
-						if isempty(obj.mass)
-							obj.mass = @(v) f.Mass * v;
-						end
-					else
-						obj.mass = @(v) f.Mass(t,y) * v;
-						stats.nMassEvals = stats.nMassEvals + 1;
-					end
-				end
+				stats = obj.computeMass(f, t, y, stats);
+				
 			end
 
             obj.system = @(v) mass_scale * obj.mass(v) + jac_scale * obj.jac(v);
-        end
+		end
+
+		function  [stats] = computeMass(obj, f, t, y, stats)
+			if ~isempty(f.MVectorProduct)
+				obj.mass = @(v) f.MVectorProduct(t, y, v);
+				stats.nMassEvals = stats.nMassEvals + 1;
+			else
+				if isempty(f.Mass)
+					if isempty(obj.mass)
+						obj.mass = @(v) v;
+					end
+				elseif isa(f.Mass, 'double')
+					%TODO: Replace with Data Type
+					if isempty(obj.mass)
+						obj.mass = @(v) f.Mass * v;
+					end
+				else
+					obj.mass = @(v) f.Mass(t,y) * v;
+					stats.nMassEvals = stats.nMassEvals + 1;
+				end
+			end
+		end
         
         function [sol, stats] = solve(obj, x, stats)
             [sol, flag, relres, iter] = obj.Solver(obj.system, x, obj.SolverArgs{:});
-            
+            %TODO: Add Flag results
             stats.nLinearSolves = stats.nLinearSolves + 1;
         end
     end

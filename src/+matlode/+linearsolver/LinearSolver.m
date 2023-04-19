@@ -26,6 +26,8 @@ classdef (Abstract) LinearSolver < handle
     methods (Abstract)
         % mass_scale*mass + jac_scale*jac
         [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats);
+
+		[stats] = computeMass(obj, f, t, y, stats);
         
         [sol, stats] = solve(obj, x, stats);
         
