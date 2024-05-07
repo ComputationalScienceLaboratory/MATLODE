@@ -14,7 +14,7 @@
 			std::ostringstream ss;                                                                               \
 			ss << "CUDA API failed at line " << __LINE__ << " with error: " << cudaGetErrorString(status) << "(" \
 			   << status << ")";                                                                                 \
-			mexErrMsgIdAndTxt("Matlode:cudaGmres", ss.str().c_str());                                            \
+			mexErrMsgIdAndTxt("Matlode:cudaMex", ss.str().c_str());                                              \
 		}                                                                                                        \
 	}
 
@@ -25,7 +25,7 @@
 			std::ostringstream ss;                                                                                \
 			ss << "CUSPARSE API failed at line " << __LINE__ << " with error: " << cusparseGetErrorString(status) \
 			   << "(" << status << ")";                                                                           \
-			mexErrMsgIdAndTxt("Matlode:cudaGmres", ss.str().c_str());                                             \
+			mexErrMsgIdAndTxt("Matlode:cudaMex", ss.str().c_str());                                               \
 		}                                                                                                         \
 	}
 
@@ -36,7 +36,7 @@
 			std::ostringstream ss;                                                                                    \
 			ss << "CUBLAS API failed at line " << __LINE__ << " with error: " << cublasGetStatusString(status) << "(" \
 			   << status << ")";                                                                                      \
-			mexErrMsgIdAndTxt("Matlode:cudaGmres", ss.str().c_str());                                                 \
+			mexErrMsgIdAndTxt("Matlode:cudaMex", ss.str().c_str());                                                   \
 		}                                                                                                             \
 	}
 
@@ -49,10 +49,11 @@
 			std::ostringstream ss;                                                                               \
 			ss << "CUSPARSE API failed at line " << __LINE__ << " with error: " << cublasGetStatusString(status) \
 			   << "(" << status << ")";                                                                          \
-			mexErrMsgIdAndTxt("Matlode:cudaGmres", ss.str().c_str());                                            \
+			mexErrMsgIdAndTxt("Matlode:cudaMex", ss.str().c_str());                                              \
 		}                                                                                                        \
 	}(func)
 
+// TODO: replace this with "DevBox" which works like an owned pointer. Also add separate view class (or use C++20 span).
 /// @brief Wrapper around a device pointr (GPU)
 /// @tparam T What type it is pointing to
 /// @tparam isView Whether or not the pointer is a view into another buffer (and shouldn't be freed)
@@ -101,6 +102,7 @@ struct DevPtr {
 	}
 };
 
+// TODO: replace this with "HostManagedPtr" which only works with managed memory
 /// @brief Wrapper around a host pointer (CPU)
 /// @tparam T What type it is pointing to
 template <typename T>
