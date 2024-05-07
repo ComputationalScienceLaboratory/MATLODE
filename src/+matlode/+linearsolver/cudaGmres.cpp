@@ -60,19 +60,21 @@ void uptrisol(int neqns, std::vector<double>& hes_sol, const std::vector<double>
 }
 #pragma endregion
 
-void gmresm(uint32_t m,                         /* restart frequency */
-            uint32_t maxnit,                    /* max number of iterations */
-            double tol,                         /* rel. convergence tolerance */
-            DevPtr<double> sol,                 /* solution vector (in/out) */
-            const SparseMatCSC<DevPtr>& matrix, /* matrix data structure */
-            DevPtr<double> rhs,                 /* right hand side vector */
-            DevPtr<double> res) {               /* residual vector */
+DevPtr<double> gmresm(uint32_t m,                         /* restart frequency */
+                      uint32_t maxnit,                    /* max number of iterations */
+                      double tol,                         /* rel. convergence tolerance */
+                      const SparseMatCSC<DevPtr>& matrix, /* matrix data structure */
+                      DevPtr<double> rhs) {               /* right hand side vector */
 
 	mxAssert(matrix.rows == matrix.cols, "Matrix must be square");
 	mxAssert(matrix.rows == rhs.size, "Rhs vector dimension must match the matrix size");
-	mxAssert(matrix.rows == res.size, "Residual vector dimension must match the matrix size");
 
 	CudaSparseMath gpu_math;
+
+	// Residual vector
+	DevPtr<double> res = new_gpu_buffer<double>(rhs.size);
+	// Solution vector (return value)
+	DevPtr<double> sol = new_gpu_buffer<double>(rhs.size);
 
 	cusparseSpMatDescr_t mat_cuda = cuda_csc(matrix);
 	cusparseDnVecDescr_t rhs_cuda = cuda_vec(rhs);
@@ -98,7 +100,17 @@ void gmresm(uint32_t m,                         /* restart frequency */
 
 	// Keep track of the size of the residual - this is what will let us know when we're ready to be done
 	double res_nrm = CHECK_CUBLAS_VARIANT(gpu_math.norm(res));
-	if (res_nrm <= res_tol) { return; }
+	if (res_nrm <= res_tol) {
+		// mexPrintf("CUDA GMRES exited early w/ residual norm %e < %e\n", res_nrm, res_tol);
+		tmp_vec.free();
+		res.free();
+
+		CHECK_CUSPARSE(cusparseDestroySpMat(mat_cuda));
+		CHECK_CUSPARSE(cusparseDestroyDnVec(rhs_cuda));
+		CHECK_CUSPARSE(cusparseDestroyDnVec(sol_cuda));
+		CHECK_CUSPARSE(cusparseDestroyDnVec(tmp_cuda));
+		return sol;
+	}
 
 	int m1 = m + 1;
 	// Space for hessenberg matrix
@@ -176,10 +188,14 @@ void gmresm(uint32_t m,                         /* restart frequency */
 
 	vv.free();
 	tmp_vec.free();
+	res.free();
 
 	CHECK_CUSPARSE(cusparseDestroySpMat(mat_cuda));
 	CHECK_CUSPARSE(cusparseDestroyDnVec(rhs_cuda));
 	CHECK_CUSPARSE(cusparseDestroyDnVec(sol_cuda));
+	CHECK_CUSPARSE(cusparseDestroyDnVec(tmp_cuda));
+
+	return sol;
 }
 
 std::optional<uint32_t> get_uint(const mxArray* input) {
@@ -309,9 +325,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 	if (restart == 0) { restart = maxit; }
 
-	DevPtr<double> sol_dev = new_gpu_buffer<double>(b_dev.size);
-	DevPtr<double> res_dev = new_gpu_buffer<double>(b_dev.size);
-	gmresm(restart, maxit, tol, sol_dev, a_dev, b_dev, res_dev);
+	DevPtr<double> sol_dev = gmresm(restart, maxit, tol, a_dev, b_dev);
 
 	// Output vector
 	plhs[0]             = mxCreateDoubleMatrix(a_host.rows, 1, mxREAL);
@@ -321,5 +335,4 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 	b_dev.free();
 	sol_dev.free();
-	res_dev.free();
 }
