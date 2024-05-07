@@ -74,7 +74,7 @@ DevPtr<double> bicg_stab(uint32_t maxnit,                    /* max number of it
 		double alpha = rho / CHECK_CUBLAS_VARIANT(gpu_math.dot_product(r_hat, v));
 
 		CHECK_CUBLAS(gpu_math.axpy(alpha, p, sol));
-		CHECK_CUBLAS(gpu_math.axpy(-alpha, tmp_vec, res));
+		CHECK_CUBLAS(gpu_math.axpy(-alpha, v, res));
 		res_nrm = CHECK_CUBLAS_VARIANT(gpu_math.norm(res));
 
 		if (res_nrm < res_tol) { break; }
