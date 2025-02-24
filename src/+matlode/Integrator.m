@@ -16,8 +16,8 @@ classdef (Abstract) Integrator < handle
     methods (Abstract, Access = protected)
         [t, y, stats] = timeLoop(obj, f, tspan, y0, opts);
 		[t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts);
-        [ynew, stages, stats] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats);
-        [err, stats] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats);
+        [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats);
+        [err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats);
         [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats);
         [q] = timeLoopInit(obj);
     end
@@ -85,7 +85,7 @@ classdef (Abstract) Integrator < handle
 
 			fmod = matlode.Model(f, varargin{:});
 
-            [t, y, stats] = obj.timeLoop(fmod, tspan, y0, opts);
+            [t, y, stats] = obj.timeLoopFixed(fmod, tspan, y0, opts);
             
             sol.t = t;
             sol.y = y;

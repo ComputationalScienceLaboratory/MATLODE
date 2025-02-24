@@ -18,6 +18,9 @@ classdef DIRK < matlode.rk.RungeKutta
             obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
 			
 			obj.StifflyAccurate = all(obj.A(end,:) == obj.B(:)');
+			if obj.FSAL
+				
+			end
 
         end
 	end
@@ -36,43 +39,40 @@ classdef DIRK < matlode.rk.RungeKutta
             obj.NonLinearSolver = opts.NonLinearSolver;
         end
         
-        function [ynew, stages, stats] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
-            persistent fsal s a b c
-            if isempty(fsal)
-                fsal = obj.FsalStart;
-                s = obj.StageNum;
-                a = obj.A;
-                b = obj.B;
-                c = obj.C;
-            end
-            
-			if fsal && prevAccept
+        function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
+			if obj.FSAL && prevAccept
                 stages(:, 1) = stages(:, end);
 			end
+			ynew = y;
             
 			%TODO: Update PorMAss
-			for i = fsal:s
-                ynew = y;
+			for i = obj.FsalStart:obj.StageNum
+                g_const = 0;
                 for j = 1:i-1
-					if a(i,j) ~= 0
-						ynew = ynew + stages(:, j) .* (dt * a(i, j));
+					if obj.A(i,j) ~= 0
+						g_const = g_const + stages(:, j) .* (dt * obj.A(i, j));
 					end
                 end
-                thc = t + dt .* c(i);
+                thc = t + dt .* obj.C(i);
 
-				%TODO: Setup NonLin Flags
 				%Solve Nonlinear System
-				[ynew, stages(:,i), ~, stats] = obj.NonLinearSolver.solve(f, thc, ynew, ynew, 1, dt .* a(i,i),  [], stats);
+				[ynew, stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, ynew, -ynew, 1, -dt .* obj.A(i,i),  [], stats);
+				if solver_opts.convergenceFailure == true
+					out_opts.failure = true;
+					return;
+				end
 			end
 
 			if ~obj.StifflyAccurate
 				ynew = y;
-				for i = 1:s
-					if b(i) ~= 0
-						ynew = ynew + stages(:, i) .* (dt .* b(i));
+				for i = 1:obj.StageNum
+					if obj.B(i) ~= 0
+						ynew = ynew + stages(:, i) .* (dt .* obj.B(i));
 					end
 				end
 			end
+
+			out_opts.failure = false;
             
 		end
     end

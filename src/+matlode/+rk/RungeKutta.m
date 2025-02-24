@@ -34,27 +34,7 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             obj.FSAL = all(a(end, :) == b) && all(a(1, :) == 0);
             obj.FsalStart = uint32(obj.FSAL) + 1;
 			obj.DenseOut = matlode.denseoutput.Linear(obj.B);
-        end
-        
-        function obj = fromCoeffs(a, b, bHat, c, e, bTheta, order, embededOrder)
-            
-            
-            if istril(a)
-                if any(diag(a))
-                    %TODO
-                    % set as DIRK
-                    return
-                end
-                
-                obj = ERK(a, b, bHat, c, e, bTheta, order, embededOrder);
-                return
-            end
-            
-            %TODO
-            
-            %Set as FIRK
-                
-        end
+		end
     end
     
     methods (Access = protected)
@@ -85,21 +65,18 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
             q = min(obj.Order, obj.EmbeddedOrder);
 		end
 
-        function [err, stats] = timeStepErr(obj, ~, ~, y, ynew, dt, stages, ErrNorm, stats)
-            persistent e s
-            if isempty(e)
-                e = obj.E;
-                s = obj.StageNum;
-            end
+        function [err, stats, out_opts] = timeStepErr(obj, ~, ~, y, ynew, dt, stages, ErrNorm, stats)
+            
             
 			%TODO: Update for Mass
             yerror = 0;
-			for i = 1:s
-				if e(i) ~= 0
-					yerror = yerror + stages(:, i) .* (dt .* e(i));
+			for i = 1:obj.StageNum
+				if obj.E(i) ~= 0
+					yerror = yerror + stages(:, i) .* (dt .*  obj.E(i));
 				end
 			end
             err = ErrNorm.errEstimate(y, ynew, yerror);
+			out_opts.failure = false;
         end
     end
     

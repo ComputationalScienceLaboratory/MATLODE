@@ -2,13 +2,13 @@ clear
 format long e
 close all
 
-integrator = matlode.rk.dirk.SDIRK_4_3_5;
+integrator = matlode.rk.dirk.SDIRK_2_1_2;
 
 options.ErrNorm = matlode.errnorm.InfNorm(1e-6, 1e-6);
 options.StepSizeController = matlode.stepsizecontroller.StandardController;
 options.NonLinearSolver = matlode.nonlinearsolver.Newton;
 
-problem = otp.kpr.presets.Canonical;
+problem = otp.robertson.presets.Canonical;
 
 sol = integrator.integrate(problem.RHS, problem.TimeSpan, problem.Y0, options);
 

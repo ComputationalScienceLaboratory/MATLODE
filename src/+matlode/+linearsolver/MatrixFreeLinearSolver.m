@@ -59,7 +59,7 @@ classdef MatrixFreeLinearSolver < matlode.linearsolver.LinearSolver
 			end
 		end
         
-        function [sol, stats] = solve(obj, x, stats)
+        function [sol, stats, out_opts] = solve(obj, x, stats)
             [sol, flag, relres, iter] = obj.Solver(obj.system, x, obj.SolverArgs{:});
             %TODO: Add Flag results
             stats.nLinearSolves = stats.nLinearSolves + 1;

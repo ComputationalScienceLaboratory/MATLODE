@@ -131,7 +131,7 @@ classdef Rosenbrock < matlode.OneStepIntegrator
         end
         
 		%% Time step
-		function [ynew, stages, stats] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
+		function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
             
             if obj.FSAL && prevAccept
                 stages(:, 1) = stages(:, end);
@@ -180,10 +180,11 @@ classdef Rosenbrock < matlode.OneStepIntegrator
             end
             
             stats.nFevals = stats.nFevals + obj.StageNum - uint16(prevAccept);
+			out_opts.failure = false;
         end
         
 		%% Error Estimate
-		function [err, stats] = timeStepErr(obj, ~, ~, y, ynew, ~, stages, ErrNorm, stats)
+		function [err, stats, out_opts] = timeStepErr(obj, ~, ~, y, ynew, ~, stages, ErrNorm, stats)
 
             y_error = 0;
             for i = 1:obj.StageNum
@@ -193,6 +194,7 @@ classdef Rosenbrock < matlode.OneStepIntegrator
             end
             
             err = ErrNorm.errEstimate(y, ynew, y_error);
+			out_opts.failure = false;
         end
         
         function [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)

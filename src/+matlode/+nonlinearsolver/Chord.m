@@ -2,10 +2,6 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 	%CHORD Classic Chord method for solving nonlinear systems. Does not
 	%calculate the jacobian more than once
 	
-	properties
-		Property1
-	end
-	
 	methods
 		function obj = Chord(linsolve, args)
 			arguments
@@ -16,7 +12,7 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
             obj = obj@matlode.nonlinearsolver.NonlinearSolver(linsolve, args{:});
 		end
 		
-		function [xn, xnf, optout, stats] = solve(obj, f, t, x0, sys_const, mass_scale, jac_scale,  ~, stats)
+		function [xn, xnf, out_opts, stats] = solve(obj, f, t, x0, sys_const, mass_scale, jac_scale,  ~, stats)
 			xn = x0;
 			i = 0;
 			stats = obj.LinearSolver.preprocess(f, t, xn, true, mass_scale, jac_scale, stats);
@@ -38,7 +34,7 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 
 
 				xnf = f.F(t,xn);
-				b = -mx .* (mass_scale) + sys_const + jac_scale * xnf;
+				b = mx .* (-mass_scale) - sys_const + (-jac_scale) .* xnf;
 				[w_i, stats] = obj.LinearSolver.solve(b, stats);
 
 				xtn = w_i + xn;
@@ -55,9 +51,9 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 
 			if i == obj.MaxIterations
 				%TODO Add Flags
-				optout = false;
+				out_opts.convergenceFailure = true;
 			else
-				optout = true;
+				out_opts.convergenceFailure = false;
 			end
 		
 		end

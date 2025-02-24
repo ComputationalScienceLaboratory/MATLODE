@@ -92,36 +92,45 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                 %Will keep looping until accepted step
                 while true
                     
-                    [ynext, stages, stats] = timeStep(obj, f, tcur, ycur, dtcur, stages, prevAccept, stats);
-                    [err(:, 1), stats] = timeStepErr(obj, f, tcur, ycur, ynext, dtcur, stages, errNorm, stats);
-                    
-                    %Find next Step
-					%TODO: Update to take stats
-                    [prevAccept, dtnext, tnext] = stepController.newStepSize(prevAccept, tcur, tspan, dthist, err, q);
-                    
-                    %Check if step is really small
-                    if abs(dtnext) < abs(dtmin)
+                    [ynext, stages, stats, out_opts] = timeStep(obj, f, tcur, ycur, dtcur, stages, prevAccept, stats);
+					%Check if integration failed with the given time step
+					if out_opts.failure == false
+                    	[err(:, 1), stats, out_opts] = timeStepErr(obj, f, tcur, ycur, ynext, dtcur, stages, errNorm, stats);
+                    	
+                    	%Find next Step
+						%TODO: Update to take stats
+                    	[prevAccept, dtnext, tnext] = stepController.newStepSize(prevAccept, tcur, tspan, dthist, err, q);
+					else
+						%TODO setup with memory based time step controller
+						prevAccept = false;
+						%TODO: Allow factor to be choosen
+						dtnext = 0.1 * dtcur;
+						tnext = tcur;
+					end
+
+                	%Check if step is really small
+                	if abs(dtnext) < abs(dtmin)
 						%Prevents excessive output
-                        if stats.nSmallSteps == 0
-                            warning('The step the integrator is taking extremely small, results may not be optimal')
-                        end
-                        %accept step since the step cannot get any smaller
-                        stats.nSmallSteps = stats.nSmallSteps + 1;
-                        dtnext = dtmin;
-                        tnext = tcur + dtmin;
-                        prevAccept = true;
-                        break;
-                    end
-                    
-                    %check step acception
-                    if prevAccept
-                        break;
-                    end
-                    
-                    stats.nFailed = stats.nFailed + 1;
-                    dtcur = dtnext;
-                    dthist(1) = dtnext;
-                    
+                    	if stats.nSmallSteps == 0
+                        	warning('The step the integrator is taking extremely small, results may not be optimal')
+                    	end
+                    	%accept step since the step cannot get any smaller
+                    	stats.nSmallSteps = stats.nSmallSteps + 1;
+                    	dtnext = dtmin;
+                    	tnext = tcur + dtmin;
+                    	prevAccept = true;
+                    	break;
+                	end
+                	
+                	%check step acception
+                	if prevAccept
+                    	break;
+                	end
+                	
+                	stats.nFailed = stats.nFailed + 1;
+                	dtcur = dtnext;
+                	dthist(1) = dtnext;
+
                 end
                 
                 %set new step to be in range

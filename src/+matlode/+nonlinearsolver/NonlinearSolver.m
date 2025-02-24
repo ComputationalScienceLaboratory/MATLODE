@@ -9,6 +9,9 @@ classdef NonlinearSolver < handle
 		LinearSolver
 		MaxIterations
 		Tolerance
+		AbsTol
+		RelTol
+		RatioTol
 	end
 	
 	methods
@@ -33,7 +36,7 @@ classdef NonlinearSolver < handle
 
 	methods(Abstract)
 		
-		[xn, xnf, optout, stats] = solve(obj,f, t, x0, sys_const, mass_scale, jac_scale,  optin, stats);
+		[xn, xnf, out_opts, stats] = solve(obj,f, t, x0, sys_const, mass_scale, jac_scale,  optin, stats);
 	end
 end
 

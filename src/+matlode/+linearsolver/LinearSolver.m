@@ -29,7 +29,7 @@ classdef (Abstract) LinearSolver < handle
 
 		[stats] = computeMass(obj, f, t, y, stats);
         
-        [sol, stats] = solve(obj, x, stats);
+        [sol, stats, out_opts] = solve(obj, x, stats);
         
         
     end

@@ -21,40 +21,33 @@ classdef ERK < matlode.rk.RungeKutta
             opts = matlodeSets@matlode.rk.RungeKutta(obj, p, varargin{:});
         end
         
-        function [ynew, stages, stats] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
-            persistent fsal s a b c fevalIterCounts
-            if isempty(fsal)
-                fsal = obj.FsalStart;
-                s = obj.StageNum;
-                a = obj.A;
-                b = obj.B;
-                c = obj.C;
-                fevalIterCounts = double(obj.StageNum - obj.FsalStart + 1);
-            end
-            
-			if fsal && prevAccept
+        function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
+			
+			if obj.FsalStart && prevAccept
                 stages(:, 1) = stages(:, end);
 			end
             
 			%TODO: Update PorMass
-            for i = fsal:s
+            for i = obj.FsalStart:obj.StageNum
                 ynew = y;
                 for j = 1:i-1
-					if a(i,j) ~= 0
-						ynew = ynew + stages(:, j) .* (dt .* a(i, j));
+					if obj.A(i,j) ~= 0
+						ynew = ynew + stages(:, j) .* (dt .* obj.A(i, j));
 					end
                 end
-                thc = t + dt .* c(i);
+                thc = t + dt .* obj.C(i);
                 stages(:, i) = f.F(thc, ynew);
             end
             ynew = y;
-			for i = 1:s
-				if b(i) ~= 0
-					ynew = ynew + stages(:, i) .* (dt .* b(i));
+			for i = 1:obj.StageNum
+				if obj.B(i) ~= 0
+					ynew = ynew + stages(:, i) .* (dt .* obj.B(i));
 				end
 			end
             
-            stats.nFevals = stats.nFevals + fevalIterCounts;
+            stats.nFevals = stats.nFevals + double(obj.StageNum - obj.FsalStart + 1);
+
+			out_opts.failure = false;
 		end
     end
 end

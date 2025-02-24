@@ -53,7 +53,7 @@ classdef MatrixLinearSolver < matlode.linearsolver.LinearSolver
 			end
 		end
         
-        function [sol, stats] = solve(obj, x, stats)
+        function [sol, stats, out_opts] = solve(obj, x, stats)
             sol = obj.Solver(obj.system, x, obj.SolverArgs{:});
             
             stats.nLinearSolves = stats.nLinearSolves + 1;
