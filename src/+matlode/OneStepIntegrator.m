@@ -243,10 +243,12 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
+                    t(i + 1) = tspan(:, i + 1);
 				end
 			end
 
 			y(:, end) = ynext;
+            t(end) = tspan(:, end);
 		end
 
 		%Statistics intialization
