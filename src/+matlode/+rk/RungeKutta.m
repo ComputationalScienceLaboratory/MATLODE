@@ -71,8 +71,8 @@ classdef (Abstract) RungeKutta < matlode.OneStepIntegrator
 			%TODO: Update for Mass
             yerror = 0;
 			for i = 1:obj.StageNum
-				if obj.E(i) ~= 0
-					yerror = yerror + stages(:, i) .* (dt .*  obj.E(i));
+				if abs(obj.E(i)) > eps
+					yerror = yerror +  (dt .*  obj.E(i)) .* stages(:, i);
 				end
 			end
             err = ErrNorm.errEstimate(y, ynew, yerror);

@@ -44,6 +44,9 @@ classdef DIRK < matlode.rk.RungeKutta
                 stages(:, 1) = stages(:, end);
 			end
 			ynew = y;
+
+			%Setup Nonlinear Solver
+			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, [], stats);
             
 			%TODO: Update PorMAss
 			for i = obj.FsalStart:obj.StageNum
@@ -56,18 +59,21 @@ classdef DIRK < matlode.rk.RungeKutta
                 thc = t + dt .* obj.C(i);
 
 				%Solve Nonlinear System
-				[ynew, stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, ynew, -ynew, 1, -dt .* obj.A(i,i),  [], stats);
+				[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, y, zeros(length(y),1), g_const, 1, dt .* obj.A(i,i),  [], stats);
 				if solver_opts.convergenceFailure == true
 					out_opts.failure = true;
 					return;
 				end
+				ynew = y + ydiff;
+
+				stages(:,i) = f.F(thc, ynew);
 			end
 
 			if ~obj.StifflyAccurate
 				ynew = y;
 				for i = 1:obj.StageNum
 					if obj.B(i) ~= 0
-						ynew = ynew + stages(:, i) .* (dt .* obj.B(i));
+						ynew = ynew + (dt .* obj.B(i)) .* stages(:, i);
 					end
 				end
 			end

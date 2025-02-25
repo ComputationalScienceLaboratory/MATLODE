@@ -48,7 +48,8 @@ classdef MatrixLinearSolver < matlode.linearsolver.LinearSolver
 					obj.mass = f.Mass;
 				end
 			else
-				obj.mass = f.Mass(t,y);
+				%TODO: Only time matrix working
+				obj.mass = f.Mass(t);
 				stats.nMassEvals = stats.nMassEvals + 1;
 			end
 		end

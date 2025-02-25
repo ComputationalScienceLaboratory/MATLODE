@@ -9,9 +9,11 @@ options.StepSizeController = matlode.stepsizecontroller.StandardController;
 
 problem = otp.robertson.presets.Canonical;
 
+tic
 sol = integrator.integrate(problem.RHS, problem.TimeSpan, problem.Y0, options);
+toc
 
-sol_matlab = problem.solve('Solver', @ode23s, 'RelTol', 1e-8, 'AbsTol', 1e-8);
+sol_matlab = problem.solve('Solver', @ode15s, 'RelTol', 1e-8, 'AbsTol', 1e-8);
 
 true_sol = problem.solve('RelTol', 1e-12, 'AbsTol', 1e-12);
 % true_sol.y = exp(-1);

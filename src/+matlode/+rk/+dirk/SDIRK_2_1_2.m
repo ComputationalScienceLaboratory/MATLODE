@@ -16,9 +16,9 @@ classdef SDIRK_2_1_2 < matlode.rk.dirk.DIRK
              
             b =  caster('[1/sqrt(2), 1 - (1/sqrt(2))]');
             
-            bHat =  caster('[3/5, 2/5]');
+            bHat =  caster('[2/3, 1/3]');
             
-            e = caster('[1/sqrt(2) - 3/5, 3/5 - 1/sqrt(2)]');
+            e = caster('[1/sqrt(2) - 2/3, 2/3 - 1/sqrt(2)]');
             
             c = caster('[1 - (1/sqrt(2)), 1]');
             

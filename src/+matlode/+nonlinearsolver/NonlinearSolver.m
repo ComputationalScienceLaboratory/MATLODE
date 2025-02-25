@@ -35,8 +35,10 @@ classdef NonlinearSolver < handle
 	end
 
 	methods(Abstract)
+
+		[out_opts, stats] = preprocess(obj, f, t0, y0, optin, stats);
 		
-		[xn, xnf, out_opts, stats] = solve(obj,f, t, x0, sys_const, mass_scale, jac_scale,  optin, stats);
+		[xn, xnf, out_opts, stats] = solve(obj, f, t, y0, x0, sys_const, mass_scale, jac_scale,  optin, stats);
 	end
 end
 
