@@ -5,7 +5,7 @@ classdef NonlinearSolver < handle
 		NonLinearArgs
 	end
 	
-	properties (SetAccess = protected)
+	properties (SetAccess = protected, GetAccess = public)
 		LinearSolver
 		MaxIterations
 		Tolerance
@@ -38,7 +38,7 @@ classdef NonlinearSolver < handle
 
 		[out_opts, stats] = preprocess(obj, f, t0, y0, optin, stats);
 		
-		[xn, xnf, out_opts, stats] = solve(obj, f, t, y0, x0, sys_const, mass_scale, jac_scale,  optin, stats);
+		[xn, xnf, out_opts, stats] = solve(obj, f, t, dt, y0, x0, fn0, sys_const, mass_scale, jac_scale,  optin, stats);
 	end
 end
 

@@ -29,21 +29,21 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 			out_opts = [];
 		end
 		
-		function [xn, out_opts, stats] = solve(obj, f, t, y0, x0, sys_const, mass_scale, jac_scale,  ~, stats)
-			%Solve the nonlinear equation 0 = -M(t)z + -M(t)*y0 + q0 + const + a * f(t, y_0 + z) 
+		function [xn, out_opts, stats] = solve(obj, f, t, dt, y0, x0, fn0, sys_const, mass_scale, jac_scale,  ~, stats)
+			%Solve the nonlinear equation 0 = -M(t)z + const + a * f(t, y_0 + z) 
 			xn = x0;
 			i = 0;
 			y1 = y0 + x0;
+			intial_fun_cond = uint32(~isempty(fn0));
+			if intial_fun_cond == 0
+				fn0 = f.F(t, y1);
+			end
 
 			stats = obj.LinearSolver.preprocess(f, t, y1, true, -mass_scale, jac_scale, stats);
-			if ~(isempty(f.Mass) || ~isa(f.Mass, 'function_handle'))
-				sys_const = sys_const + mass_scale * (obj.q0 - obj.LinearSolver.mass * y0);
-			end
 
 			while i < obj.MaxIterations
 				mx = obj.LinearSolver.mass * x0;
-				xnf = f.F(t, y1);
-				b =  (-mass_scale) .* (mx) + sys_const + (jac_scale) .* xnf;
+				b =  (-mass_scale) .* (mx) + sys_const + (jac_scale) .* fn0;
 				[w_i, stats] = obj.LinearSolver.solve(-b, stats);
 
 				xn = w_i + x0;
@@ -55,9 +55,10 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 				end
 				x0 = xn;
 				y1 = y0 + x0;
+				fn0 = f.F(t, y1);
 			end
 			stats.nNonLinIterations = stats.nNonLinIterations + i;
-			stats.nFevals = stats.nFevals + i;
+			stats.nFevals = stats.nFevals + i - intial_fun_cond;
 
 			out_opts.convergenceFailure = i >= obj.MaxIterations;
 		end
