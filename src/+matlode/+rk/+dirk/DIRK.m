@@ -18,12 +18,14 @@ classdef DIRK < matlode.rk.RungeKutta
 	end
 
     properties (SetAccess = protected)
+		Gamma
         D
 		Theta
 		ET
 		Alpha
 		StifflyAccurate
 		ESDIRK
+		SinglyImplicit
 
 		falseYDiff
 	end
@@ -32,6 +34,8 @@ classdef DIRK < matlode.rk.RungeKutta
 	methods
         function obj = DIRK(a, b, bHat, c, e, order, embeddedOrder)
             obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
+
+			adiag = diag(obj.A);
 			
 			obj.StifflyAccurate = all(obj.A(end,:) == obj.B(:)');
 			%TODO: Change to coefficents provides to prevent accuracy loss.
@@ -42,6 +46,9 @@ classdef DIRK < matlode.rk.RungeKutta
 			%ESDIRK only utilizes the sub matrices inverse
 			obj.ESDIRK = all(obj.A(1, :) == 0);
 			if (obj.ESDIRK)
+				obj.Gamma = obj.A(2,2);
+
+				obj.SinglyImplicit = all(abs(adiag(2:end) - obj.Gamma) < eps);
 
 				%Note the first stage is treated differently in the z
 				%transformation. Adding the effects to the intial stage are
@@ -69,6 +76,10 @@ classdef DIRK < matlode.rk.RungeKutta
 				obj.Theta(2:end, 1) = obj.A(2:end,1) + tril(obj.A(2:end, 2:end), -1)*q;
 
 			else
+				obj.Gamma = obj.A(1,1);
+
+				obj.SinglyImplicit = all(abs(adiag - obj.Gamma) < eps );
+
 				if obj.StifflyAccurate
 					obj.D = zeros(1,obj.StageNum);
 					obj.D(1,end) = 1;
@@ -83,6 +94,10 @@ classdef DIRK < matlode.rk.RungeKutta
 				end
 
 				obj.Theta = obj.A \ tril(obj.A, -1);
+			end
+
+			if ~obj.SinglyImplicit
+				error('General Dirk is not supported. Only SDIRK and ESDIRK.');
 			end
 
         end
@@ -119,7 +134,8 @@ classdef DIRK < matlode.rk.RungeKutta
 			ynew = y;
 
 			%Setup Nonlinear Solver
-			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, [], stats);
+			%TODO:Currently assuming diagonals are the same. fix
+			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt .* obj.Gamma, [], stats);
             
 			if obj.Z_Transformation
 				ydiff = zeros(length(y),1);
@@ -146,7 +162,7 @@ classdef DIRK < matlode.rk.RungeKutta
 					end
 	
 					%Solve Nonlinear System
-					[stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.A(i,i),  [], stats);
+					[stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
 					ydiff = stages(:,i);
 					obj.falseYDiff(:,i) = ydiff;
 					if solver_opts.convergenceFailure == true
@@ -190,7 +206,7 @@ classdef DIRK < matlode.rk.RungeKutta
                 	thc = t + obj.C(i) .* dt;
 	
 					%Solve Nonlinear System
-					[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.A(i,i),  [], stats);
+					[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
 					if solver_opts.convergenceFailure == true
 						out_opts.failure = true;
 						return;
@@ -230,7 +246,7 @@ classdef DIRK < matlode.rk.RungeKutta
 				esdirkstart = uint32(obj.ESDIRK) + 1;
 				for i = esdirkstart:obj.StageNum
 					if abs(obj.ET(i)) > eps
-						yerror = yerror +  (obj.ET(i)) .* obj.falseYDiff(:, i);
+						yerror = yerror +  (obj.ET(i)) .* stages(:, i);
 					end
 				end
 				

@@ -1,12 +1,11 @@
-classdef Newton < matlode.nonlinearsolver.NonlinearSolver
-	%NEWTON Classic Newton method for solving nonlinear systems
+classdef FixedPoint < matlode.nonlinearsolver.NonlinearSolver
+	%CHORD Classic Fixed Point iteration
 	properties(Access = protected)
-		q0
 		t0_pre
 	end
 	
 	methods
-		function obj = Newton(linsolve, args)
+		function obj = FixedPoint(linsolve, args)
 			arguments
 				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.MatrixLinearSolver();
 				args(1,:) cell = {};
@@ -15,21 +14,22 @@ classdef Newton < matlode.nonlinearsolver.NonlinearSolver
             obj = obj@matlode.nonlinearsolver.NonlinearSolver(linsolve, args{:});
 		end
 
+
 		function [out_opts, stats] = preprocess(obj, f, t0, y0, mass_scale, jac_scale, optin, stats)
 			% Preprocess to compute M(t_0) y_0
 			[stats] = obj.LinearSolver.computeMass(f, t0, y0, stats);
-			if isempty(f.Mass) || ~isa(f.Mass, 'function_handle')
-				obj.q0 = 0;
-			else
-				obj.q0 = (obj.LinearSolver.mass * y0);
+			%TODO: Fixed point can be formulated to support DAEs. Utilize
+			%QR factorization plus some transformation to get it.
+			if ~isempty(f.MassSingular)
+				error('Fixed Point Iteration does not support DAEs.')
 			end
+
 			obj.t0_pre = t0;
 			out_opts = [];
 		end
-
-
+		
 		function [xn, out_opts, stats] = solve(obj, f, t, dt, y0, x0, fn0, sys_const, mass_scale, jac_scale,  ~, stats)
-			%Solve the nonlinear equation 0 = -M(t)z + -M(t)*y0 + q0 + const + a * f(t, y_0 + z) 
+			%Solve the nonlinear equation 0 = -M(t)z + const + a * f(t, y_0 + z) 
 			xn = x0;
 			i = 0;
 			y1 = y0 + x0;
@@ -38,18 +38,15 @@ classdef Newton < matlode.nonlinearsolver.NonlinearSolver
 				fn0 = f.F(t, y1);
 			end
 
+			stats = obj.LinearSolver.preprocess(f, t, y1, true, mass_scale, 0, stats);
+
 			while i < obj.MaxIterations
-				stats = obj.LinearSolver.preprocess(f, t, y1, true, -mass_scale, jac_scale, stats);
-
-				mx = obj.LinearSolver.mass * x0;
-				b =  (-mass_scale) .* (mx) + (jac_scale) .* fn0 + sys_const;
-				[w_i, stats] = obj.LinearSolver.solve(-b, stats);
-
-				xn = w_i + x0;
+				b = sys_const + (jac_scale) .* fn0;
+				[xn, stats] = obj.LinearSolver.solve(b, stats);
 				
 				i = i + 1;
 
-				if norm(w_i) < obj.Tolerance
+				if norm(xn - x0) < obj.Tolerance
 					break;
 				end
 				x0 = xn;
@@ -61,6 +58,10 @@ classdef Newton < matlode.nonlinearsolver.NonlinearSolver
 
 			out_opts.convergenceFailure = i >= obj.MaxIterations;
 		end
+	end
+
+	methods (Access=private)
+		
 	end
 end
 

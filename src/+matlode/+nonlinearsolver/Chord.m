@@ -17,7 +17,7 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 		end
 
 
-		function [out_opts, stats] = preprocess(obj, f, t0, y0, optin, stats)
+		function [out_opts, stats] = preprocess(obj, f, t0, y0, mass_scale, jac_scale, optin, stats)
 			% Preprocess to compute M(t_0) y_0
 			[stats] = obj.LinearSolver.computeMass(f, t0, y0, stats);
 			if isempty(f.Mass) || ~isa(f.Mass, 'function_handle')
