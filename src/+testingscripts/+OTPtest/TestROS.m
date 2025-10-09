@@ -2,7 +2,7 @@ clear
 format long e
 close all
 
-integrator = matlode.rosenbrock.ROS34PW2();
+integrator = matlode.rosenbrock.ROS3P();
 
 problem = otp.allencahn.presets.Canonical;
 

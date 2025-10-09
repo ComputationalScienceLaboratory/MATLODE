@@ -6,8 +6,10 @@ integrator = matlode.rk.dirk.SDIRK_2_1_2;
 
 options.ErrNorm = matlode.errnorm.StandardNorm(1e-7, 1e-7);
 options.StepSizeController = matlode.stepsizecontroller.StandardController;
+options.NonLinearSolver = matlode.nonlinearsolver.Chord;
+options.NonLinearSolver.MaxIterations = 1000;
 
-problem = otp.ascherlineardae.presets.Canonical;
+problem = otp.robertson.presets.Canonical;
 
 tic
 sol = integrator.integrate(problem.RHS, problem.TimeSpan, problem.Y0, options);

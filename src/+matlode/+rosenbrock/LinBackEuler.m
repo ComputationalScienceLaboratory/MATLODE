@@ -16,7 +16,7 @@ classdef LinBackEuler < matlode.rosenbrock.Rosenbrock
             b = caster('[1]');
             be = [];
 
-			[gammadia, gammasum, alphasum, a, c, m, me, e] = RosCoefMethTrans(gamma, alpha, b, be);
+			[gammadia, gammasum, alphasum, a, c, m, me, e] = matlode.rosenbrock.Rosenbrock.RosCoefMethTrans(gamma, alpha, b, be);
             
             order = 1;
             

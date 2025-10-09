@@ -83,7 +83,7 @@ classdef Model < handle
 					p.addParameter(obj.OTPSetVars{i}, obj.(obj.OTPSetVars{i}));
 				end
 
-			elseif isa(f, 'matlode.model.Model')
+			elseif isa(f, 'matlode.Model')
 				%% Model Copying
 				
 				obj = modelCopy(obj, f);

@@ -5,7 +5,7 @@ classdef NonlinearSolver < handle
 		NonLinearArgs
 	end
 	
-	properties (SetAccess = protected, GetAccess = public)
+	properties (SetAccess = public, GetAccess = public)
 		LinearSolver
 		MaxIterations
 		Tolerance

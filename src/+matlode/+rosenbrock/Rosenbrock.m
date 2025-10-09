@@ -155,7 +155,7 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 
                 for j = 1:(i-1)
                     if obj.C(i,j) ~= 0
-                        ynew = ynew + (obj.C(i,j) / dt) * stages(:,j);
+                        ynew = ynew + obj.LinearSolver.mass * (obj.C(i,j) / dt) * stages(:,j);
                     end
                 end
 
