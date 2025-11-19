@@ -46,16 +46,9 @@ classdef SoderlandController < matlode.stepsizecontroller.StepSizeController
             obj.AQfunc = opts.AQfunc;
         end
         
-        function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q)
+        function [accept, hNew] = newStepSize(obj, ~, ~, h, err, q)
             
             accept = err(1) <= 1; 
-            if accept
-                tNew = t + h(1);
-                
-            else
-                tNew = t;
-            end
-            
             
             facScal = prod(err(1:obj.History).^obj.AQfunc(q,obj.A));
             hScal = prod(abs(h(1:obj.History - 1) ./ h(2:obj.History)).^obj.B);

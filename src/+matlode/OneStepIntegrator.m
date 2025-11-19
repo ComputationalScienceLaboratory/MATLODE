@@ -46,13 +46,14 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
             %inital values
             tcur = tspan(1);
             tnext = tcur;
+            dtbuf = 0; % Kahan summation buffer to remember small parts of dt which haven't yet been added to t
             tindex = 2;
             
             tspanlen = length(tspan);
             
             tdir = sign(tspan(end) - tspan(1));
             dtmax = min([abs(opts.MaxStep), abs(tspan(end) - tspan(1))]) * tdir;
-            dtmin = 64 * eps(tspan(1)) * tdir;
+            dtmin = opts.MinStep * tdir;
             
             ynext = y0;
             
@@ -76,6 +77,11 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
             
             %Time Loop
             while tindex <= tspanlen
+                if(stats.nSteps > opts.MaxNumSteps)
+                    warning("OneStepIntegrator:MaxNumSteps", "Integrator reached maximum steps before finishing integration at t = %f.", tcur)
+                    break
+                end
+
                 %Cycle history
                 err = circshift(err, 1, 2);
                 dthist = circshift(dthist, 1, 2);
@@ -84,9 +90,6 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                 tcur = tnext;
                 dtcur = dtnext;
                 dthist(1) = dtnext;
-                
-                %Subject to change
-                dtmin = 64 * eps(tcur) * tdir;
                 
                 %Accept Loop
                 %Will keep looping until accepted step
@@ -99,33 +102,36 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                     	
                     	%Find next Step
 						%TODO: Update to take stats
-                    	[prevAccept, dtnext, tnext] = stepController.newStepSize(prevAccept, tcur, tspan, dthist, err, q);
+                    	[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dthist, err, q);
 					else
 						%TODO setup with memory based time step controller
 						prevAccept = false;
 						%TODO: Allow factor to be choosen
 						dtnext = 0.1 * dtcur;
-						tnext = tcur;
 					end
 
-                	%Check if step is really small
+                	% Verify we don't go below MinStep.
                 	if abs(dtnext) < abs(dtmin)
-						%Prevents excessive output
-                    	if stats.nSmallSteps == 0
-                        	warning('The step the integrator is taking extremely small, results may not be optimal')
-                    	end
-                    	%accept step since the step cannot get any smaller
-                    	stats.nSmallSteps = stats.nSmallSteps + 1;
                     	dtnext = dtmin;
-                    	tnext = tcur + dtmin;
-                    	prevAccept = true;
-                    	break;
                 	end
                 	
                 	%check step acception
-                	if prevAccept
-                    	break;
-                	end
+                    if prevAccept
+                        % Kahan summation - adjust dt by adding the parts of previous dt
+                        % that we haven't been able to add yet
+                        dtadj = dtcur + dtbuf;
+                        tnext = tcur + dtadj;
+
+                        % Due to rounding error, tnext - tcur may not properly capture all of dtadj,
+                        % so record the parts that are missing to be added later
+                        dtbuf = dtadj - (tnext - tcur);
+                        break;
+                    else
+                        if dtcur == dtmin
+                            % TODO maybe we should return our progress up until now
+                            error("OneStepIntegrator:MinStep", "Step failed with h = MinStep")
+                        end
+                    end
                 	
                 	stats.nFailed = stats.nFailed + 1;
                 	dtcur = dtnext;
@@ -156,7 +162,7 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                         
                         %incase lucky and land on point, can be cheaper
                         %than dense output if dense requires fevals
-                        if abs(tspan(tindex) - tnext) < abs(dtmin)
+                        if abs(tspan(tindex) - tnext) < 64 * eps(tcur)
                             t(:, tindex) = tspan(tindex);
                             y(:, tindex) = ynext;
                         else
@@ -175,7 +181,7 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                     
                     %integrate to/ End point
                     %check if close enough with hmin
-                    if abs(tspan(tindex) - tnext) < abs(dtmin)
+                    if abs(tspan(tindex) - tnext) < 64 * eps(tnext)
 
                         if multiTspan
                             t(:, tindex) = tspan(tindex);
@@ -184,6 +190,7 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                         tindex = tindex + 1;
 					else
                         
+                        % TODO - what if this is < dtmin
                         dtnext = tspan(tindex) - tnext;
                     end
                     

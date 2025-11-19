@@ -35,7 +35,7 @@ classdef (Abstract) StepSizeController < handle
     end
     
     methods (Abstract)
-        [accept, hNew, tNew] = newStepSize(obj, prevAccept, t, tspan, h, err, q);
+        [accept, hNew] = newStepSize(obj, prevAccept, tspan, h, err, q);
 	end
     
     methods

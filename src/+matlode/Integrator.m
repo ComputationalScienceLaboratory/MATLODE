@@ -107,7 +107,8 @@ classdef (Abstract) Integrator < handle
 			p.addParameter('FullTrajectory', false);
             p.addParameter('Dense', []);
             p.addParameter('MaxStep', inf);
-			
+            p.addParameter('MinStep', 0, @(x) isscalar(x) && isfloat(x) && x >= 0)
+			p.addParameter('MaxNumSteps', inf, @(x) isscalar(x) && isnumeric(x) && floor(x) == x)
             
             p.parse(varargin{:});
             

@@ -32,13 +32,12 @@ classdef Gustafson < matlode.stepsizecontroller.StepSizeController
             
         end
         
-        function [accept, hNew, tNew] = newStepSize(obj, prevAccept, t, ~, h, err, q)
+        function [accept, hNew] = newStepSize(obj, prevAccept, ~, h, err, q)
             accept = err(1) <= 1;
             
             scalh = 1;
             
             if accept
-                tNew = t + h(1);
                 if ~prevAccept
                     %H_0220 Controller
                    scalh = (h(1) / h(2))^obj.A; 
@@ -46,7 +45,6 @@ classdef Gustafson < matlode.stepsizecontroller.StepSizeController
                 %PI Controller
                 scalerr = err(1)^(obj.Ki/q) * err(2)^(obj.Kp/q);
             else
-                tNew = t;
                 %Standard Controller(I controller)
                 scalerr = err(1)^(-1/(q + 1));
             end
