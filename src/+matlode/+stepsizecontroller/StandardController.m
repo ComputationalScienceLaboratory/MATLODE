@@ -10,14 +10,8 @@ classdef StandardController < matlode.stepsizecontroller.StepSizeController
             
         end
         
-        function [accept, hNew, tNew] = newStepSize(obj, ~, t, ~, h, err, q)
+        function [accept, hNew] = newStepSize(obj, ~, ~, h, err, q)
             accept = err <= 1;
-            
-            if accept
-                tNew = t + h;
-            else
-                tNew = t;
-            end
             
             hNew = h * min(obj.FacMax, max(obj.FacMin, obj.Fac * err^(-1 / (q + 1))));
             
