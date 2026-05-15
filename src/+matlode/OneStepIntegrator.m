@@ -93,6 +93,9 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                 while true
                     
                     [ynext, stages, stats, out_opts] = timeStep(obj, f, tcur, ycur, dtcur, stages, prevAccept, stats);
+                    if (any(ynext) < 0)
+                        disp(ynext)
+                    end
 					%Check if integration failed with the given time step
 					if out_opts.failure == false
                     	[err(:, 1), stats, out_opts] = timeStepErr(obj, f, tcur, ycur, ynext, dtcur, stages, errNorm, stats);
@@ -239,8 +242,11 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
                 tcur = tspan(i);
                 dtc = tspan(i+1) - tspan(i);
                 
-                [ynext, stages, stats] = timeStep(obj, f, tcur, yi, dtc, stages, true, stats);
-
+                [ynext, stages, stats, out_opts] = timeStep(obj, f, tcur, yi, dtc, stages, true, stats);
+                
+                if out_opts.failure
+                    error('timestep failed')
+                end
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
                     t(i + 1) = tspan(:, i + 1);

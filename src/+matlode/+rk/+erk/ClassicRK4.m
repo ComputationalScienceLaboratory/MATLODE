@@ -4,7 +4,7 @@ classdef ClassicRK4 < matlode.rk.erk.ERK
 %Reference: 
 
     properties (SetAccess = immutable)
-        DenseOut
+        % DenseOut
     end
     
     methods

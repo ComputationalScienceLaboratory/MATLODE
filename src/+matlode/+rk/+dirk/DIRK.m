@@ -1,6 +1,299 @@
+% classdef DIRK < matlode.rk.RungeKutta
+% 	%DIRK Will support DIRK, ESDIRK, and SDIRK
+% 
+%     properties (Constant)
+%         PartitionMethod = false;
+% 		PartitionNum = 1;
+% 		MultirateMethod = false;
+% 
+% 		%Using Z_Transformation varies. At times false can be faster even
+% 		%with the more Feval. The nonlinear system seems better
+% 		%conditioned. However, z transformation works best for DAEs. SDIRK
+% 		%can work for M(t) DAEs only under Z-transformation
+% 		Z_Transformation = false;
+%     end
+% 
+%     properties 
+%         NonLinearSolver
+%         y_temp
+%         matrix_func
+% 	end
+% 
+%     properties (SetAccess = protected)
+% 		Gamma
+%         D
+% 		Theta
+% 		ET
+% 		Alpha
+% 		StifflyAccurate
+% 		ESDIRK
+% 		SinglyImplicit
+% 
+% 		falseYDiff
+% 	end
+% 
+% 
+% 	methods
+%         function obj = DIRK(a, b, bHat, c, e, order, embeddedOrder)
+%             obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
+% 
+% 			adiag = diag(obj.A);
+% 
+% 			obj.StifflyAccurate = all(obj.A(end,:) == obj.B(:)');
+% 			%TODO: Change to coefficents provides to prevent accuracy loss.
+% 			%Similar to the Rosenbrock methods
+% 
+% 			%Note is only for SDIRK and ESDIRK methods. FIRK and other
+% 			%will require more care. Firk requries full inverses
+% 			%ESDIRK only utilizes the sub matrices inverse
+% 			obj.ESDIRK = all(obj.A(1, :) == 0);
+% 			if (obj.ESDIRK)
+% 				obj.Gamma = obj.A(2,2);
+% 
+% 				obj.SinglyImplicit = all(abs(adiag(2:end) - obj.Gamma) < eps);
+% 
+% 				%Note the first stage is treated differently in the z
+% 				%transformation. Adding the effects to the intial stage are
+% 				%nesscary
+% 				q = -(obj.A(2:end, 2:end) \ obj.A(2:end, 1));
+% 
+% 				obj.D = zeros(1,obj.StageNum);
+% 				obj.D(1) = obj.B(1) + obj.B(1,2:end)*q;
+% 				if obj.StifflyAccurate
+% 					obj.D(1,end) = 1;
+% 				else
+% 					obj.D(1,2:end) = (obj.A(2:end, 2:end)' \ obj.B(2:end)')';
+% 				end
+% 
+% 				obj.ET = zeros(1, obj.StageNum);
+% 				if obj.Adaptive
+% 					obj.ET(1) = obj.E(1) + obj.E(1,2:end)*q;
+% 					obj.ET(1,2:end) = (obj.A(2:end, 2:end)' \ (obj.E(2:end))')';
+% 				else
+% 					obj.ET = [];
+% 				end
+% 
+% 				obj.Theta = zeros(obj.StageNum, obj.StageNum);
+% 				obj.Theta(2:end, 2:end) = obj.A(2:end, 2:end) \ tril(obj.A(2:end, 2:end), -1);
+% 				obj.Theta(2:end, 1) = obj.A(2:end,1) + tril(obj.A(2:end, 2:end), -1)*q;
+% 
+% 			else
+% 				obj.Gamma = obj.A(1,1);
+% 
+% 				obj.SinglyImplicit = all(abs(adiag - obj.Gamma) < eps );
+% 
+% 				if obj.StifflyAccurate
+% 					obj.D = zeros(1,obj.StageNum);
+% 					obj.D(1,end) = 1;
+% 				else
+% 					obj.D = (obj.A' \ obj.B')';
+% 				end
+% 
+% 				if obj.Adaptive
+% 					obj.ET = (obj.A' \ (obj.E)')';
+% 				else
+% 					obj.ET = obj.E;
+% 				end
+% 
+% 				obj.Theta = obj.A \ tril(obj.A, -1);
+% 			end
+% 
+% 			if ~obj.SinglyImplicit
+% 				error('General Dirk is not supported. Only SDIRK and ESDIRK.');
+% 			end
+% 
+%         end
+% 	end
+% 
+% 	methods (Access = protected)
+%         function opts = matlodeSets(obj, p, varargin)
+% 
+%             %DIRK specific options
+%             p.addParameter('NonLinearSolver', matlode.nonlinearsolver.Chord());
+%             p.addParameter('MatrixFunction', []);
+% 
+%             opts = matlodeSets@matlode.rk.RungeKutta(obj, p, varargin{:});
+% 
+%             if isempty(opts.NonLinearSolver)
+%                 error('Please provide appropiate parameters and a non-linear solver')
+%             end
+%             obj.NonLinearSolver = opts.NonLinearSolver;
+%             obj.matrix_func = opts.MatrixFunction;
+%         end
+% 
+%         function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
+% 			if isa(f.Mass,'function_handle') && (~obj.Z_Transformation || obj.ESDIRK)
+% 				error('Not Supported method for time dependent Mass Matrix M(t)')
+% 			end
+% 
+% 			if obj.FSAL && prevAccept
+% 				if obj.Z_Transformation
+% 					stages(:, 1) = f.F(t,y);
+% 
+% 					stats.nFevals = stats.nFevals + 1;
+% 				else
+% 					stages(:, 1) = stages(:, end);
+% 				end
+% 			end
+% 			ynew = y;
+% 
+% 			%Setup Nonlinear Solver
+% 			%TODO:Currently assuming diagonals are the same. fix
+% 			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt .* obj.Gamma, [], stats);
+% 
+% 			if obj.Z_Transformation
+% 				ydiff = zeros(length(y),1);
+% 				fd0 = [];
+% 				for i = obj.FsalStart:obj.StageNum
+% 
+% 					g_const = zeros(length(y),1);
+%                 	for j = 2:i-1
+% 						if abs(obj.Theta(i,j)) > eps
+% 							g_const = g_const + (obj.Theta(i, j)) .* stages(:, j) ;
+% 						end
+%                 	end
+%                 	thc = t + obj.C(i) .* dt ;
+% 
+% 					if ~obj.ESDIRK && i > 1 && abs(obj.Theta(i,1)) > eps
+% 						g_const = g_const + obj.Theta(i,1) .* stages(:,1);
+% 					end
+% 
+% 					[stats] = obj.NonLinearSolver.LinearSolver.computeMass(f, thc, y, stats);
+% 					g_const = (obj.NonLinearSolver.LinearSolver.mass * g_const);
+% 
+% 					if obj.ESDIRK && i > 1 && abs(obj.Theta(i,1)) > eps
+% 						g_const = g_const +  dt * obj.Theta(i,1) .* stages(:,1);
+% 					end
+% 
+% 					%Solve Nonlinear System
+% 					[stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
+% 					ydiff = stages(:,i);
+% 					obj.falseYDiff(:,i) = ydiff;
+% 					if solver_opts.convergenceFailure == true
+% 						out_opts.failure = true;
+% 						return;
+% 					end
+% 				end
+% 
+% 				if obj.ESDIRK
+% 					if abs(obj.D(1)) > eps
+% 						ynew = ynew + dt * (obj.D(i)) .* stages(:, 1);
+% 					end
+%                 end
+% 
+%                 if ~obj.StifflyAccurate
+% 					esdirkstart = uint32(obj.ESDIRK) + 1;
+% 					for i = esdirkstart:obj.StageNum
+% 						if abs(obj.D(i)) > eps
+% 							ynew = ynew + (obj.D(i)) .* stages(:, i);
+% 						end
+% 					end
+%                 else
+% 					ynew = ynew + stages(:,end);
+%                 end
+% 
+% 			else
+% 				obj.falseYDiff = zeros(length(y),obj.StageNum);
+% 				ydiff = zeros(length(y),1);
+% 				if obj.ESDIRK
+% 					fd0 = stages(:,1);
+% 				else
+% 					fd0 = [];
+% 				end
+% 
+% 				for i = obj.FsalStart:obj.StageNum
+%                 	g_const = zeros(length(y),1);
+%                 	for j = 1:i-1
+% 						if obj.A(i,j) ~= 0
+% 							g_const = g_const + (dt * obj.A(i, j)) .* stages(:, j) ;
+% 						end
+%                 	end
+%                 	thc = t + obj.C(i) .* dt;
+% 
+% 					%Solve Nonlinear System
+% 					[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
+% 					if solver_opts.convergenceFailure == true
+% 						out_opts.failure = true;
+% 						return;
+% 					end
+% 					ynew = y + ydiff;
+% 					obj.falseYDiff(:,i) = ydiff;
+% 
+% 					stages(:,i) = f.F(thc, ynew);
+% 					fd0 = stages(:,i);
+% 				end
+% 				stats.nFevals = stats.nFevals + obj.StageNum;
+% 
+% 				if ~obj.StifflyAccurate
+% 					ynew = y;
+% 					for i = 1:obj.StageNum
+% 						if obj.B(i) ~= 0
+% 							ynew = ynew + (dt .* obj.B(i)) .* stages(:, i);
+% 						end
+% 					end
+% 				end
+% 
+%             end
+% 
+% 			out_opts.failure = false;
+% 
+% 		end
+% 
+% 
+%         function [err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats)
+%             yerror = 0;
+% 			if obj.Z_Transformation
+% 				if obj.ESDIRK
+% 					if abs(obj.ET(1)) > eps
+% 						yerror = dt*(obj.ET(1)) .* stages(:, 1);
+% 					end
+% 				end
+% 				esdirkstart = uint32(obj.ESDIRK) + 1;
+% 				for i = esdirkstart:obj.StageNum
+% 					if abs(obj.ET(i)) > eps
+% 						yerror = yerror +  (obj.ET(i)) .* stages(:, i);
+% 					end
+% 				end
+% 
+% 			else
+% 				% for i = 1:obj.StageNum
+% 				% 	if abs(obj.E(i)) > eps
+% 				% 		yerror = yerror +  (dt .*  obj.E(i)) .* stages(:, i);
+% 				% 	end
+% 				% end
+% 
+% 				if obj.ESDIRK
+% 					if abs(obj.ET(1)) > eps
+% 						yerror = dt*(obj.ET(1)) .* stages(:, 1);
+% 					end
+% 				end
+% 				esdirkstart = uint32(obj.ESDIRK) + 1;
+% 
+% 				for i = esdirkstart:obj.StageNum
+% 					if abs(obj.ET(i)) > eps
+% 						yerror = yerror + (obj.ET(i)) .* obj.falseYDiff(:, i);
+% 					end
+% 				end
+% 				% [stats] = obj.NonLinearSolver.LinearSolver.computeMass(f, t + dt, ynew, stats);
+% 				% yerror = (obj.NonLinearSolver.LinearSolver.mass * yerror);
+% 				% [yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats);
+% 			end
+% 
+%             err = ErrNorm.errEstimate(y, ynew, yerror);
+% 			out_opts.failure = false;
+%         end
+%     end
+% 
+% end
+% 
+
+% % % % % % % % % % % % % % % % % % % % % % % % % %  % % % % % % % % % % % %
+% % % % % % % % % % % % % % % % WITH CORRECTIONS % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % %  % % % % % % % % % % % %
+
 classdef DIRK < matlode.rk.RungeKutta
 	%DIRK Will support DIRK, ESDIRK, and SDIRK
-	
+
     properties (Constant)
         PartitionMethod = false;
 		PartitionNum = 1;
@@ -12,9 +305,11 @@ classdef DIRK < matlode.rk.RungeKutta
 		%can work for M(t) DAEs only under Z-transformation
 		Z_Transformation = true;
     end
-    
+
     properties 
         NonLinearSolver
+        y_temp
+        matrix_func
 	end
 
     properties (SetAccess = protected)
@@ -30,13 +325,13 @@ classdef DIRK < matlode.rk.RungeKutta
 		falseYDiff
 	end
 
-	
+
 	methods
         function obj = DIRK(a, b, bHat, c, e, order, embeddedOrder)
             obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
 
 			adiag = diag(obj.A);
-			
+
 			obj.StifflyAccurate = all(obj.A(end,:) == obj.B(:)');
 			%TODO: Change to coefficents provides to prevent accuracy loss.
 			%Similar to the Rosenbrock methods
@@ -62,7 +357,7 @@ classdef DIRK < matlode.rk.RungeKutta
 				else
 					obj.D(1,2:end) = (obj.A(2:end, 2:end)' \ obj.B(2:end)')';
 				end
-	
+
 				obj.ET = zeros(1, obj.StageNum);
 				if obj.Adaptive
 					obj.ET(1) = obj.E(1) + obj.E(1,2:end)*q;
@@ -70,7 +365,7 @@ classdef DIRK < matlode.rk.RungeKutta
 				else
 					obj.ET = [];
 				end
-	
+
 				obj.Theta = zeros(obj.StageNum, obj.StageNum);
 				obj.Theta(2:end, 2:end) = obj.A(2:end, 2:end) \ tril(obj.A(2:end, 2:end), -1);
 				obj.Theta(2:end, 1) = obj.A(2:end,1) + tril(obj.A(2:end, 2:end), -1)*q;
@@ -86,7 +381,7 @@ classdef DIRK < matlode.rk.RungeKutta
 				else
 					obj.D = (obj.A' \ obj.B')';
 				end
-	
+
 				if obj.Adaptive
 					obj.ET = (obj.A' \ (obj.E)')';
 				else
@@ -105,18 +400,20 @@ classdef DIRK < matlode.rk.RungeKutta
 
 	methods (Access = protected)
         function opts = matlodeSets(obj, p, varargin)
-            
+
             %DIRK specific options
             p.addParameter('NonLinearSolver', matlode.nonlinearsolver.Chord());
-            
+            p.addParameter('MatrixFunction', []);
+
             opts = matlodeSets@matlode.rk.RungeKutta(obj, p, varargin{:});
 
             if isempty(opts.NonLinearSolver)
                 error('Please provide appropiate parameters and a non-linear solver')
             end
             obj.NonLinearSolver = opts.NonLinearSolver;
+            obj.matrix_func = opts.MatrixFunction;
         end
-        
+
         function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
 			if isa(f.Mass,'function_handle') && (~obj.Z_Transformation || obj.ESDIRK)
 				error('Not Supported method for time dependent Mass Matrix M(t)')
@@ -125,7 +422,7 @@ classdef DIRK < matlode.rk.RungeKutta
 			if obj.FSAL && prevAccept
 				if obj.Z_Transformation
 					stages(:, 1) = f.F(t,y);
-					
+
 					stats.nFevals = stats.nFevals + 1;
 				else
 					stages(:, 1) = stages(:, end);
@@ -136,7 +433,7 @@ classdef DIRK < matlode.rk.RungeKutta
 			%Setup Nonlinear Solver
 			%TODO:Currently assuming diagonals are the same. fix
 			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt .* obj.Gamma, [], stats);
-            
+
 			if obj.Z_Transformation
 				ydiff = zeros(length(y),1);
 				fd0 = [];
@@ -160,7 +457,7 @@ classdef DIRK < matlode.rk.RungeKutta
 					if obj.ESDIRK && i > 1 && abs(obj.Theta(i,1)) > eps
 						g_const = g_const +  dt * obj.Theta(i,1) .* stages(:,1);
 					end
-	
+
 					%Solve Nonlinear System
 					[stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
 					ydiff = stages(:,i);
@@ -170,23 +467,63 @@ classdef DIRK < matlode.rk.RungeKutta
 						return;
 					end
 				end
-				
+
 				if obj.ESDIRK
 					if abs(obj.D(1)) > eps
 						ynew = ynew + dt * (obj.D(i)) .* stages(:, 1);
 					end
 				end
-	
-				if ~obj.StifflyAccurate
+
+                % positivity corrections
+                %corrections start
+                y_stage = zeros(length(y), length(obj.B));
+                for i = 1:length(obj.B)
+                    y_stage(:,i) = stages(:,i) + y;
+                end
+
+                %predicted final solution for stiffy accurate method
+                tol = 1.e-6;
+                y_p = max(y_stage(:,length(obj.B)), tol);
+
+                %apply positive correction
+
+                %first, truncate versions of the stages are computed
+                y_trunc = y_stage;
+                for i = 1:length(obj.B)
+                    y_trunc(:,i) = max(y_stage(:,i), tol);
+                end
+
+                %second, averaged system matrix is computed
+                g_corr = zeros(length(y), length(y));
+                for i = 1:length(obj.B)
+                    % g_corr = g_corr + obj.B(i) * obj.matrix_func(y_trunc(:, i), thc)*diag(y_trunc(:,i)./y_p);
+                    g_corr = g_corr + obj.B(i) * obj.matrix_func(y_trunc(:, i), thc)*diag(ones(150,1)./y_p);
+                end
+
+                %corrected solution for y
+                y_corr = (eye(length(g_corr)) - dt*g_corr)\y;
+                % if any(y_corr < 0)
+                %     disp(find(y_corr < 0))
+                % end
+                % y_corr = max(y_corr, tol);
+
+                if ~obj.StifflyAccurate
 					esdirkstart = uint32(obj.ESDIRK) + 1;
 					for i = esdirkstart:obj.StageNum
 						if abs(obj.D(i)) > eps
 							ynew = ynew + (obj.D(i)) .* stages(:, i);
 						end
 					end
-				else
+                else
 					ynew = ynew + stages(:,end);
-				end
+                end
+
+                obj.y_temp = ynew;
+                ynew=y_corr;
+                % if any(ynew < 0)
+                %     disp(find(ynew < 0))
+                % end
+
 			else
 				obj.falseYDiff = zeros(length(y),obj.StageNum);
 				ydiff = zeros(length(y),1);
@@ -204,7 +541,7 @@ classdef DIRK < matlode.rk.RungeKutta
 						end
                 	end
                 	thc = t + obj.C(i) .* dt;
-	
+
 					%Solve Nonlinear System
 					[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
 					if solver_opts.convergenceFailure == true
@@ -213,12 +550,12 @@ classdef DIRK < matlode.rk.RungeKutta
 					end
 					ynew = y + ydiff;
 					obj.falseYDiff(:,i) = ydiff;
-	
+
 					stages(:,i) = f.F(thc, ynew);
 					fd0 = stages(:,i);
 				end
 				stats.nFevals = stats.nFevals + obj.StageNum;
-	
+
 				if ~obj.StifflyAccurate
 					ynew = y;
 					for i = 1:obj.StageNum
@@ -231,7 +568,7 @@ classdef DIRK < matlode.rk.RungeKutta
 			end
 
 			out_opts.failure = false;
-            
+
 		end
 
 
@@ -249,7 +586,7 @@ classdef DIRK < matlode.rk.RungeKutta
 						yerror = yerror +  (obj.ET(i)) .* stages(:, i);
 					end
 				end
-				
+
 			else
 				% for i = 1:obj.StageNum
 				% 	if abs(obj.E(i)) > eps
@@ -263,7 +600,7 @@ classdef DIRK < matlode.rk.RungeKutta
 					end
 				end
 				esdirkstart = uint32(obj.ESDIRK) + 1;
-				
+
 				for i = esdirkstart:obj.StageNum
 					if abs(obj.ET(i)) > eps
 						yerror = yerror + (obj.ET(i)) .* obj.falseYDiff(:, i);
@@ -274,10 +611,375 @@ classdef DIRK < matlode.rk.RungeKutta
 				% [yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats);
 			end
 
-            err = ErrNorm.errEstimate(y, ynew, yerror);
+            err = ErrNorm.errEstimate(y, obj.y_temp, yerror);
+            % err = ErrNorm.errEstimate(y, ynew, yerror);
 			out_opts.failure = false;
         end
     end
 
 end
 
+
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% % % % % % % % % % % % % % % % % ALL  STAGES % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% % 
+% classdef DIRK < matlode.rk.RungeKutta
+% 	%DIRK Will support DIRK, ESDIRK, and SDIRK
+% 
+%     properties (Constant)
+%         PartitionMethod = false;
+% 		PartitionNum = 1;
+% 		MultirateMethod = false;
+% 
+% 		%Using Z_Transformation varies. At times false can be faster even
+% 		%with the more Feval. The nonlinear system seems better
+% 		%conditioned. However, z transformation works best for DAEs. SDIRK
+% 		%can work for M(t) DAEs only under Z-transformation
+% 		Z_Transformation = true;
+%     end
+% 
+%     properties 
+%         NonLinearSolver
+%         y_temp
+%         matrix_func
+% 	end
+% 
+%     properties (SetAccess = protected)
+% 		Gamma
+%         D
+% 		Theta
+% 		ET
+% 		Alpha
+% 		StifflyAccurate
+% 		ESDIRK
+% 		SinglyImplicit
+% 
+% 		falseYDiff
+% 	end
+% 
+% 
+% 	methods
+%         function obj = DIRK(a, b, bHat, c, e, order, embeddedOrder)
+%             obj = obj@matlode.rk.RungeKutta(a, b, bHat, c, e, order, embeddedOrder);
+% 
+% 			adiag = diag(obj.A);
+% 
+% 			obj.StifflyAccurate = all(obj.A(end,:) == obj.B(:)');
+% 			%TODO: Change to coefficents provides to prevent accuracy loss.
+% 			%Similar to the Rosenbrock methods
+% 
+% 			%Note is only for SDIRK and ESDIRK methods. FIRK and other
+% 			%will require more care. Firk requries full inverses
+% 			%ESDIRK only utilizes the sub matrices inverse
+% 			obj.ESDIRK = all(obj.A(1, :) == 0);
+% 			if (obj.ESDIRK)
+% 				obj.Gamma = obj.A(2,2);
+% 
+% 				obj.SinglyImplicit = all(abs(adiag(2:end) - obj.Gamma) < eps);
+% 
+% 				%Note the first stage is treated differently in the z
+% 				%transformation. Adding the effects to the intial stage are
+% 				%nesscary
+% 				q = -(obj.A(2:end, 2:end) \ obj.A(2:end, 1));
+% 
+% 				obj.D = zeros(1,obj.StageNum);
+% 				obj.D(1) = obj.B(1) + obj.B(1,2:end)*q;
+% 				if obj.StifflyAccurate
+% 					obj.D(1,end) = 1;
+% 				else
+% 					obj.D(1,2:end) = (obj.A(2:end, 2:end)' \ obj.B(2:end)')';
+% 				end
+% 
+% 				obj.ET = zeros(1, obj.StageNum);
+% 				if obj.Adaptive
+% 					obj.ET(1) = obj.E(1) + obj.E(1,2:end)*q;
+% 					obj.ET(1,2:end) = (obj.A(2:end, 2:end)' \ (obj.E(2:end))')';
+% 				else
+% 					obj.ET = [];
+% 				end
+% 
+% 				obj.Theta = zeros(obj.StageNum, obj.StageNum);
+% 				obj.Theta(2:end, 2:end) = obj.A(2:end, 2:end) \ tril(obj.A(2:end, 2:end), -1);
+% 				obj.Theta(2:end, 1) = obj.A(2:end,1) + tril(obj.A(2:end, 2:end), -1)*q;
+% 
+% 			else
+% 				obj.Gamma = obj.A(1,1);
+% 
+% 				obj.SinglyImplicit = all(abs(adiag - obj.Gamma) < eps );
+% 
+% 				if obj.StifflyAccurate
+% 					obj.D = zeros(1,obj.StageNum);
+% 					obj.D(1,end) = 1;
+% 				else
+% 					obj.D = (obj.A' \ obj.B')';
+% 				end
+% 
+% 				if obj.Adaptive
+% 					obj.ET = (obj.A' \ (obj.E)')';
+% 				else
+% 					obj.ET = obj.E;
+% 				end
+% 
+% 				obj.Theta = obj.A \ tril(obj.A, -1);
+% 			end
+% 
+% 			if ~obj.SinglyImplicit
+% 				error('General Dirk is not supported. Only SDIRK and ESDIRK.');
+% 			end
+% 
+%         end
+% 	end
+% 
+% 	methods (Access = protected)
+%         function opts = matlodeSets(obj, p, varargin)
+% 
+%             %DIRK specific options
+%             p.addParameter('NonLinearSolver', matlode.nonlinearsolver.Chord());
+%             p.addParameter('MatrixFunction', []);
+% 
+%             opts = matlodeSets@matlode.rk.RungeKutta(obj, p, varargin{:});
+% 
+%             if isempty(opts.NonLinearSolver)
+%                 error('Please provide appropiate parameters and a non-linear solver')
+%             end
+%             obj.NonLinearSolver = opts.NonLinearSolver;
+%             obj.matrix_func = opts.MatrixFunction;
+%         end
+% 
+%         function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
+% 			if isa(f.Mass,'function_handle') && (~obj.Z_Transformation || obj.ESDIRK)
+% 				error('Not Supported method for time dependent Mass Matrix M(t)')
+% 			end
+% 
+% 			if obj.FSAL && prevAccept
+% 				if obj.Z_Transformation
+% 					stages(:, 1) = f.F(t,y);
+% 
+% 					stats.nFevals = stats.nFevals + 1;
+% 				else
+% 					stages(:, 1) = stages(:, end);
+% 				end
+% 			end
+% 			ynew = y;
+% 
+% 			%Setup Nonlinear Solver
+% 			%TODO:Currently assuming diagonals are the same. fix
+% 			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt .* obj.Gamma, [], stats);
+% 
+% 			if obj.Z_Transformation
+% 				ydiff = zeros(length(y),1);
+% 				fd0 = [];
+% 				for i = obj.FsalStart:obj.StageNum
+% 
+% 					g_const = zeros(length(y),1);
+%                 	for j = 2:i-1
+% 						if abs(obj.Theta(i,j)) > eps
+% 							g_const = g_const + (obj.Theta(i, j)) .* stages(:, j) ;
+% 						end
+%                 	end
+%                 	thc = t + obj.C(i) .* dt ;
+% 
+% 					if ~obj.ESDIRK && i > 1 && abs(obj.Theta(i,1)) > eps
+% 						g_const = g_const + obj.Theta(i,1) .* stages(:,1);
+% 					end
+% 
+% 					[stats] = obj.NonLinearSolver.LinearSolver.computeMass(f, thc, y, stats);
+% 					g_const = (obj.NonLinearSolver.LinearSolver.mass * g_const);
+% 
+% 					if obj.ESDIRK && i > 1 && abs(obj.Theta(i,1)) > eps
+% 						g_const = g_const +  dt * obj.Theta(i,1) .* stages(:,1);
+% 					end
+% 
+% 					%Solve Nonlinear System
+% 					[stages(:,i), solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
+% 					ydiff = stages(:,i);
+% 					obj.falseYDiff(:,i) = ydiff;
+% 					if solver_opts.convergenceFailure == true
+% 						out_opts.failure = true;
+% 						return;
+% 					end
+% 				end
+% 
+% 				if obj.ESDIRK
+% 					if abs(obj.D(1)) > eps
+% 						ynew = ynew + dt * (obj.D(i)) .* stages(:, 1);
+% 					end
+%                 end
+% 
+%                 % % positivity corrections start
+%                 % tol = 1.e-6;
+%                 % 
+%                 % % predicted y stage values
+%                 % y_stage_p = zeros(length(y), length(obj.B));
+%                 % 
+%                 % y_trunc = y_stage_p;
+%                 % 
+%                 % % corrected y stage values
+%                 % y_stage_corr = zeros(length(y), length(obj.B));
+%                 % 
+%                 % for i = 1:length(obj.B)
+%                 %     % predict i-th stage (after Z trasnformation)
+%                 %     y_stage_p(:,i) = stages(:,i) + y;
+%                 % 
+%                 %     %first, truncated versions of the stages are computed
+%                 %     y_trunc(:,i) = max(y_stage_p(:,i), tol);
+%                 % 
+%                 %     %second, averaged system matrix is computed
+%                 %     g_corr_i = zeros(length(y), length(y));
+%                 %     for j = 1:(i-1)
+%                 %         % g_corr_i = g_corr_i + obj.A(i,j) * obj.matrix_func(y_stage_corr(:,j), thc)*diag(ones(150,1)./y_trunc(:,i));
+%                 %         g_corr_i = g_corr_i + obj.A(i,j) * obj.matrix_func(y_stage_corr(:,j), thc)*diag(y_stage_corr(:,j)./y_trunc(:,i));
+%                 %     end
+%                 %     g_corr_i = g_corr_i + obj.A(i, i)* obj.matrix_func(y_trunc(:,i), thc);
+%                 % 
+%                 %     y_stage_corr(:,i) = (eye(length(g_corr_i)) - dt*g_corr_i)\y;
+%                 % end                
+%                 % 
+%                 % %corrected solution for y
+%                 % y_corr = y_stage_corr(:,length(obj.B));
+% 
+%                 % positivity corrections
+%                 %corrections start
+%                 y_stage_p = zeros(length(y), length(obj.B));
+%                 for i = 1:length(obj.B)
+%                     y_stage_p(:,i) = stages(:,i) + y;
+%                 end
+% 
+%                 %predicted final solution for stiffy accurate method
+%                 tol = 1.e-12;
+% 
+%                 %apply positive correction
+% 
+%                 %first, truncate versions of the stages are computed
+%                 y_trunc = y_stage_p;
+%                 for i = 1:length(obj.B)
+%                     y_trunc(:,i) = max(y_stage_p(:,i), tol);
+%                 end
+% 
+%                 %second, averaged system matrix is computed
+%                 y_stage_corr = zeros(length(y), length(obj.B));
+% 
+%                 for i = 1:length(obj.B)
+%                     g_corr_i = zeros(length(y), length(y));
+%                     for j = 1:(i-1)
+%                         g_corr_i = g_corr_i + obj.A(i,j) * obj.matrix_func(y_stage_corr(:,j), thc)*diag(y_stage_corr(:,j)./y_trunc(:,i));
+%                         % g_corr_i = g_corr_i + obj.A(i,j) * obj.matrix_func(y_stage_corr(:,j), thc)*diag(ones(150,1)./y_trunc(:,i));
+%                     end
+%                     g_corr_i = g_corr_i + obj.A(i, i)* obj.matrix_func(y_trunc(:,i), thc);
+% 
+%                     y_stage_corr(:,i) = (eye(length(g_corr_i)) - dt*g_corr_i)\y;
+%                 end
+% 
+%                 %corrected solution for y
+%                 y_corr = y_stage_corr(:,length(obj.B));
+% 
+%                 if ~obj.StifflyAccurate
+% 					esdirkstart = uint32(obj.ESDIRK) + 1;
+% 					for i = esdirkstart:obj.StageNum
+% 						if abs(obj.D(i)) > eps
+% 							ynew = ynew + (obj.D(i)) .* stages(:, i);
+% 						end
+% 					end
+%                 else
+% 					ynew = ynew + stages(:,end);
+%                 end
+% 
+%                 obj.y_temp = ynew;
+%                 ynew=y_corr;
+% 
+% 			else
+% 				obj.falseYDiff = zeros(length(y),obj.StageNum);
+% 				ydiff = zeros(length(y),1);
+% 				if obj.ESDIRK
+% 					fd0 = stages(:,1);
+% 				else
+% 					fd0 = [];
+% 				end
+% 
+% 				for i = obj.FsalStart:obj.StageNum
+%                 	g_const = zeros(length(y),1);
+%                 	for j = 1:i-1
+% 						if obj.A(i,j) ~= 0
+% 							g_const = g_const + (dt * obj.A(i, j)) .* stages(:, j) ;
+% 						end
+%                 	end
+%                 	thc = t + obj.C(i) .* dt;
+% 
+% 					%Solve Nonlinear System
+% 					[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, thc, dt, y, ydiff, fd0, g_const, 1, dt .* obj.Gamma,  [], stats);
+% 					if solver_opts.convergenceFailure == true
+% 						out_opts.failure = true;
+% 						return;
+% 					end
+% 					ynew = y + ydiff;
+% 					obj.falseYDiff(:,i) = ydiff;
+% 
+% 					stages(:,i) = f.F(thc, ynew);
+% 					fd0 = stages(:,i);
+% 				end
+% 				stats.nFevals = stats.nFevals + obj.StageNum;
+% 
+% 				if ~obj.StifflyAccurate
+% 					ynew = y;
+% 					for i = 1:obj.StageNum
+% 						if obj.B(i) ~= 0
+% 							ynew = ynew + (dt .* obj.B(i)) .* stages(:, i);
+% 						end
+% 					end
+% 				end
+% 
+% 			end
+% 
+% 			out_opts.failure = false;
+% 
+% 		end
+% 
+% 
+%         function [err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats)
+%             yerror = 0;
+% 			if obj.Z_Transformation
+% 				if obj.ESDIRK
+% 					if abs(obj.ET(1)) > eps
+% 						yerror = dt*(obj.ET(1)) .* stages(:, 1);
+% 					end
+% 				end
+% 				esdirkstart = uint32(obj.ESDIRK) + 1;
+% 				for i = esdirkstart:obj.StageNum
+% 					if abs(obj.ET(i)) > eps
+% 						yerror = yerror +  (obj.ET(i)) .* stages(:, i);
+% 					end
+% 				end
+% 
+% 			else
+% 				% for i = 1:obj.StageNum
+% 				% 	if abs(obj.E(i)) > eps
+% 				% 		yerror = yerror +  (dt .*  obj.E(i)) .* stages(:, i);
+% 				% 	end
+% 				% end
+% 
+% 				if obj.ESDIRK
+% 					if abs(obj.ET(1)) > eps
+% 						yerror = dt*(obj.ET(1)) .* stages(:, 1);
+% 					end
+% 				end
+% 				esdirkstart = uint32(obj.ESDIRK) + 1;
+% 
+% 				for i = esdirkstart:obj.StageNum
+% 					if abs(obj.ET(i)) > eps
+% 						yerror = yerror + (obj.ET(i)) .* obj.falseYDiff(:, i);
+% 					end
+% 				end
+% 				% [stats] = obj.NonLinearSolver.LinearSolver.computeMass(f, t + dt, ynew, stats);
+% 				% yerror = (obj.NonLinearSolver.LinearSolver.mass * yerror);
+% 				% [yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats);
+% 			end
+% 
+%             err = ErrNorm.errEstimate(y, obj.y_temp, yerror);
+%             % err = ErrNorm.errEstimate(y, ynew, yerror);
+% 			out_opts.failure = false;
+%         end
+%     end
+% 
+% end
