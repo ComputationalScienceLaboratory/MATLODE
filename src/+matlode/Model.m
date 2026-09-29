@@ -3,35 +3,35 @@ classdef Model < handle
 	%Will contain all properties that are associated with the model such as
 	%F,Jacobian, Mass Matrix, etc..
 	%All time Integration methods are passed this object
-	
+
 	properties
 		F
 		AddPartitionNum
 		ComponentPartitionNum
 
 		Jacobian
-        JacobianVectorProduct
+		JacobianVectorProduct
 		JacobianAdjointVectorProduct
-        JPattern
-        Vectorized
+		JPattern
+		Vectorized
 
-        Mass
+		Mass
 		MVectorProduct
 
 		%For complatency with MATLAB standard. May have DAEModel instead
-        MassSingular
-        MStateDependence
-        MvPattern
+		MassSingular
+		MStateDependence
+		MvPattern
 
 		PartialDerivativeTime
 
 		PartialDerivativeParameters
-		
+
 		%FIXME: Not Supported
 		Events
 		OnEvent
 
-        NonNegative
+		NonNegative
 	end
 
 	properties(GetAccess = protected, Constant)
@@ -43,37 +43,37 @@ classdef Model < handle
 			'PartialDerivativeTime' ,'PartialDerivativeParameters', ...
 			'OnEvent', 'NonNegative'}
 	end
-	
+
 	methods
 		function obj = Model(f,varargin)
-	
+
 			%Handle varargin
-    		p = inputParser;
-    		p.KeepUnmatched = true;
+			p = inputParser;
+			p.KeepUnmatched = true;
 
 			%Handle what f could be
 			if isa(f, 'function_handle') || (isa(f, 'cell') && cellfun(@(x) isa(x, 'function_handle'), f))
 				%% Create new model based of f
 				obj.F = f;
-	
+
 				p.addParameter('Jacobian', []);
 				p.addParameter('JPattern', []);
 				p.addParameter('JacobianVectorProduct', []);
 				p.addParameter('Vectorized', []);
-	
+
 				p.addParameter('Mass', []);
 				p.addParameter('MassSingular', false);
 				p.addParameter('MStateDependence', false);
 				p.addParameter('MvPattern', []);
-	
+
 				p.addParameter('PartialDerivativeTime', []);
-	
+
 				p.addParameter('PartialDerivativeParameters', []);
-	
-	
+
+
 				p.addParameter('Events', []);
 				p.addParameter('OnEvent', []);
-	
+
 				p.addParameter('NonNegative', []);
 			elseif isa(f, 'otp.RHS')
 				%% OTP RHS Parsing
@@ -85,7 +85,7 @@ classdef Model < handle
 
 			elseif isa(f, 'matlode.Model')
 				%% Model Copying
-				
+
 				obj = modelCopy(obj, f);
 
 				props = properties(obj);
@@ -95,12 +95,12 @@ classdef Model < handle
 				end
 			end
 
-    		%Handles the varargin
+			%Handles the varargin
 			%Will overwrite model with new parameters
-    		p.parse(varargin{:});
+			p.parse(varargin{:});
 
 			parms = p.Results;
-	
+
 			fields = fieldnames(parms);
 			props = properties(obj);
 			for i = 1:length(fields)
@@ -126,7 +126,7 @@ classdef Model < handle
 		function obj = setF(obj, f)
 			obj.F = f;
 		end
-		
+
 		%Take a preexsisting model and copy into a new one
 		function obj = modelCopy(obj, otherModel)
 
@@ -141,7 +141,7 @@ classdef Model < handle
 		function [f, odeopts] = modelToMATLABOdeSets(obj)
 			f = obj.F;
 			odeopts = odeset([]);
-			
+
 			for i = 1:length(obj.MATLABSetVars)
 				odeopts.(obj.MATLABSetVars{i}) = obj.(obj.MATLABSetVars{i});
 			end
@@ -159,7 +159,7 @@ classdef Model < handle
 
 		%Convert  OTP RHS object to Model
 		function obj = otpRHSToModel(obj, rhs)
-			
+
 			for i = 1:length(obj.OTPSetVars)
 				obj.(obj.OTPSetVars{i}) = rhs.(obj.OTPSetVars{i});
 			end

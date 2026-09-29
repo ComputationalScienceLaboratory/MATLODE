@@ -1,14 +1,14 @@
 classdef LUDecomposition < matlode.linearsolver.MatrixLinearSolver
-    
-    methods
+
+	methods
 		function obj = LUDecomposition()
-            obj = obj@matlode.linearsolver.MatrixLinearSolver(@mldivide, {});
-        end
-        
-        function [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats)
-            
-            [stats] = preprocess@matlode.linearsolver.MatrixLinearSolver(obj, f, t, y, reeval, mass_scale, jac_scale, stats);
-            
+			obj = obj@matlode.linearsolver.MatrixLinearSolver(@mldivide, {});
+		end
+
+		function [stats] = preprocess(obj, f, t, y, reeval, mass_scale, jac_scale, stats)
+
+			[stats] = preprocess@matlode.linearsolver.MatrixLinearSolver(obj, f, t, y, reeval, mass_scale, jac_scale, stats);
+
 			if issparse(obj.system)
 				[L,U,P,Q,D] = lu(obj.system);
 				obj.system = @(x) Q*(U\(L\(P*(D \ x))));
@@ -16,8 +16,8 @@ classdef LUDecomposition < matlode.linearsolver.MatrixLinearSolver
 				[L,U,P] = lu(obj.system);
 				obj.system = @(x) U\(L\(P*x));
 			end
-            
-            stats.nDecompositions = stats.nDecompositions + 1;
+
+			stats.nDecompositions = stats.nDecompositions + 1;
 		end
 
 		function [stats] = computeMass(obj, f, t, y, stats)
@@ -25,10 +25,10 @@ classdef LUDecomposition < matlode.linearsolver.MatrixLinearSolver
 		end
 
 		function [sol, stats] = solve(obj, x, stats)
-            sol = obj.system(x);
-            
-            stats.nLinearSolves = stats.nLinearSolves + 1;
-        end
-    end
+			sol = obj.system(x);
+
+			stats.nLinearSolves = stats.nLinearSolves + 1;
+		end
+	end
 end
 
