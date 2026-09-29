@@ -5,3 +5,4 @@
 *.mltbx
 octave-workspace
 
+.vscode/

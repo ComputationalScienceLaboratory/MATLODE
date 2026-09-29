@@ -5,15 +5,15 @@ classdef AdaptiveChord < matlode.nonlinearsolver.NonlinearSolver
 	properties(Access = protected)
 		t0_pre
 	end
-	
+
 	methods
 		function obj = AdaptiveChord(linsolve, args)
 			arguments
 				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.MatrixLinearSolver();
 				args(1,:) cell = {};
 			end
-            
-            obj = obj@matlode.nonlinearsolver.NonlinearSolver(linsolve, args{:});
+
+			obj = obj@matlode.nonlinearsolver.NonlinearSolver(linsolve, args{:});
 		end
 
 
@@ -25,9 +25,9 @@ classdef AdaptiveChord < matlode.nonlinearsolver.NonlinearSolver
 			obj.t0_pre = t0;
 			out_opts = [];
 		end
-		
+
 		function [xn, out_opts, stats] = solve(obj, f, t, dt, y0, x0, fn0, sys_const, mass_scale, jac_scale,  ~, stats)
-			%Solve the nonlinear equation 0 = -M(t)z + const + a * f(t, y_0 + z) 
+			%Solve the nonlinear equation 0 = -M(t)z + const + a * f(t, y_0 + z)
 			xn = x0;
 			i = 0;
 			y1 = y0 + x0;
@@ -67,14 +67,14 @@ classdef AdaptiveChord < matlode.nonlinearsolver.NonlinearSolver
 						end
 					else
 						out_opts.convergenceFailure = true;
-                    	break;
+						break;
 					end
 				end
 
-                i = i + 1;
-                
+				i = i + 1;
+
 				if nuRate * deltaZ < obj.Tolerance
-                    break;
+					break;
 				end
 
 				deltaZold = deltaZ;
@@ -90,7 +90,7 @@ classdef AdaptiveChord < matlode.nonlinearsolver.NonlinearSolver
 	end
 
 	methods (Access=private)
-		
+
 	end
 end
 

@@ -4,15 +4,15 @@ classdef Newton < matlode.nonlinearsolver.NonlinearSolver
 		q0
 		t0_pre
 	end
-	
+
 	methods
 		function obj = Newton(linsolve, args)
 			arguments
 				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.MatrixLinearSolver();
 				args(1,:) cell = {};
 			end
-            
-            obj = obj@matlode.nonlinearsolver.NonlinearSolver(linsolve, args{:});
+
+			obj = obj@matlode.nonlinearsolver.NonlinearSolver(linsolve, args{:});
 		end
 
 		function [out_opts, stats] = preprocess(obj, f, t0, y0, mass_scale, jac_scale, optin, stats)
@@ -29,7 +29,7 @@ classdef Newton < matlode.nonlinearsolver.NonlinearSolver
 
 
 		function [xn, out_opts, stats] = solve(obj, f, t, dt, y0, x0, fn0, sys_const, mass_scale, jac_scale,  ~, stats)
-			%Solve the nonlinear equation 0 = -M(t)z + -M(t)*y0 + q0 + const + a * f(t, y_0 + z) 
+			%Solve the nonlinear equation 0 = -M(t)z + -M(t)*y0 + q0 + const + a * f(t, y_0 + z)
 			xn = x0;
 			i = 0;
 			y1 = y0 + x0;
@@ -46,7 +46,7 @@ classdef Newton < matlode.nonlinearsolver.NonlinearSolver
 				[w_i, stats] = obj.LinearSolver.solve(-b, stats);
 
 				xn = w_i + x0;
-				
+
 				i = i + 1;
 
 				if norm(w_i) < obj.Tolerance

@@ -1,37 +1,37 @@
 classdef Rosenbrock < matlode.OneStepIntegrator
-    %ROSENBROCK Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (Constant)
-        PartitionMethod = false;
+	%ROSENBROCK Summary of this class goes here
+	%   Detailed explanation goes here
+
+	properties (Constant)
+		PartitionMethod = false;
 		PartitionNum = 1;
 		MultirateMethod = false;
-    end
-    
-    properties (SetAccess = private)
-		GammaDia
-        GammaSum
-        A
-        AlphaSum
-        C
-        M
-        E
-        Order
-        StageNum
-        EmbeddedOrder
-        FSAL
-    end
+	end
 
-    properties (SetAccess = immutable, GetAccess = private)
-        FsalStart
+	properties (SetAccess = private)
+		GammaDia
+		GammaSum
+		A
+		AlphaSum
+		C
+		M
+		E
+		Order
+		StageNum
+		EmbeddedOrder
+		FSAL
+	end
+
+	properties (SetAccess = immutable, GetAccess = private)
+		FsalStart
 	end
 
 	properties (SetAccess = protected)
-        DenseOut
+		DenseOut
 	end
-    
-    properties 
-        LinearSolver
+
+	properties
+		LinearSolver
 	end
 
 	methods (Static)
@@ -85,16 +85,16 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 			else
 				be = me * gamma;
 			end
-			
+
 
 		end
 	end
-    
-    methods
 
-        function obj = Rosenbrock(gammadia, gammasum, alphasum, a, c, m, e, order, embeddedOrder)
-            
-            obj = obj@matlode.OneStepIntegrator(~isempty(e), class(gammadia));
+	methods
+
+		function obj = Rosenbrock(gammadia, gammasum, alphasum, a, c, m, e, order, embeddedOrder)
+
+			obj = obj@matlode.OneStepIntegrator(~isempty(e), class(gammadia));
 
 			obj.GammaDia = gammadia;
 			obj.GammaSum = gammasum;
@@ -104,60 +104,60 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 			obj.C = c;
 			obj.M = m;
 			obj.E = e;
-            
-            obj.EmbeddedOrder = embeddedOrder;
-            obj.Order = order;
-            obj.StageNum = size(obj.M, 2);
-            obj.FSAL = all(obj.A(end, :) == obj.M) && all(obj.A(1, :) == 0) && all(obj.C(1, :) == 0) && obj.AlphaSum(1) == 0;
-            obj.FsalStart = uint32(obj.FSAL) + 1;
-            obj.DenseOut = matlode.denseoutput.Linear(obj.M);
+
+			obj.EmbeddedOrder = embeddedOrder;
+			obj.Order = order;
+			obj.StageNum = size(obj.M, 2);
+			obj.FSAL = all(obj.A(end, :) == obj.M) && all(obj.A(1, :) == 0) && all(obj.C(1, :) == 0) && obj.AlphaSum(1) == 0;
+			obj.FsalStart = uint32(obj.FSAL) + 1;
+			obj.DenseOut = matlode.denseoutput.Linear(obj.M);
 		end
-        
+
 	end
-    
-    methods (Access = protected)
-        function opts = matlodeSets(obj, p, varargin)
-            
-            %Rosenbrock sepcific options
-            p.addParameter('LinearSolver', matlode.linearsolver.MatrixLinearSolver());
-            
-            opts = matlodeSets@matlode.OneStepIntegrator(obj, p, varargin{:});
-            
-            if isempty(opts.LinearSolver)
-                error('Please provide appropiate parameters and a linear solver')
-            end
-            obj.LinearSolver = opts.LinearSolver;
-            
-        end
-        
+
+	methods (Access = protected)
+		function opts = matlodeSets(obj, p, varargin)
+
+			%Rosenbrock sepcific options
+			p.addParameter('LinearSolver', matlode.linearsolver.MatrixLinearSolver());
+
+			opts = matlodeSets@matlode.OneStepIntegrator(obj, p, varargin{:});
+
+			if isempty(opts.LinearSolver)
+				error('Please provide appropiate parameters and a linear solver')
+			end
+			obj.LinearSolver = opts.LinearSolver;
+
+		end
+
 		%% Time step
 		function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
-            
-            if obj.FSAL && prevAccept
-                stages(:, 1) = stages(:, end);
-            end
-            
+
+			if obj.FSAL && prevAccept
+				stages(:, 1) = stages(:, end);
+			end
+
 			%Check if time derivative is avalible
 			if ~isempty(f.PartialDerivativeTime)
-            	dfdt_0 = f.PartialDerivativeTime(t, y);
+				dfdt_0 = f.PartialDerivativeTime(t, y);
 				stats.nPDTEval = stats.nPDTEval + 1;
 			end
-            
-            for i = obj.FsalStart:obj.StageNum
-                ynew = y;
-                for j = 1:(i-1)
-                    if obj.A(i,j) ~= 0
-                        ynew = ynew + obj.A(i,j) * stages(:,j);
-                    end
-                end
 
-                ynew = f.F(t + obj.AlphaSum(i) * dt, ynew);
+			for i = obj.FsalStart:obj.StageNum
+				ynew = y;
+				for j = 1:(i-1)
+					if obj.A(i,j) ~= 0
+						ynew = ynew + obj.A(i,j) * stages(:,j);
+					end
+				end
 
-                for j = 1:(i-1)
-                    if obj.C(i,j) ~= 0
-                        ynew = ynew + obj.LinearSolver.mass * (obj.C(i,j) / dt) * stages(:,j);
-                    end
-                end
+				ynew = f.F(t + obj.AlphaSum(i) * dt, ynew);
+
+				for j = 1:(i-1)
+					if obj.C(i,j) ~= 0
+						ynew = ynew + obj.LinearSolver.mass * (obj.C(i,j) / dt) * stages(:,j);
+					end
+				end
 
 
 				if ~isempty(f.PartialDerivativeTime) && obj.GammaSum(i) ~= 0
@@ -169,51 +169,51 @@ classdef Rosenbrock < matlode.OneStepIntegrator
 					stats = obj.LinearSolver.preprocess(f, t, y, i==obj.FsalStart, 1/(dt * obj.GammaDia(i)), -1, stats);
 				end
 
-                [stages(:, i), stats] = obj.LinearSolver.solve(ynew, stats);
-            end
+				[stages(:, i), stats] = obj.LinearSolver.solve(ynew, stats);
+			end
 
-            ynew = y;
-            for i = 1:obj.StageNum
-                if obj.M(i) ~= 0
-                    ynew = ynew + obj.M(i) * stages(:,i);
-                end
-            end
-            
-            stats.nFevals = stats.nFevals + obj.StageNum - uint16(prevAccept);
+			ynew = y;
+			for i = 1:obj.StageNum
+				if obj.M(i) ~= 0
+					ynew = ynew + obj.M(i) * stages(:,i);
+				end
+			end
+
+			stats.nFevals = stats.nFevals + obj.StageNum - uint16(prevAccept);
 			out_opts.failure = false;
-        end
-        
+		end
+
 		%% Error Estimate
 		function [err, stats, out_opts] = timeStepErr(obj, ~, ~, y, ynew, ~, stages, ErrNorm, stats)
 
-            y_error = 0;
-            for i = 1:obj.StageNum
-                if obj.E(i) ~= 0
-                    y_error = y_error + obj.E(i) * stages(:,i);
-                end
-            end
-            
-            err = ErrNorm.errEstimate(y, ynew, y_error);
+			y_error = 0;
+			for i = 1:obj.StageNum
+				if obj.E(i) ~= 0
+					y_error = y_error + obj.E(i) * stages(:,i);
+				end
+			end
+
+			err = ErrNorm.errEstimate(y, ynew, y_error);
 			out_opts.failure = false;
-        end
-        
-        function [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
-           stages = zeros(length(y0), obj.StageNum);
-            
-            if obj.FSAL
-                if isempty(f0)
-                    stages(:, end) = f.F(t0, y0);
-                    stats.FEvals = stats.FEvals + 1;
-                else
-                    stages(:, end) = f0;
-                end
-            end
-            
-        end
-        
-        function [q] = timeLoopInit(obj)
-            q = min(obj.Order, obj.EmbeddedOrder);
-        end
-    end
+		end
+
+		function [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
+			stages = zeros(length(y0), obj.StageNum);
+
+			if obj.FSAL
+				if isempty(f0)
+					stages(:, end) = f.F(t0, y0);
+					stats.FEvals = stats.FEvals + 1;
+				else
+					stages(:, end) = f0;
+				end
+			end
+
+		end
+
+		function [q] = timeLoopInit(obj)
+			q = min(obj.Order, obj.EmbeddedOrder);
+		end
+	end
 end
 
