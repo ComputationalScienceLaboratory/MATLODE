@@ -8,4 +8,14 @@ classdef BDF < matlode.Integrator
 			obj = obj@matlode.Integrator(true, datatype)
 		end
 	end
+
+	methods (Access = protected)
+		function opts = matlodeSets(obj, p, varargin)
+
+			%BDF Specific options
+
+			opts = matlodeSets@matlode.Integrator(obj, p, varargin{:});
+
+		end
+	end
 end
