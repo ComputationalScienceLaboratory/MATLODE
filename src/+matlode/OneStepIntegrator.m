@@ -1,6 +1,11 @@
 classdef (Abstract) OneStepIntegrator < matlode.Integrator
 	%One Step Integrator template
 
+	methods (Abstract, Access = protected)
+		[ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats);
+		[err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats);
+	end
+
 	methods (Access = protected)
 		function obj = OneStepIntegrator(varargin)
 			obj = obj@matlode.Integrator(varargin{:});
