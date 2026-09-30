@@ -1,11 +1,26 @@
 classdef BDF < matlode.Integrator
+	properties (Constant)
+		PartitionMethod = false;
+		PartitionNum = 1;
+		MultirateMethod = false;
+	end
+
+	properties (SetAccess = protected)
+		Pascal
+
+		MaxOrder
+	end
+
 	methods
 		function obj = BDF(datatype)
 			arguments
 				datatype(1,1) string = 'double';
 			end
 
-			obj = obj@matlode.Integrator(true, datatype)
+			obj = obj@matlode.Integrator(true, datatype);
+
+			obj.MaxOrder = 5;
+			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 		end
 	end
 
@@ -16,6 +31,9 @@ classdef BDF < matlode.Integrator
 
 			opts = matlodeSets@matlode.Integrator(obj, p, varargin{:});
 
+		end
+
+		function [t, y, stats] = timeLoop(obj, f, tspan, y0, opts)
 		end
 
 		function [t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts)
@@ -69,6 +87,11 @@ classdef BDF < matlode.Integrator
 			% p + 1, where p is max order
 			stages = zeros(length(y0), 5 + 1);
 
+		end
+
+		function [q] = timeLoopInit(obj)
+
+			q = obj.MaxOrder;
 		end
 
 		function stats = intalizeStats(obj)
