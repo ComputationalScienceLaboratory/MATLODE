@@ -42,6 +42,8 @@ classdef BDF < matlode.Integrator
 					obj.Pascal(i, j) = obj.Pascal(i - 1, j) + obj.Pascal(i - 1, j - 1);
 				end
 			end
+
+			obj.Pascal
 		end
 	end
 
@@ -130,7 +132,6 @@ classdef BDF < matlode.Integrator
 
 			l = obj.L(order, :);
 
-			% TODO - it was dt .* l(1) here. Why .*?
 			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt * l(1), [], stats);
 
 			% TODO - using nordsieck(:, 1) as initial guess. Maybe try applying fixed point iteration first? Analyze the cost of doing so.
