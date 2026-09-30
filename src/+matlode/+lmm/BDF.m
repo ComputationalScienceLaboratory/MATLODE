@@ -21,6 +21,13 @@ classdef BDF < matlode.Integrator
 
 			obj.MaxOrder = 5;
 			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
+
+			for j = 1:obj.MaxOrder + 1
+				obj.Pascal(1, j) = 1;
+				for i = 2:j
+					obj.Pascal(i, j) = obj.Pascal(i, j - 1) + obj.Pascal(i - 1, j - 1);
+				end
+			end
 		end
 	end
 
@@ -58,15 +65,31 @@ classdef BDF < matlode.Integrator
 			stats.nSteps = length(tspan);
 
 
-			[stages, stats] = obj.timeLoopBeforeLoop(f, [], tspan(1), y0, stats);
+			[nordsieck, stats] = obj.timeLoopBeforeLoop(f, [], tspan(1), y0, stats);
 
 			%Time Loop
 			for i = 1:(length(tspan)-1)
 				yi = ynext;
 				tcur = tspan(i);
-				dtc = tspan(i+1) - tspan(i);
+				dtnext = tspan(i+1) - tspan(i);
 
-				[ynext, stages, stats] = obj.timeStep(f, tcur, yi, dtc, stages, true, stats);
+				if i > 1
+					omega = dtnext / dtc;
+				else
+					omega = 1;
+				end
+
+				if abs(omega - 1) > 1e-14
+					error("BDF currently only works for fixed step integration")
+				end
+
+				dtc = dtnext;
+
+				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, stats);
+
+				% TODO - Omega matrix. Because of check above we know omega is always approximately 1, so Omega must be identity.
+				% So we can skip multiplying here. To get rid of the check above and allow variable time steps, we must add Omega matrix multiplication
+				% of Nordsieck vector.
 
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
@@ -78,14 +101,13 @@ classdef BDF < matlode.Integrator
 			t(end) = tspan(:, end);
 		end
 
-		function [ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats)
+		function [ynew, nordsieck, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, stats)
 
 		end
 
-		function [stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
+		function [nordsieck, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
 
-			% p + 1, where p is max order
-			stages = zeros(length(y0), 5 + 1);
+			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
 
 		end
 
