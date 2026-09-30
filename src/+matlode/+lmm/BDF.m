@@ -83,9 +83,6 @@ classdef BDF < matlode.Integrator
 			stats = obj.intalizeStats;
 			stats.nSteps = length(tspan);
 
-			% TODO - adaptive order.
-			currentorder = 1;
-
 			% nordsieck vector stored as a multivector, one column for each entry
 			% TODO - reuse this f call in the nonlinear solver
 			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
@@ -110,6 +107,9 @@ classdef BDF < matlode.Integrator
 				end
 
 				dtc = dtnext;
+
+				% Adaptive order strategy for fixed step - increase order every step until we hit max order
+				currentorder = min(i, obj.MaxOrder);
 
 				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentorder, stats);
 
