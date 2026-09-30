@@ -5,9 +5,14 @@ classdef BDF < matlode.Integrator
 		MultirateMethod = false;
 	end
 
+	properties
+		NonLinearSolver
+	end
+
 	properties (SetAccess = protected)
 		Pascal
 
+		L % The matrix of methods coefficients. Each row is a different order method
 		MaxOrder
 	end
 
@@ -21,6 +26,13 @@ classdef BDF < matlode.Integrator
 
 			obj.MaxOrder = 5;
 			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
+			obj.L = [...
+				[1  , 1  , 0  , 0 , 0 , 0] / 1;...
+				[2  , 3  , 1  , 0 , 0 , 0] / 3;...
+				[6  , 11 , 6  , 1 , 0 , 0] / 11;...
+				[24 , 50 , 35 , 10, 1 , 0] / 50;...
+				[120, 274, 225, 85, 15, 1] / 274;...
+				];
 
 			% Note that the pascal matrix constructed here is transposed from the text.
 			% This is due to how we apply it to the nordsieck vector as a multivector
@@ -37,9 +49,14 @@ classdef BDF < matlode.Integrator
 		function opts = matlodeSets(obj, p, varargin)
 
 			%BDF Specific options
+			p.addParameter('NonLinearSolver', matlode.nonlinearsolver.Chord());
 
 			opts = matlodeSets@matlode.Integrator(obj, p, varargin{:});
 
+			if isempty(opts.NonLinearSolver)
+				error('Please provide appropiate parameters and a non-linear solver')
+			end
+			obj.NonLinearSolver = opts.NonLinearSolver;
 		end
 
 		function [t, y, stats] = timeLoop(obj, f, tspan, y0, opts)
@@ -94,7 +111,7 @@ classdef BDF < matlode.Integrator
 
 				dtc = dtnext;
 
-				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, stats);
+				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentorder, stats);
 
 				% TODO - Omega matrix. Because of check above we know omega is always approximately 1, so Omega must be identity.
 				% So we can skip multiplying here. To get rid of the check above and allow variable time steps, we must add Omega matrix multiplication
@@ -110,13 +127,36 @@ classdef BDF < matlode.Integrator
 			t(end) = tspan(:, end);
 		end
 
-		function [ynew, nordsieck, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, stats)
+		function [ynew, nordsieck, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, order, stats)
 
 			% Predictor step - propagate nordsieck vector forward in time.
 			% Since nordsieck vector is a multivector, this is normal matrix multiplication from the left
 			nordsieck = nordsieck * obj.Pascal;
 
+			l = obj.L(order, :);
 
+			% TODO - it was dt .* l(1) here. Why .*?
+			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt * l(1), [], stats);
+
+			% TODO - using nordsieck(:, 1) as initial guess. Maybe try applying fixed point iteration first? Analyze the cost of doing so.
+			% TODO - no clue what x0 is. DIRK passes in a zero vector with same size as y for the first stage.
+			% TODO - fn0 is passed in as [] in DIRK, only not if it's already precomputed in ESDIRK. Maybe can re-use this for fixed point iteration.
+			x0 = zeros(size(y));
+			sys_const = -l(1) * nordsieck(:, 2);
+			[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, t + dt, dt, nordsieck(:, 1), x0, [], sys_const, 1, dt * l(1), [], stats);
+			ynew = nordsieck(:, 1) + ydiff;
+
+			nordsieck(:, 1) = ynew;
+
+			fnew = f.F(t + dt, ynew);
+			stats.nFevals = stats.nFevals + 1;
+
+			nordsieck(:, 2:end) = nordsieck(:, 2:end) + (dt * fnew - nordsieck(:, 2)) * l(2:end);
+
+			if solver_opts.convergenceFailure == true
+				out_opts.failure = true;
+				return;
+			end
 		end
 
 		function stats = intalizeStats(obj)
