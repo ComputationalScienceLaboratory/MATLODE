@@ -134,7 +134,7 @@ classdef BDF < matlode.Integrator
 			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt * l(1), [], stats);
 
 			% TODO - using nordsieck(:, 1) as initial guess. Maybe try applying fixed point iteration first? Analyze the cost of doing so.
-			% TODO - no clue what x0 is. DIRK passes in a zero vector with same size as y for the first stage.
+			% y0 must be nordsieck(:, 1), so any adjustment to the initial guess must be through x0, which is added to y0.
 			% TODO - fn0 is passed in as [] in DIRK, only not if it's already precomputed in ESDIRK. Maybe can re-use this for fixed point iteration.
 			x0 = zeros(size(y));
 			sys_const = -l(1) * nordsieck(:, 2);
