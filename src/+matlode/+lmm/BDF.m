@@ -131,7 +131,7 @@ classdef BDF < matlode.Integrator
 
 			% Predictor step - propagate nordsieck vector forward in time.
 			% Since nordsieck vector is a multivector, this is normal matrix multiplication from the left
-			nordsieck = nordsieck * obj.Pascal;
+			nordsieck(:, 1:order + 1) = nordsieck(:, 1:order + 1) * obj.Pascal(1:order + 1, 1:order + 1);
 
 			l = obj.L(order, :);
 
@@ -151,7 +151,7 @@ classdef BDF < matlode.Integrator
 			fnew = f.F(t + dt, ynew);
 			stats.nFevals = stats.nFevals + 1;
 
-			nordsieck(:, 2:end) = nordsieck(:, 2:end) + (dt * fnew - nordsieck(:, 2)) * l(2:end);
+			nordsieck(:, 2:order+1) = nordsieck(:, 2:order+1) + (dt * fnew - nordsieck(:, 2)) * l(2:order+1);
 
 			if solver_opts.convergenceFailure == true
 				out_opts.failure = true;
