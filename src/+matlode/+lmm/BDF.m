@@ -22,10 +22,12 @@ classdef BDF < matlode.Integrator
 			obj.MaxOrder = 5;
 			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 
-			for j = 1:obj.MaxOrder + 1
-				obj.Pascal(1, j) = 1;
-				for i = 2:j
-					obj.Pascal(i, j) = obj.Pascal(i, j - 1) + obj.Pascal(i - 1, j - 1);
+			% Note that the pascal matrix constructed here is transposed from the text.
+			% This is due to how we apply it to the nordsieck vector as a multivector
+			for i = 1:obj.MaxOrder + 1
+				obj.Pascal(i, 1) = 1;
+				for j = 2:i
+					obj.Pascal(i, j) = obj.Pascal(i - 1, j) + obj.Pascal(i - 1, j - 1);
 				end
 			end
 		end
@@ -103,10 +105,16 @@ classdef BDF < matlode.Integrator
 
 		function [ynew, nordsieck, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, stats)
 
+			% Predictor step - propagate nordsieck vector forward in time.
+			% Since nordsieck vector is a multivector, this is normal matrix multiplication from the left
+			nordsieck = nordsieck * obj.Pascal;
+
+
 		end
 
 		function [nordsieck, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
 
+			% nordsieck vector stored as a multivector, one column for each entry
 			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
 
 		end
