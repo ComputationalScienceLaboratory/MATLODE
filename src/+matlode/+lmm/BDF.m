@@ -42,8 +42,6 @@ classdef BDF < matlode.Integrator
 					obj.Pascal(i, j) = obj.Pascal(i - 1, j) + obj.Pascal(i - 1, j - 1);
 				end
 			end
-
-			obj.Pascal
 		end
 	end
 
