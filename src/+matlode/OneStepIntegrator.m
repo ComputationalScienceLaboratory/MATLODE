@@ -4,6 +4,8 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 	methods (Abstract, Access = protected)
 		[ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats);
 		[err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats);
+		[stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats);
+		[q] = timeLoopInit(obj);
 	end
 
 	methods (Access = protected)

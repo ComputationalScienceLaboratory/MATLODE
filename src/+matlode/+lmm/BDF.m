@@ -66,8 +66,15 @@ classdef BDF < matlode.Integrator
 			stats = obj.intalizeStats;
 			stats.nSteps = length(tspan);
 
+			% TODO - adaptive order.
+			currentorder = 1;
 
-			[nordsieck, stats] = obj.timeLoopBeforeLoop(f, [], tspan(1), y0, stats);
+			% nordsieck vector stored as a multivector, one column for each entry
+			% TODO - reuse this f call in the nonlinear solver
+			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
+			nordsieck(:, 1) = y0;
+			nordsieck(:, 2) = (tspan(2) - tspan(1)) * f.F(tspan(1), y0);
+			stats.nFevals = 1;
 
 			%Time Loop
 			for i = 1:(length(tspan)-1)
@@ -81,7 +88,7 @@ classdef BDF < matlode.Integrator
 					omega = 1;
 				end
 
-				if abs(omega - 1) > 1e-14
+				if abs(omega - 1) > 1e-12
 					error("BDF currently only works for fixed step integration")
 				end
 
@@ -110,18 +117,6 @@ classdef BDF < matlode.Integrator
 			nordsieck = nordsieck * obj.Pascal;
 
 
-		end
-
-		function [nordsieck, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats)
-
-			% nordsieck vector stored as a multivector, one column for each entry
-			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
-
-		end
-
-		function [q] = timeLoopInit(obj)
-
-			q = obj.MaxOrder;
 		end
 
 		function stats = intalizeStats(obj)

@@ -16,8 +16,6 @@ classdef (Abstract) Integrator < handle
 	methods (Abstract, Access = protected)
 		[t, y, stats] = timeLoop(obj, f, tspan, y0, opts);
 		[t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts);
-		[stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats);
-		[q] = timeLoopInit(obj);
 	end
 
 	methods
