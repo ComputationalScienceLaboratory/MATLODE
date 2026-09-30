@@ -102,20 +102,15 @@ classdef BDF < matlode.Integrator
 					omega = 1;
 				end
 
-				if abs(omega - 1) > 1e-12
-					error("BDF currently only works for fixed step integration")
-				end
-
 				dtc = dtnext;
 
 				% Adaptive order strategy for fixed step - increase order every step until we hit max order
 				currentorder = min(i, obj.MaxOrder);
 
-				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentorder, stats);
+				Omega = sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
+				nordsieck = nordsieck * Omega;
 
-				% TODO - Omega matrix. Because of check above we know omega is always approximately 1, so Omega must be identity.
-				% So we can skip multiplying here. To get rid of the check above and allow variable time steps, we must add Omega matrix multiplication
-				% of Nordsieck vector.
+				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentorder, stats);
 
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;

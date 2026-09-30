@@ -14,6 +14,8 @@ options.Jacobian = test_problem.jac;
 
 t_f = 1;
 
-sol = integrator.integrateFixed(@(t,y) test_problem.f(t,y), linspace(test_problem.t_0, t_f, 101), test_problem.y_0, options);
+tspan = (2.^linspace(0, 1, 401) - 1) * t_f + test_problem.t_0;
+
+sol = integrator.integrateFixed(@(t,y) test_problem.f(t,y), tspan, test_problem.y_0, options);
 
 norm(sol.y(end) - test_problem.y_exact(t_f))
