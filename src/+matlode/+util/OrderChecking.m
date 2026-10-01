@@ -16,9 +16,11 @@ classdef OrderChecking < handle
 			error = zeros(1,length(stepamount));
 			statsCumlative = cell(1, length(stepamount));
 
+			% (roughly) Number of orders of magnitude difference between the first step size and final step size
+			base = 1e3;
 
-			for i = 1:length(error)
-				steps = t0:((tf - t0) / stepamount(i)):tf;
+			for i = 1:length(error)				
+				steps = (base .^ (linspace(0, 1, stepamount(i) + 1)) - 1) / (base - 1) * (tf - t0) + t0;
 				sol = obj.Integrator.integrateFixed(model, steps, y0, opts);
 				statsCumlative{i} = sol.stats;
 				error(i) = norm(sol.y(end) - ytrue) / norm(ytrue);
