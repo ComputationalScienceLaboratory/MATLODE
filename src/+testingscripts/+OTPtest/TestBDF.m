@@ -10,9 +10,11 @@ options.ErrNorm = matlode.errnorm.InfNorm(1e-6, 1e-6);
 options.StepSizeController = matlode.stepsizecontroller.StandardController;
 options.Jacobian = problem.RHS.Jacobian(problem.TimeSpan(1),problem.Y0);
 
-tspan = (2.^linspace(0, 1, 201) - 1) * problem.TimeSpan(end) + problem.TimeSpan(1);
+base = 1e3;
+tspan = (base .^ (linspace(0, 1, 200 + 1)) - 1) / (base - 1) * (problem.TimeSpan(end) - problem.TimeSpan(1)) + problem.TimeSpan(1);
 
 sol = integrator.integrateFixed(problem.RHS, tspan, problem.Y0, options);
+sol.stats
 
 sol_matlab = problem.solve('RelTol', 1e-8, 'AbsTol', 1e-8);
 
