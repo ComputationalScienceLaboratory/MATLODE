@@ -10,10 +10,10 @@ classdef BDF < matlode.Integrator
 	end
 
 	properties (SetAccess = protected)
-		Pascal
+		Pascal   % Pascal matrix needed for the predictor step. Same for all methods, should only vary in size based on MaxOrder.
 
-		L % The matrix of methods coefficients. Each row is a different order method
-		MaxOrder
+		L        % The matrix of methods coefficients. Each row is a different order method, so there should be a number of rows equal to MaxOrder
+		MaxOrder % The maximum feasible order attainable by the method. Determines the size of the nordsieck vector.
 	end
 
 	methods
@@ -24,8 +24,8 @@ classdef BDF < matlode.Integrator
 
 			obj = obj@matlode.Integrator(true, datatype);
 
+			% In the future, these will be set by the individual method
 			obj.MaxOrder = 5;
-			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 			obj.L = [...
 				[1  , 1  , 0  , 0 , 0 , 0] / 1;...
 				[2  , 3  , 1  , 0 , 0 , 0] / 3;...
@@ -34,6 +34,7 @@ classdef BDF < matlode.Integrator
 				[120, 274, 225, 85, 15, 1] / 274;...
 				];
 
+			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 			% Note that the pascal matrix constructed here is transposed from the text.
 			% This is due to how we apply it to the nordsieck vector as a multivector
 			for i = 1:obj.MaxOrder + 1
@@ -50,6 +51,8 @@ classdef BDF < matlode.Integrator
 
 			%BDF Specific options
 			p.addParameter('NonLinearSolver', matlode.nonlinearsolver.Chord());
+
+			% TODO - add option for startup procedure
 
 			opts = matlodeSets@matlode.Integrator(obj, p, varargin{:});
 
@@ -85,10 +88,14 @@ classdef BDF < matlode.Integrator
 
 			% nordsieck vector stored as a multivector, one column for each entry
 			% TODO - reuse this f call in the nonlinear solver
+			% TODO - get more values from startup procedure
 			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
 			nordsieck(:, 1) = y0;
 			nordsieck(:, 2) = (tspan(2) - tspan(1)) * f.F(tspan(1), y0);
 			stats.nFevals = 1;
+
+			% TODO - can get this from startup procedure
+			currentOrder = 1;
 
 			%Time Loop
 			for i = 1:(length(tspan)-1)
@@ -104,13 +111,14 @@ classdef BDF < matlode.Integrator
 
 				dtc = dtnext;
 
-				% Adaptive order strategy for fixed step - increase order every step until we hit max order
-				currentorder = min(i, obj.MaxOrder);
-
 				Omega = sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
 				nordsieck = nordsieck * Omega;
 
-				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentorder, stats);
+				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentOrder, stats);
+
+				% Adaptive order strategy for fixed step - increase order every step until we hit max order
+				% TODO - replace this with user-configured max order
+				currentOrder = min(currentOrder + 1, obj.MaxOrder);
 
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
@@ -124,7 +132,8 @@ classdef BDF < matlode.Integrator
 
 		function [ynew, nordsieck, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, order, stats)
 
-			% Predictor step - propagate nordsieck vector forward in time.
+			%% Predictor step - propagate nordsieck vector forward in time.
+			% For explicit methods, the predicted y value (nordsieck(:, 1)) is exactly the next step value
 			% Since nordsieck vector is a multivector, this is normal matrix multiplication from the left
 			nordsieck(:, 1:(order + 1)) = nordsieck(:, 1:(order + 1)) * obj.Pascal(1:(order + 1), 1:(order + 1));
 
@@ -132,7 +141,8 @@ classdef BDF < matlode.Integrator
 
 			[~, stats] = obj.NonLinearSolver.preprocess(f, t, y, 1, dt * l(1), [], stats);
 
-			% TODO - using nordsieck(:, 1) as initial guess. Maybe try applying fixed point iteration first? Analyze the cost of doing so.
+			%% Corrector step - correct explicit y value and higher derivatives
+			% nordsieck(:,1) is a good choice of initial guess for the Nonlinear Solve since it is the next step of an explicit method
 			% y0 must be nordsieck(:, 1), so any adjustment to the initial guess must be through x0, which is added to y0.
 			% TODO - fn0 is passed in as [] in DIRK, only not if it's already precomputed in ESDIRK. Maybe can re-use this for fixed point iteration.
 			x0 = zeros(size(y));
