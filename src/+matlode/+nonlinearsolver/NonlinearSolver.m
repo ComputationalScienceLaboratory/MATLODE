@@ -38,6 +38,7 @@ classdef NonlinearSolver < handle
 
 		[out_opts, stats] = preprocess(obj, f, t0, y0, mass_scale, jac_scale, optin, stats);
 
+		% TODO - allow passing in a "mass constant" which is multiplied by the mass matrix, so the caller doesn't need to evaluate the mass matrix
 		[xn, xnf, out_opts, stats] = solve(obj, f, t, dt, y0, x0, fn0, sys_const, mass_scale, jac_scale,  optin, stats);
 	end
 end

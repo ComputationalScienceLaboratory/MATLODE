@@ -35,11 +35,7 @@ classdef MatrixLinearSolver < matlode.linearsolver.LinearSolver
 		function [stats] = computeMass(obj, f, t, y, stats)
 			if isempty(f.Mass)
 				if isempty(obj.mass)
-					if issparse(obj.jac)
-						obj.mass = speye(length(y));
-					else
-						obj.mass = eye(length(y));
-					end
+					obj.mass = speye(length(y));
 				end
 
 			elseif isa(f.Mass, 'double')
@@ -57,6 +53,7 @@ classdef MatrixLinearSolver < matlode.linearsolver.LinearSolver
 		function [sol, stats, out_opts] = solve(obj, x, stats)
 			sol = obj.Solver(obj.system, x, obj.SolverArgs{:});
 
+			stats.nDecompositions = stats.nDecompositions + 1;
 			stats.nLinearSolves = stats.nLinearSolves + 1;
 		end
 	end

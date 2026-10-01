@@ -7,7 +7,7 @@ classdef FixedPoint < matlode.nonlinearsolver.NonlinearSolver
 	methods
 		function obj = FixedPoint(linsolve, args)
 			arguments
-				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.MatrixLinearSolver();
+				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.DecompositionLinearSolver();
 				args(1,:) cell = {};
 			end
 

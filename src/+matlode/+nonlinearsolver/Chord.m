@@ -9,7 +9,7 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 	methods
 		function obj = Chord(linsolve, args)
 			arguments
-				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.MatrixLinearSolver();
+				linsolve(1,1) matlode.linearsolver.LinearSolver = matlode.linearsolver.DecompositionLinearSolver();
 				args(1,:) cell = {};
 			end
 
@@ -19,12 +19,12 @@ classdef Chord < matlode.nonlinearsolver.NonlinearSolver
 
 		function [out_opts, stats] = preprocess(obj, f, t0, y0, mass_scale, jac_scale, optin, stats)
 			% Preprocess to compute M(t_0) y_0
-			[stats] = obj.LinearSolver.computeMass(f, t0, y0, stats);
-			if isempty(f.Mass) || ~isa(f.Mass, 'function_handle')
-				obj.q0 = 0;
-			else
-				obj.q0 = (obj.LinearSolver.mass * y0);
-			end
+			% [stats] = obj.LinearSolver.computeMass(f, t0, y0, stats);
+			% if isempty(f.Mass) || ~isa(f.Mass, 'function_handle')
+			% 	obj.q0 = 0;
+			% else
+			% 	obj.q0 = (obj.LinearSolver.mass * y0);
+			% end
 			obj.t0_pre = t0;
 			out_opts = [];
 		end
