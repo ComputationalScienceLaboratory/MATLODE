@@ -87,7 +87,6 @@ classdef BDF < matlode.Integrator
 			stats.nSteps = length(tspan);
 
 			% nordsieck vector stored as a multivector, one column for each entry
-			% TODO - reuse this f call in the nonlinear solver
 			% TODO - get more values from startup procedure
 			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
 			nordsieck(:, 1) = y0;
@@ -144,7 +143,6 @@ classdef BDF < matlode.Integrator
 			%% Corrector step - correct explicit y value and higher derivatives
 			% nordsieck(:,1) is a good choice of initial guess for the Nonlinear Solve since it is the next step of an explicit method
 			% y0 must be nordsieck(:, 1), so any adjustment to the initial guess must be through x0, which is added to y0.
-			% TODO - fn0 is passed in as [] in DIRK, only not if it's already precomputed in ESDIRK. Maybe can re-use this for fixed point iteration.
 			x0 = zeros(size(y));
 			sys_const = -l(1) * nordsieck(:, 2);
 			[ydiff, solver_opts, stats] = obj.NonLinearSolver.solve(f, t + dt, dt, nordsieck(:, 1), x0, [], sys_const, 1, dt * l(1), [], stats);
