@@ -63,6 +63,132 @@ classdef BDF < matlode.Integrator
 		end
 
 		function [t, y, stats] = timeLoop(obj, f, tspan, y0, opts)
+
+			numVars = length(y0);
+			multiTspan = length(tspan) > 2;
+
+			errNorm = opts.ErrNorm;
+			stepController = opts.StepSizeController;
+
+			tlen = 0;
+			if multiTspan
+				y = zeros(numVars, length(tspan));
+				t = zeros(1, length(tspan));
+			elseif opts.FullTrajectory
+				y = zeros(numVars, opts.ChunkSize);
+				t = zeros(1, opts.ChunkSize);
+				tlen = length(t);
+			else
+				y = zeros(length(y0), 2);
+				t = tspan;
+			end
+
+			t(:,1) = tspan(:,1);
+			y(:, 1) = y0;
+
+			tcur = tspan(1);
+			tnext = tcur;
+			dtbuf = 0; % Kahan summation buffer to remember small parts of dt which haven't yet been added to t
+			tindex = 2;
+
+			tspanlen = length(tspan);
+
+			tdir = sign(tspan(end) - tspan(1));
+			dtmax = min([abs(opts.MaxStep), abs(tspan(end) - tspan(1))]) * tdir;
+			dtmin = opts.MinStep * tdir;
+
+			%inital values
+			ynext = y0;
+
+			%Start stats
+			stats = obj.intalizeStats;
+			stats.nSteps = 1;
+
+			%First step
+			%allocates memory for first step
+			q = 1;
+			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, q, errNorm, dtmin, dtmax);
+			dtnext = dt0;
+
+			% nordsieck vector stored as a multivector, one column for each entry
+			% TODO - get more values from startup procedure
+			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
+			nordsieck(:, 1) = y0;
+			nordsieck(:, 2) = (tspan(2) - tspan(1)) * f0;
+
+			% TODO - can get this from startup procedure
+			currentOrder = 1;
+			prevAccept = true;
+
+			% time loop
+			while tindex <= tspanlen
+				if(stats.nSteps > opts.MaxNumSteps)
+					warning("OneStepIntegrator:MaxNumSteps", "Integrator reached maximum steps before finishing integration at t = %f.", tcur)
+					break
+				end
+
+				ycur = ynext;
+				tcur = tnext;
+				dtcur = dtnext;
+
+				% Accept Loop
+				% Will keep looping until accepted step
+				while true
+					[ynext, nordsieck, stats, out_opts] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentOrder, stats);
+				
+					if out_opts.failure == false
+						[err, stats] = timeStepErr(obj, f, tcur, ycur, ynext, dtcur, nordsieck, errNorm, stats);
+
+						% Find next Step
+						% TODO: Update to take stats
+						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dthist, err, q);
+					else
+						% TODO setup with memory based time step controller
+						prevAccept = false;
+						% TODO: Allow factor to be choosen
+						% TODO: Lighter penalty for if we are using an older Jacobian
+						dtnext = 0.1 * dtcur;
+					end
+
+					% Set new step to be in range
+					dtnext = max(abs(dtmin), min(abs(dtmax), abs(dtnext))) * tdir;
+
+					% Advance time
+					if prevAccept
+						% Kahan summation - adjust dt by adding the parts of previous dt
+						% that we haven't been able to add yet
+						dtadj = dtcur + dtbuf;
+						tnext = tcur + dtadj;
+
+						% Due to rounding error, tnext - tcur may not properly capture all of dtadj,
+						% so record the parts that are missing to be added later
+						dtbuf = dtadj - (tnext - tcur);
+						break;
+					end
+
+					if abs(dtcur) == abs(dtmin)
+						% TODO maybe we should return our progress up until now
+						error("OneStepIntegrator:MinStep", "Step failed with h = MinStep")
+					end
+
+					stats.nFailed = stats.nFailed + 1;
+
+					omega = dtnext / dtcur;
+					nordsieck = nordsieck * sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
+
+					dtcur = dtnext;
+				end
+
+				stats.nSteps = stats.nSteps + 1;
+
+				% TODO: Add FullTrajectory and dense output
+			end
+
+			y(:, end) = ynext;
+			t(end) = tspan(:, end);
+		end
+
+		function [err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, nordsieck, ErrNorm, stats)
 		end
 
 		function [t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts)
