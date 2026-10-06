@@ -105,6 +105,7 @@ classdef (Abstract) Integrator < handle
 			p.addParameter('MaxStep', inf);
 			p.addParameter('MinStep', 0, @(x) isscalar(x) && isfloat(x) && x >= 0)
 			p.addParameter('MaxNumSteps', inf, @(x) isscalar(x) && isnumeric(x) && floor(x) == x)
+			p.addParameter('StiffCorrectError', false, @(x) isscalar(x) && islogical(x))
 
 			p.parse(varargin{:});
 

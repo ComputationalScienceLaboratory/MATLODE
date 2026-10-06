@@ -13,6 +13,7 @@ classdef BDF < matlode.Integrator
 		Pascal   % Pascal matrix needed for the predictor step. Same for all methods, should only vary in size based on MaxOrder.
 
 		L        % The matrix of methods coefficients. Each row is a different order method, so there should be a number of rows equal to MaxOrder
+		C        % Vector of error constants. Each entry is the error constant of a different order method
 		MaxOrder % The maximum feasible order attainable by the method. Determines the size of the nordsieck vector.
 	end
 
@@ -33,6 +34,7 @@ classdef BDF < matlode.Integrator
 				[24 , 50 , 35 , 10, 1 , 0] / 50;...
 				[120, 274, 225, 85, 15, 1] / 274;...
 				];
+			obj.C = [-1/2, 2/9, -3/22, 12/125, -10/137];
 
 			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 			% Note that the pascal matrix constructed here is transposed from the text.
@@ -134,14 +136,14 @@ classdef BDF < matlode.Integrator
 				% Accept Loop
 				% Will keep looping until accepted step
 				while true
-					[ynext, nordsieck, stats, out_opts] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentOrder, stats);
+					[ynext, nordsieck, delta, stats, out_opts] = obj.timeStep(f, tcur, ycur, dtcur, nordsieck, true, currentOrder, stats);
 				
 					if out_opts.failure == false
-						[err, stats] = timeStepErr(obj, f, tcur, ycur, ynext, dtcur, nordsieck, errNorm, stats);
+						[err, stats] = timeStepErr(obj, ycur, ynext, dtcur, nordsieck, errNorm, currentOrder, delta, stats, opts);
 
 						% Find next Step
 						% TODO: Update to take stats
-						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dthist, err, q);
+						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dtcur, err, q);
 					else
 						% TODO setup with memory based time step controller
 						prevAccept = false;
@@ -182,13 +184,24 @@ classdef BDF < matlode.Integrator
 				stats.nSteps = stats.nSteps + 1;
 
 				% TODO: Add FullTrajectory and dense output
+
+				if tcur >= tspan(tindex)
+					tindex = tindex + 1;
+				end
 			end
 
 			y(:, end) = ynext;
 			t(end) = tspan(:, end);
 		end
 
-		function [err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, nordsieck, ErrNorm, stats)
+		function [err, stats] = timeStepErr(obj, y, ynew, dt, nordsieck, ErrNorm, order, delta, stats, opts)
+			yerror = obj.C(order) / (obj.C(order) + 1) * obj.L(1) * delta;
+
+			if opts.StiffCorrectError
+				[yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats)
+			end
+
+			err = ErrNorm.errEstimate(y, ynew, yerror);
 		end
 
 		function [t, y, stats] = timeLoopFixed(obj, f, tspan, y0, opts)
@@ -239,7 +252,7 @@ classdef BDF < matlode.Integrator
 				Omega = sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
 				nordsieck = nordsieck * Omega;
 
-				[ynext, nordsieck, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentOrder, stats);
+				[ynext, nordsieck, ~, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentOrder, stats);
 
 				% Adaptive order strategy for fixed step - increase order every step until we hit max order
 				% TODO - replace this with user-configured max order
@@ -255,7 +268,7 @@ classdef BDF < matlode.Integrator
 			t(end) = tspan(:, end);
 		end
 
-		function [ynew, nordsieck, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, order, stats)
+		function [ynew, nordsieck, delta, stats, out_opts] = timeStep(obj, f, t, y, dt, nordsieck, prevAccept, order, stats)
 
 			%% Predictor step - propagate nordsieck vector forward in time.
 			% For explicit methods, the predicted y value (nordsieck(:, 1)) is exactly the next step value
@@ -279,12 +292,15 @@ classdef BDF < matlode.Integrator
 			fnew = f.F(t + dt, ynew);
 			stats.nFevals = stats.nFevals + 1;
 
-			nordsieck(:, 2:(order+1)) = nordsieck(:, 2:(order+1)) + (dt * fnew - nordsieck(:, 2)) * l(2:(order+1));
+			delta = (dt * fnew - nordsieck(:, 2));
+			nordsieck(:, 2:(order+1)) = nordsieck(:, 2:(order+1)) + delta * l(2:(order+1));
 
 			if solver_opts.convergenceFailure == true
 				out_opts.failure = true;
 				return;
 			end
+
+			out_opts.failure = false;
 		end
 
 		function stats = intalizeStats(obj)

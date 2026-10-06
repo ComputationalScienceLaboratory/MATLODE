@@ -27,6 +27,22 @@ classdef OrderChecking < handle
 			end
 		end
 
+		function [error, steps, statsCumlative] = getErrorWRTExactValueAdaptive(obj, model, t0, tf, y0, ytrue, tolerance, opts)
+
+			error = zeros(1,length(tolerance));
+			steps = zeros(1,length(tolerance));
+			statsCumlative = cell(1, length(tolerance));
+
+			for i = 1:length(error)	
+				i
+				opts.ErrNorm = matlode.errnorm.InfNorm(tolerance(i), tolerance(i));
+				sol = obj.Integrator.integrate(model, [t0, tf], y0, opts);
+				statsCumlative{i} = sol.stats;
+				steps(i) = sol.stats.nSteps;
+				error(i) = norm(sol.y(end) - ytrue) / norm(ytrue);
+			end
+		end
+
 		function [f, polyError] = plot_error_single(obj, stepamount, error, fig_num)
 			f = figure(fig_num);
 
