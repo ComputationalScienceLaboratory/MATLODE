@@ -109,8 +109,8 @@ classdef BDF < matlode.Integrator
 			%First step
 			%allocates memory for first step
 			% TODO - can get this from startup procedure
-			current_order = 1;
-			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, current_order, errNorm, dtmin, dtmax);
+			order_next = 1;
+			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, order_next, errNorm, dtmin, dtmax);
 			dtnext = dt0;
 
 			% nordsieck vector stored as a multivector, one column for each entry
@@ -132,24 +132,42 @@ classdef BDF < matlode.Integrator
 				tcur = tnext;
 				dtcur = dtnext;
 				nordsieck = nordsieck_next;
+				order_current = order_next;
 
 				% Accept Loop
 				% Will keep looping until accepted step
 				while true
-					[ynext, nordsieck_next, delta, stats, out_opts] = obj.timeStep(f, tcur, ycur, dtcur, nordsieck, true, current_order, stats);
+					[ynext, nordsieck_next, delta, stats, out_opts] = obj.timeStep(f, tcur, ycur, dtcur, nordsieck, true, order_current, stats);
 				
 					if out_opts.failure == false
-						[err, stats] = timeStepErr(obj, ycur, ynext, dtcur, errNorm, current_order, delta, stats, opts);
+						[err, stats] = timeStepErr(obj, ycur, ynext, dtcur, errNorm, order_current, delta, stats, opts);
 
 						% Find next Step
 						% TODO: Update to take stats
-						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dtcur, err, q);
+						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current);
+
+						% Check the step size if we decrease order
+						if order_current > 1
+							err = errNorm.errEstimate(ycur, ynext, obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1));
+							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
+
+							if dtnext_candidate > dtnext
+								dtnext = dtnext_candidate;
+								order_next = order_current - 1;
+							end
+						end
+
+						% TODO - how to increase order?
 					else
 						% TODO setup with memory based time step controller
 						prevAccept = false;
 						% TODO: Allow factor to be choosen
 						% TODO: Lighter penalty for if we are using an older Jacobian
-						dtnext = 0.1 * dtcur;
+						dtnext = 0.25 * dtcur;
+
+						if order_current > 1
+							order_next = order_current - 1;
+						end
 					end
 
 					% Set new step to be in range
@@ -178,7 +196,13 @@ classdef BDF < matlode.Integrator
 					omega = dtnext / dtcur;
 					nordsieck = nordsieck * sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
 
+					% If we increase order, ensure that the higher nordsieck elements are zeroed
+					if order_next > order_current
+						nordsieck(:, (order_current + 2) : (order_next + 1)) = zeros(length(y0), order_next - order_current);
+					end
+
 					dtcur = dtnext;
+					order_current = order_next;
 				end
 
 				stats.nSteps = stats.nSteps + 1;
