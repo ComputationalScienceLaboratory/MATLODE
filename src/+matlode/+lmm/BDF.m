@@ -185,7 +185,7 @@ classdef BDF < matlode.Integrator
 
 				% TODO: Add FullTrajectory and dense output
 
-				if tcur >= tspan(tindex)
+				if tcur * tdir >= tspan(tindex) * tdir
 					tindex = tindex + 1;
 				end
 
