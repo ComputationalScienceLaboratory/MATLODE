@@ -108,18 +108,17 @@ classdef BDF < matlode.Integrator
 
 			%First step
 			%allocates memory for first step
-			q = 1;
-			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, q, errNorm, dtmin, dtmax);
+			% TODO - can get this from startup procedure
+			current_order = 1;
+			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, current_order, errNorm, dtmin, dtmax);
 			dtnext = dt0;
 
 			% nordsieck vector stored as a multivector, one column for each entry
 			% TODO - get more values from startup procedure
-			nordsieck = zeros(length(y0), obj.MaxOrder + 1);
-			nordsieck(:, 1) = y0;
-			nordsieck(:, 2) = (tspan(2) - tspan(1)) * f0;
+			nordsieck_next = zeros(length(y0), obj.MaxOrder + 1);
+			nordsieck_next(:, 1) = y0;
+			nordsieck_next(:, 2) = (tspan(2) - tspan(1)) * f0;
 
-			% TODO - can get this from startup procedure
-			currentOrder = 1;
 			prevAccept = true;
 
 			% time loop
@@ -132,14 +131,15 @@ classdef BDF < matlode.Integrator
 				ycur = ynext;
 				tcur = tnext;
 				dtcur = dtnext;
+				nordsieck = nordsieck_next;
 
 				% Accept Loop
 				% Will keep looping until accepted step
 				while true
-					[ynext, nordsieck, delta, stats, out_opts] = obj.timeStep(f, tcur, ycur, dtcur, nordsieck, true, currentOrder, stats);
+					[ynext, nordsieck_next, delta, stats, out_opts] = obj.timeStep(f, tcur, ycur, dtcur, nordsieck, true, current_order, stats);
 				
 					if out_opts.failure == false
-						[err, stats] = timeStepErr(obj, ycur, ynext, dtcur, nordsieck, errNorm, currentOrder, delta, stats, opts);
+						[err, stats] = timeStepErr(obj, ycur, ynext, dtcur, errNorm, current_order, delta, stats, opts);
 
 						% Find next Step
 						% TODO: Update to take stats
@@ -188,14 +188,36 @@ classdef BDF < matlode.Integrator
 				if tcur >= tspan(tindex)
 					tindex = tindex + 1;
 				end
+
+				if tspan(tindex) * tdir <= (tnext + dtnext) * tdir
+
+					%integrate to/ End point
+					%check if close enough with hmin
+					if abs(tspan(tindex) - tnext) < 64 * eps(tnext)
+
+						if multiTspan
+							t(:, tindex) = tspan(tindex);
+							y(:, tindex) = ynext;
+						end
+
+						if tcur < tspan(tindex)
+							tindex = tindex + 1;
+						end
+					else
+
+						% TODO - what if this is < dtmin
+						dtnext = tspan(tindex) - tnext;
+					end
+
+				end
 			end
 
 			y(:, end) = ynext;
 			t(end) = tspan(:, end);
 		end
 
-		function [err, stats] = timeStepErr(obj, y, ynew, dt, nordsieck, ErrNorm, order, delta, stats, opts)
-			yerror = obj.C(order) / (obj.C(order) + 1) * obj.L(1) * delta;
+		function [err, stats] = timeStepErr(obj, y, ynew, ~, ErrNorm, order, delta, stats, opts)
+			yerror = obj.C(order) / (obj.C(order) + 1) * obj.L(order, 1) * delta;
 
 			if opts.StiffCorrectError
 				[yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats)
@@ -233,7 +255,7 @@ classdef BDF < matlode.Integrator
 			stats.nFevals = 1;
 
 			% TODO - can get this from startup procedure
-			currentOrder = 1;
+			current_order = 1;
 
 			%Time Loop
 			for i = 1:(length(tspan)-1)
@@ -252,11 +274,11 @@ classdef BDF < matlode.Integrator
 				Omega = sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
 				nordsieck = nordsieck * Omega;
 
-				[ynext, nordsieck, ~, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, currentOrder, stats);
+				[ynext, nordsieck, ~, stats] = obj.timeStep(f, tcur, yi, dtc, nordsieck, true, current_order, stats);
 
 				% Adaptive order strategy for fixed step - increase order every step until we hit max order
 				% TODO - replace this with user-configured max order
-				currentOrder = min(currentOrder + 1, obj.MaxOrder);
+				current_order = min(current_order + 1, obj.MaxOrder);
 
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
