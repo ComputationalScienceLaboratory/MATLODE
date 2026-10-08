@@ -112,12 +112,13 @@ classdef BDF < matlode.Integrator
 			order_next = 1;
 			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, order_next, errNorm, dtmin, dtmax);
 			dtnext = dt0;
+			dtprev = dt0;
 
 			% nordsieck vector stored as a multivector, one column for each entry
 			% TODO - get more values from startup procedure
 			nordsieck_next = zeros(length(y0), obj.MaxOrder + 1);
 			nordsieck_next(:, 1) = y0;
-			nordsieck_next(:, 2) = (tspan(2) - tspan(1)) * f0;
+			nordsieck_next(:, 2) = dtnext * f0;
 
 			prevAccept = true;
 
@@ -130,6 +131,7 @@ classdef BDF < matlode.Integrator
 
 				ycur = ynext;
 				tcur = tnext;
+				dtprev = dtcur;
 				dtcur = dtnext;
 				nordsieck = nordsieck_next;
 				order_current = order_next;
@@ -148,6 +150,7 @@ classdef BDF < matlode.Integrator
 
 						% Check the step size if we decrease order
 						if order_current > 1
+							% The nordsieck vector already stores an estimate of y_p, which is the residual for order p - 1 
 							err = errNorm.errEstimate(ycur, ynext, obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1));
 							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
 
@@ -157,7 +160,36 @@ classdef BDF < matlode.Integrator
 							end
 						end
 
-						% TODO - how to increase order?
+						if order_current < obj.MaxOrder
+							temp = factorial(current_order);
+							temp2 = current_order * temp;
+							% The p-1 derivative of y at last time step
+							fnm1 = temp * nordsieck(:, order_current) / dtprev^order_current;
+							% The p derivative of y at last time step
+							fpnm1 = temp2 * nordsieck(:, order_current + 1) / dtprev^(order_current + 1);
+							% The p-1 derivative of y at next time step
+							fn = temp * nordsieck_next(:, order_current) / dtcur^order_current;
+							% the p derivative of y at next time step
+							fpn = temp2 * nordsieck_next(:, order_current + 1) / dtprev^(order_current + 1);
+
+							% Estimated p + 1 derivative at last time step - can use this for order p error estimate
+							backward_diff = (fn - fnm1 - dtcur * fpnm1) / dtcur^2;
+							% Estimated p + 1 derivative at next time step - can use this for filling nordsieck vector
+							forward_diff = (dtcur * fpn - fn + fnm1) / dtcur^2;
+
+							% Estimated p + 2 derivative - can use this for order p + 1 error estimate
+							final_diff = (forward_diff - backward_diff) / dtcur;
+
+							% 24 from 4! from 4-point finite difference above
+							err = errNorm.errEstimate(ycur, ynext, obj.C(order_current + 1) * final_diff * 24);
+							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current + 1);
+
+							if dtnext_candidate > dtnext
+								dtnext = dtnext_candidate;
+								order_next = order_current + 1;
+								nordsieck_next(:, order_current + 2) = forward_diff * 6 / temp2 / (order_current + 1) * dtcur ^ (order_current + 1);
+							end
+						end
 					else
 						% TODO setup with memory based time step controller
 						prevAccept = false;
