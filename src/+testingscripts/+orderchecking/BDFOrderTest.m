@@ -1,0 +1,28 @@
+clear
+format long e
+close all
+
+integrator = matlode.lmm.BDF();
+
+options.ErrNorm = matlode.errnorm.InfNorm(1e-12, 1e-12);
+options.StepSizeController = matlode.stepsizecontroller.StandardController;
+
+lambda = -1;
+test_problem = testingscripts.testproblems.ODE.EulerProblem(lambda);
+
+options.Jacobian = test_problem.jac;
+
+t_f = 1;
+
+order_checker = matlode.util.OrderChecking(integrator);
+
+% stepamount = 2.^(5:8);
+fig_num = 1;
+
+% [error, ~] = order_checker.getErrorWRTExactValue(@(t,y) test_problem.f(t,y), test_problem.t_0, t_f, test_problem.y_0, test_problem.y_exact(t_f), stepamount, options);
+
+tolerance = 10.^linspace(-4, -7, 4);
+[error, stepamount, stats] = order_checker.getErrorWRTExactValueAdaptive(@(t,y) test_problem.f(t,y), test_problem.t_0, t_f, test_problem.y_0, test_problem.y_exact(t_f), tolerance, options);
+
+[f, polyError] = order_checker.plot_error_single(stepamount, error, fig_num)
+saveas(f, "order.svg");
