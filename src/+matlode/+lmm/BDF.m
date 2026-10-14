@@ -198,7 +198,7 @@ classdef BDF < matlode.Integrator
 								order_next = order_current + 1;
 
 								% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 36
-								nordsieck_next(:, order_current + 2) = obj.L(order_current, order_current + 1) * (delta - delta_prev) / (order_current + 1);
+								nordsieck_next(:, order_current + 2) = obj.L(order_current, order_current + 1) * delta / (order_current + 1);
 							end
 						end
 					end
@@ -255,6 +255,23 @@ classdef BDF < matlode.Integrator
 					t(:, stats.nSteps) = tnext;
 					y(:, stats.nSteps) = ynext;
 					stats.order(:, stats.nSteps - 1) = order_current;
+				else
+					%Dense output
+					while tindex ~= tspanlen && tnext * tdir > tspan(tindex) * tdir
+				
+						%incase lucky and land on point, can be cheaper
+						%than dense output if dense requires fevals
+						if abs(tspan(tindex) - tnext) < 64 * eps(tcur)
+							t(:, tindex) = tspan(tindex);
+							y(:, tindex) = ynext;
+						else
+							%Call Dense output function and record
+							t(:, tindex) = tspan(tindex);
+							[y(:, tindex), tempFevals] = opts.Dense.denseOut(f, tcur, tspan(tindex), ycur, ynext, stages, dtcur);
+							stats.nFevals = stats.nFevals + tempFevals;
+						end
+						tindex = tindex + 1;
+					end
 				end
 
 				if tcur * tdir >= tspan(tindex) * tdir
