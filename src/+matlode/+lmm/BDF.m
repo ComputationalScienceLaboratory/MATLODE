@@ -73,17 +73,24 @@ classdef BDF < matlode.Integrator
 			errNorm = opts.ErrNorm;
 			stepController = opts.StepSizeController;
 
+			%Start stats
+			stats = obj.intalizeStats;
+			stats.nSteps = 1;
+
 			tlen = 0;
 			if multiTspan
 				y = zeros(numVars, length(tspan));
 				t = zeros(1, length(tspan));
+				stats.order = zeros(1, length(tspan));
 			elseif opts.FullTrajectory
 				y = zeros(numVars, opts.ChunkSize);
 				t = zeros(1, opts.ChunkSize);
+				stats.order = zeros(1, opts.ChunkSize);
 				tlen = length(t);
 			else
 				y = zeros(length(y0), 2);
 				t = tspan;
+				stats.order = zeros(1, 2);
 			end
 
 			t(:,1) = tspan(:,1);
@@ -104,9 +111,6 @@ classdef BDF < matlode.Integrator
 			ynext = y0;
 			delta = zeros(size(y0));
 
-			%Start stats
-			stats = obj.intalizeStats;
-			stats.nSteps = 1;
 
 			%First step
 			%allocates memory for first step
@@ -236,7 +240,22 @@ classdef BDF < matlode.Integrator
 
 				stats.nSteps = stats.nSteps + 1;
 
-				% TODO: Add FullTrajectory and dense output
+				% TODO: Add dense output
+
+				if ~multiTspan && opts.FullTrajectory
+
+					%Allocate more memory if non-dense
+					if stats.nSteps > tlen
+						y = [y, zeros(numVars, opts.ChunkSize)];
+						t = [t, zeros(1, opts.ChunkSize)];
+						stats.order = [stats.order, zeros(1, opts.ChunkSize)];
+						tlen = length(t);
+					end
+
+					t(:, stats.nSteps) = tnext;
+					y(:, stats.nSteps) = ynext;
+					stats.order(:, stats.nSteps - 1) = order_current;
+				end
 
 				if tcur * tdir >= tspan(tindex) * tdir
 					tindex = tindex + 1;
@@ -265,8 +284,15 @@ classdef BDF < matlode.Integrator
 				end
 			end
 
-			y(:, end) = ynext;
-			t(end) = tspan(:, end);
+			if ~multiTspan && opts.FullTrajectory
+				t = t(:, 1:stats.nSteps);
+				y = y(:, 1:stats.nSteps);
+				stats.order = stats.order(:, 1:stats.nSteps);
+				stats.order(end) = order_next;
+			else
+				t(:, end) = tspan(end);
+				y(:, end) = ynext;
+			end
 		end
 
 		function [err, stats] = timeStepErr(obj, y, ynew, ~, ErrNorm, order, delta, stats, opts)
@@ -391,6 +417,7 @@ classdef BDF < matlode.Integrator
 			stats.nNonLinIterations = 0;
 			stats.nPDTEval = 0;
 			stats.nDecompositions = 0;
+			stats.order = [];
 		end
 	end
 end
