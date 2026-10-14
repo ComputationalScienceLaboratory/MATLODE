@@ -21,7 +21,7 @@ fig_num = 1;
 
 % [error, ~] = order_checker.getErrorWRTExactValue(@(t,y) test_problem.f(t,y), test_problem.t_0, t_f, test_problem.y_0, test_problem.y_exact(t_f), stepamount, options);
 
-tolerance = 10.^linspace(-4, -7, 4);
+tolerance = 10.^linspace(-4, -12, 50);
 [error, stepamount, stats] = order_checker.getErrorWRTExactValueAdaptive(@(t,y) test_problem.f(t,y), test_problem.t_0, t_f, test_problem.y_0, test_problem.y_exact(t_f), tolerance, options);
 
 [f, polyError] = order_checker.plot_error_single(stepamount, error, fig_num)

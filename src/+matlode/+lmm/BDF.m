@@ -34,7 +34,8 @@ classdef BDF < matlode.Integrator
 				[24 , 50 , 35 , 10, 1 , 0] / 50;...
 				[120, 274, 225, 85, 15, 1] / 274;...
 				];
-			obj.C = [-1/2, 2/9, -3/22, 12/125, -10/137];
+			% obj.C = [-1/2, 2/9, -3/22, 12/125, -10/137];
+			obj.C = [1/2, 1/3, 1/4, 1/5, 1/6];
 
 			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 			% Note that the pascal matrix constructed here is transposed from the text.
@@ -101,6 +102,7 @@ classdef BDF < matlode.Integrator
 
 			%inital values
 			ynext = y0;
+			delta = zeros(size(y0));
 
 			%Start stats
 			stats = obj.intalizeStats;
@@ -112,7 +114,7 @@ classdef BDF < matlode.Integrator
 			order_next = 1;
 			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, order_next, errNorm, dtmin, dtmax);
 			dtnext = dt0;
-			dtprev = dt0;
+			dtcur = dt0;
 
 			% nordsieck vector stored as a multivector, one column for each entry
 			% TODO - get more values from startup procedure
@@ -133,63 +135,22 @@ classdef BDF < matlode.Integrator
 				tcur = tnext;
 				dtprev = dtcur;
 				dtcur = dtnext;
-				nordsieck = nordsieck_next;
+				omega = dtcur / dtprev;
+				nordsieck = nordsieck_next * sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
 				order_current = order_next;
+				delta_prev = delta;
 
 				% Accept Loop
 				% Will keep looping until accepted step
 				while true
 					[ynext, nordsieck_next, delta, stats, out_opts] = obj.timeStep(f, tcur, ycur, dtcur, nordsieck, true, order_current, stats);
-				
+
 					if out_opts.failure == false
 						[err, stats] = timeStepErr(obj, ycur, ynext, dtcur, errNorm, order_current, delta, stats, opts);
 
 						% Find next Step
 						% TODO: Update to take stats
 						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current);
-
-						% Check the step size if we decrease order
-						if order_current > 1
-							% The nordsieck vector already stores an estimate of y_p, which is the residual for order p - 1 
-							err = errNorm.errEstimate(ycur, ynext, obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1));
-							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
-
-							if dtnext_candidate > dtnext
-								dtnext = dtnext_candidate;
-								order_next = order_current - 1;
-							end
-						end
-
-						if order_current < obj.MaxOrder
-							temp = factorial(current_order);
-							temp2 = current_order * temp;
-							% The p-1 derivative of y at last time step
-							fnm1 = temp * nordsieck(:, order_current) / dtprev^order_current;
-							% The p derivative of y at last time step
-							fpnm1 = temp2 * nordsieck(:, order_current + 1) / dtprev^(order_current + 1);
-							% The p-1 derivative of y at next time step
-							fn = temp * nordsieck_next(:, order_current) / dtcur^order_current;
-							% the p derivative of y at next time step
-							fpn = temp2 * nordsieck_next(:, order_current + 1) / dtprev^(order_current + 1);
-
-							% Estimated p + 1 derivative at last time step - can use this for order p error estimate
-							backward_diff = (fn - fnm1 - dtcur * fpnm1) / dtcur^2;
-							% Estimated p + 1 derivative at next time step - can use this for filling nordsieck vector
-							forward_diff = (dtcur * fpn - fn + fnm1) / dtcur^2;
-
-							% Estimated p + 2 derivative - can use this for order p + 1 error estimate
-							final_diff = (forward_diff - backward_diff) / dtcur;
-
-							% 24 from 4! from 4-point finite difference above
-							err = errNorm.errEstimate(ycur, ynext, obj.C(order_current + 1) * final_diff * 24);
-							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current + 1);
-
-							if dtnext_candidate > dtnext
-								dtnext = dtnext_candidate;
-								order_next = order_current + 1;
-								nordsieck_next(:, order_current + 2) = forward_diff * 6 / temp2 / (order_current + 1) * dtcur ^ (order_current + 1);
-							end
-						end
 					else
 						% TODO setup with memory based time step controller
 						prevAccept = false;
@@ -199,6 +160,42 @@ classdef BDF < matlode.Integrator
 
 						if order_current > 1
 							order_next = order_current - 1;
+						end
+					end
+
+					% Check to adapt order for the next step
+					if prevAccept
+						% Check the step size if we decrease order
+						if order_current > 1
+							% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 34
+							% The nordsieck vector already stores an estimate of y_p, which is the residual for order p - 1
+							yerr = obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1);
+
+							err = errNorm.errEstimate(ycur, ynext, yerr);
+							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
+
+							if dtnext_candidate > dtnext
+								dtnext = dtnext_candidate;
+								order_next = order_current - 1;
+							end
+						end
+
+						if order_current < obj.MaxOrder && stats.nSteps >= 1
+							% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 34
+							% Use finite difference on delta from previous step to get higher derivative
+							yerr = obj.C(order_current + 1) * factorial(order_current) * obj.L(order_current, order_current + 1) * (delta - delta_prev);
+
+							err = errNorm.errEstimate(ycur, ynext, yerr);
+							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current + 1);
+
+							% fprintf("Considering increase in order: %e v.s. %e\n", dtnext_candidate, dtnext);
+							if dtnext_candidate > dtnext
+								dtnext = dtnext_candidate;
+								order_next = order_current + 1;
+
+								% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 36
+								nordsieck_next(:, order_current + 2) = obj.L(order_current, order_current + 1) * (delta - delta_prev) / (order_current + 1);
+							end
 						end
 					end
 
@@ -273,10 +270,11 @@ classdef BDF < matlode.Integrator
 		end
 
 		function [err, stats] = timeStepErr(obj, y, ynew, ~, ErrNorm, order, delta, stats, opts)
-			yerror = obj.C(order) / (obj.C(order) + 1) * obj.L(order, 1) * delta;
+			% yerror = obj.C(order) / (obj.C(order) + 1) * obj.L(order, 1) * delta;
+			yerror = obj.C(order) * factorial(order) * obj.L(order, order + 1) * delta;
 
 			if opts.StiffCorrectError
-				[yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats)
+				[yerror, stats] = obj.NonLinearSolver.LinearSolver.solve(yerror, stats);
 			end
 
 			err = ErrNorm.errEstimate(y, ynew, yerror);
