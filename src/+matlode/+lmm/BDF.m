@@ -34,8 +34,8 @@ classdef BDF < matlode.Integrator
 				[24 , 50 , 35 , 10, 1 , 0] / 50;...
 				[120, 274, 225, 85, 15, 1] / 274;...
 				];
-			% obj.C = [-1/2, 2/9, -3/22, 12/125, -10/137];
-			obj.C = [1/2, 1/3, 1/4, 1/5, 1/6];
+			obj.C = [-1/2, 2/9, -3/22, 12/125, -10/137];
+			% obj.C = [1/2, 1/3, 1/4, 1/5, 1/6];
 
 			obj.Pascal = zeros(obj.MaxOrder + 1, obj.MaxOrder + 1);
 			% Note that the pascal matrix constructed here is transposed from the text.
@@ -116,6 +116,7 @@ classdef BDF < matlode.Integrator
 			%allocates memory for first step
 			% TODO - can get this from startup procedure
 			order_next = 1;
+			order_current = 1;
 			[dt0, f0, stats.nFevals] = stepController.startingStep(f, tspan, y0, order_next, errNorm, dtmin, dtmax);
 			dtnext = dt0;
 			dtcur = dt0;
@@ -128,11 +129,17 @@ classdef BDF < matlode.Integrator
 
 			prevAccept = true;
 
+			steps_since_order_change = 0;
+
 			% time loop
 			while tindex <= tspanlen
 				if(stats.nSteps > opts.MaxNumSteps)
 					warning("OneStepIntegrator:MaxNumSteps", "Integrator reached maximum steps before finishing integration at t = %f.", tcur)
 					break
+				end
+
+				if order_next ~= order_current || dtnext ~= dtcur
+					steps_since_order_change = 0;
 				end
 
 				ycur = ynext;
@@ -154,7 +161,24 @@ classdef BDF < matlode.Integrator
 
 						% Find next Step
 						% TODO: Update to take stats
-						[prevAccept, dtnext] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current);
+						[prevAccept, dt_opt] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current);
+						order_opt = order_current;
+
+						% Check the step size if we decrease order
+						if order_current > 1
+							% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 34
+							% The nordsieck vector already stores an estimate of y_p, which is the residual for order p - 1
+							yerr = obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1);
+
+							% TODO: Consider adding LSODE's different safety factors for different orders?
+							err = errNorm.errEstimate(ycur, ynext, yerr);
+							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
+
+							if dtnext_candidate > dt_opt
+								dt_opt = dtnext_candidate;
+								order_opt = order_current - 1;
+							end
+						end
 					else
 						% TODO setup with memory based time step controller
 						prevAccept = false;
@@ -163,28 +187,14 @@ classdef BDF < matlode.Integrator
 						dtnext = 0.25 * dtcur;
 
 						if order_current > 1
+							steps_since_order_change = 0;
 							order_next = order_current - 1;
 						end
 					end
 
 					% Check to adapt order for the next step
-					if prevAccept
-						% Check the step size if we decrease order
-						if order_current > 1
-							% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 34
-							% The nordsieck vector already stores an estimate of y_p, which is the residual for order p - 1
-							yerr = obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1);
-
-							err = errNorm.errEstimate(ycur, ynext, yerr);
-							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
-
-							if dtnext_candidate > dtnext
-								dtnext = dtnext_candidate;
-								order_next = order_current - 1;
-							end
-						end
-
-						if order_current < obj.MaxOrder && stats.nSteps >= 1
+					if prevAccept && steps_since_order_change > order_current
+						if order_current < obj.MaxOrder
 							% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 34
 							% Use finite difference on delta from previous step to get higher derivative
 							yerr = obj.C(order_current + 1) * factorial(order_current) * obj.L(order_current, order_current + 1) * (delta - delta_prev);
@@ -193,14 +203,19 @@ classdef BDF < matlode.Integrator
 							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current + 1);
 
 							% fprintf("Considering increase in order: %e v.s. %e\n", dtnext_candidate, dtnext);
-							if dtnext_candidate > dtnext
-								dtnext = dtnext_candidate;
-								order_next = order_current + 1;
+							if dtnext_candidate > dt_opt
+								dt_opt = dtnext_candidate;
+								order_opt = order_current + 1;
 
 								% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 36
 								nordsieck_next(:, order_current + 2) = obj.L(order_current, order_current + 1) * delta / (order_current + 1);
 							end
 						end
+					end
+
+					if dt_opt < dtcur || dt_opt > 1.5 * dtcur
+						order_next = order_opt;
+						dtnext = dt_opt;
 					end
 
 					% Set new step to be in range
@@ -229,9 +244,8 @@ classdef BDF < matlode.Integrator
 					omega = dtnext / dtcur;
 					nordsieck = nordsieck * sparse(1:(obj.MaxOrder+1), 1:(obj.MaxOrder+1), omega .^ (0:obj.MaxOrder));
 
-					% If we increase order, ensure that the higher nordsieck elements are zeroed
-					if order_next > order_current
-						nordsieck(:, (order_current + 2) : (order_next + 1)) = zeros(length(y0), order_next - order_current);
+					if order_next ~= order_current || dtnext ~= dtcur
+						steps_since_order_change = 0;
 					end
 
 					dtcur = dtnext;
@@ -239,8 +253,7 @@ classdef BDF < matlode.Integrator
 				end
 
 				stats.nSteps = stats.nSteps + 1;
-
-				% TODO: Add dense output
+				steps_since_order_change = steps_since_order_change + 1;
 
 				if ~multiTspan && opts.FullTrajectory
 
@@ -255,10 +268,14 @@ classdef BDF < matlode.Integrator
 					t(:, stats.nSteps) = tnext;
 					y(:, stats.nSteps) = ynext;
 					stats.order(:, stats.nSteps - 1) = order_current;
+
+					while tindex <= tspanlen && tnext * tdir > tspan(tindex) * tdir
+						tindex = tindex + 1;
+					end
 				else
 					%Dense output
-					while tindex ~= tspanlen && tnext * tdir > tspan(tindex) * tdir
-				
+					while tindex <= tspanlen && tnext * tdir > tspan(tindex) * tdir
+
 						%incase lucky and land on point, can be cheaper
 						%than dense output if dense requires fevals
 						if abs(tspan(tindex) - tnext) < 64 * eps(tcur)
@@ -267,37 +284,15 @@ classdef BDF < matlode.Integrator
 						else
 							%Call Dense output function and record
 							t(:, tindex) = tspan(tindex);
-							[y(:, tindex), tempFevals] = opts.Dense.denseOut(f, tcur, tspan(tindex), ycur, ynext, stages, dtcur);
+
+							dense_opts.order = order_current;
+							dense_opts.nordsieck = {nordsieck, nordsieck_next};
+							dense = matlode.denseoutput.NordsieckDense;
+							[y(:, tindex), tempFevals] = dense.denseOut(f, tcur, tspan(tindex), ycur, ynext, dense_opts, dtcur);
 							stats.nFevals = stats.nFevals + tempFevals;
 						end
 						tindex = tindex + 1;
 					end
-				end
-
-				if tcur * tdir >= tspan(tindex) * tdir
-					tindex = tindex + 1;
-				end
-
-				if tspan(tindex) * tdir <= (tnext + dtnext) * tdir
-
-					%integrate to/ End point
-					%check if close enough with hmin
-					if abs(tspan(tindex) - tnext) < 64 * eps(tnext)
-
-						if multiTspan
-							t(:, tindex) = tspan(tindex);
-							y(:, tindex) = ynext;
-						end
-
-						if tcur < tspan(tindex)
-							tindex = tindex + 1;
-						end
-					else
-
-						% TODO - what if this is < dtmin
-						dtnext = tspan(tindex) - tnext;
-					end
-
 				end
 			end
 
@@ -306,9 +301,6 @@ classdef BDF < matlode.Integrator
 				y = y(:, 1:stats.nSteps);
 				stats.order = stats.order(:, 1:stats.nSteps);
 				stats.order(end) = order_next;
-			else
-				t(:, end) = tspan(end);
-				y(:, end) = ynext;
 			end
 		end
 
