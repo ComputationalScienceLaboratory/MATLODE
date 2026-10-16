@@ -171,6 +171,7 @@ classdef BDF < matlode.Integrator
 							yerr = obj.C(order_current - 1) * factorial(order_current) * nordsieck_next(:, order_current + 1);
 
 							% TODO: Consider adding LSODE's different safety factors for different orders?
+							%       Maybe we can do this by having different step controllers for each order.
 							err = errNorm.errEstimate(ycur, ynext, yerr);
 							[~, dtnext_candidate] = stepController.newStepSize(prevAccept, tspan, dtcur, err, order_current - 1);
 
@@ -186,6 +187,7 @@ classdef BDF < matlode.Integrator
 						% TODO: Lighter penalty for if we are using an older Jacobian
 						dtnext = 0.25 * dtcur;
 
+						% TODO: Record when we decrease order because of nonlinear fail v.s. error test
 						if order_current > 1
 							steps_since_order_change = 0;
 							order_next = order_current - 1;
