@@ -5,8 +5,6 @@ classdef NordsieckDense < matlode.denseoutput.DenseOutput
 
 		function [denseY, fEvals] = denseOut(obj, ~, t, tneed, y0, y1, dense_opts, dt)
 
-			assert(tneed <= t + dt)
-
 			fEvals = 0;
 			theta = (tneed - t) / dt;
 			dtf0 = dense_opts.nordsieck{1}(:, 2);
