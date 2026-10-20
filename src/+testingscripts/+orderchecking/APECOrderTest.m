@@ -2,7 +2,7 @@ clear
 format long e
 close all
 
-integrator = matlode.glm.APECE();
+integrator = matlode.glm.APEC();
 
 options.ErrNorm = matlode.errnorm.InfNorm(1e-12, 1e-12);
 options.StepSizeController = matlode.stepsizecontroller.StandardController;
@@ -11,6 +11,7 @@ lambda = -1;
 test_problem = testingscripts.testproblems.ODE.EulerProblem(lambda);
 
 options.Jacobian = test_problem.jac;
+options.MaxOrder = 3;
 
 t_f = 1;
 

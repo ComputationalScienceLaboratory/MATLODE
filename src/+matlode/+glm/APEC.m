@@ -57,6 +57,7 @@ classdef APEC < matlode.Integrator
 		function opts = matlodeSets(obj, p, varargin)
 
 			% APEC Specific options
+			p.addParameter('MaxOrder', obj.MaxOrder, @(p) isscalar(p) && isnumeric(p) && p >= 1 && p <= obj.MaxOrder);
 
 			% TODO - add option for startup procedure
 
@@ -194,7 +195,7 @@ classdef APEC < matlode.Integrator
 
 					% Check to adapt order for the next step
 					if prevAccept && steps_since_order_change > order_current
-						if order_current < obj.MaxOrder
+						if order_current < opts.MaxOrder
 							% Radhakrishnan & Hindmarsh "Description and use of LSODE" p. 34
 							% Use finite difference on delta from previous step to get higher derivative
 							yerr = obj.C(order_current + 1) * factorial(order_current) * obj.L(order_current, order_current + 1) * (delta - delta_prev);
@@ -362,7 +363,7 @@ classdef APEC < matlode.Integrator
 
 				% Adaptive order strategy for fixed step - increase order every step until we hit max order
 				% TODO - replace this with user-configured max order
-				current_order = min(current_order + 1, obj.MaxOrder);
+				current_order = min(current_order + 1, opts.MaxOrder);
 
 				if opts.FullTrajectory
 					y(:, i + 1) = ynext;
