@@ -7,10 +7,10 @@ classdef Hermite < matlode.denseoutput.DenseOutput
 
 		function [denseY, fEvals] = denseOut(~, f, t, tneed, y0, y1, ~, dt)
 
-			theta = (tneed - t) / h;
+			theta = (tneed - t) / dt;
 			f0 = f.F(t, y0);
-			f1 = f.F(t + h, y1);
-			denseY = (1 - theta) * y0 + theta * y1 + theta*(theta - 1) * ((1-2*theta) * (y1 - y0) + (theta - 1) * (dt * f0 + theta * dt * f1));
+			f1 = f.F(t + dt, y1);
+			denseY = (1 - theta) * y0 + theta * y1 + theta*(theta - 1) * ((1-2*theta) * (y1 - y0) + (theta - 1) * dt * f0 + theta * dt * f1);
 			fEvals = 2;
 		end
 	end

@@ -1,6 +1,13 @@
 classdef (Abstract) OneStepIntegrator < matlode.Integrator
 	%One Step Integrator template
 
+	methods (Abstract, Access = protected)
+		[ynew, stages, stats, out_opts] = timeStep(obj, f, t, y, dt, stages, prevAccept, stats);
+		[err, stats, out_opts] = timeStepErr(obj, f, t, y, ynew, dt, stages, ErrNorm, stats);
+		[stages, stats] = timeLoopBeforeLoop(obj, f, f0, t0, y0, stats);
+		[q] = timeLoopInit(obj);
+	end
+
 	methods (Access = protected)
 		function obj = OneStepIntegrator(varargin)
 			obj = obj@matlode.Integrator(varargin{:});
@@ -110,12 +117,10 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 						dtnext = 0.1 * dtcur;
 					end
 
-					% Verify we don't go below MinStep.
-					if abs(dtnext) < abs(dtmin)
-						dtnext = dtmin;
-					end
+					% Set new step to be in range
+					dtnext = max(abs(dtmin), min(abs(dtmax), abs(dtnext))) * tdir;
 
-					%check step acception
+					% Advance time
 					if prevAccept
 						% Kahan summation - adjust dt by adding the parts of previous dt
 						% that we haven't been able to add yet
@@ -126,11 +131,11 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 						% so record the parts that are missing to be added later
 						dtbuf = dtadj - (tnext - tcur);
 						break;
-					else
-						if dtcur == dtmin
-							% TODO maybe we should return our progress up until now
-							error("OneStepIntegrator:MinStep", "Step failed with h = MinStep")
-						end
+					end
+
+					if abs(dtcur) == abs(dtmin)
+						% TODO maybe we should return our progress up until now
+						error("OneStepIntegrator:MinStep", "Step failed with h = MinStep")
 					end
 
 					stats.nFailed = stats.nFailed + 1;
@@ -138,9 +143,6 @@ classdef (Abstract) OneStepIntegrator < matlode.Integrator
 					dthist(1) = dtnext;
 
 				end
-
-				%set new step to be in range
-				dtnext = min(abs(dtmax), abs(dtnext)) * tdir;
 
 				stats.nSteps = stats.nSteps + 1;
 
